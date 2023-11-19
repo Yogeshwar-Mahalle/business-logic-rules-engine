@@ -19,28 +19,25 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BL_RULE_TYPES")
-@IdClass(BLRuleTypesDbModel.IdClass.class)
-public class BLRuleTypesDbModel implements Serializable {
+@Table(name = "BL_RULE_FUNCTIONS")
+@IdClass(BLRuleFunctionPnAprvlDbModel.IdClass.class)
+public class BLRuleFunctionPnAprvlDbModel implements Serializable {
 
     @Id
-    @Column(name = "RULE_TYPE", length = 25, nullable=false)
-    private String ruleType;
+    @Column(name = "FUNCTION_ID", length = 128, nullable=false)
+    private String functionId;
+
+    @Column(name = "FUNCTION_NAME", length = 50, nullable=false)
+    private String functionName;
+
+    @Column(name = "FUNCTION_PARAMETERS", length = 256)
+    private String functionParameters;
+
+    @Column(name = "FUNCTION_LOGIC", length = 2097152)
+    private String functionLogic;
 
     @Column(name = "DESCRIPTION", length = 256)
     private String description;
-
-    @Column(name = "COMPLEX_RULE_FLAG", nullable=false)
-    private boolean complexRuleFlag;
-
-    @Column(name = "WORKFLOW_RULE_FLAG", nullable=false)
-    private boolean workflowRuleFlag;
-
-    @Column(name = "SYSTEM_RULE_FLAG", nullable=false)
-    private boolean systemRuleFlag;
-
-    @Column(name = "APPLY_ALL_FLAG", nullable=false)
-    private boolean applyAllFlag;
 
     @Column(name = "STATUS", length = 25, nullable=false)
     private String status;
@@ -53,7 +50,7 @@ public class BLRuleTypesDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
-        private String ruleType;
+        private String functionId;
     }
 
 }

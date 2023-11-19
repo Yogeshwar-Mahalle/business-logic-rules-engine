@@ -117,6 +117,7 @@ public class BusinessRulesService {
                 .priority(blRuleDbModel.getPriority())
                 .status(blRuleDbModel.getStatus())
                 .createTimeStamp(blRuleDbModel.getCreateTimeStamp())
+                .effectiveFromDate(blRuleDbModel.getEffectiveFromDate())
                 .updateTimeStamp(blRuleDbModel.getUpdateTimeStamp())
                 .build();
 
@@ -137,6 +138,7 @@ public class BusinessRulesService {
                 .priority(businessLogicRule.getPriority())
                 .status(businessLogicRule.getStatus())
                 .createTimeStamp(businessLogicRule.getCreateTimeStamp() == null ? new Date() : businessLogicRule.getCreateTimeStamp())
+                .effectiveFromDate(businessLogicRule.getEffectiveFromDate())
                 .updateTimeStamp(new Date())
                 .build();
 

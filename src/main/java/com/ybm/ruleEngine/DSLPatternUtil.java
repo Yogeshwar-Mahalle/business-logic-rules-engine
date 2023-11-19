@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class DSLPatternUtil {
-    private static final Pattern DSL_PATTERN = Pattern.compile("\\$\\((\\w+)(\\.\\w+)\\)"); //$(ruletype.keyword)
+    private static final Pattern DSL_PATTERN = Pattern.compile("\\$\\{((\\w+\\.\\w+\\(\\w+\\))|(\\w+\\.\\w+\\(\\w+\\.\\w+\\))|(\\w+\\.\\w+))\\}"); //${ruletype.keyword(parameter)} or ${ruletype.keyword}
     private static final String DOT = ".";
 
     public List<String> getListOfDslKeywords(String expression) {
@@ -31,8 +31,33 @@ public class DSLPatternUtil {
     }
 
     public String extractKeyword(String keyword) {
-        return keyword.substring(keyword.indexOf('(') + 1,
-                keyword.indexOf(')'));
+        return keyword.substring(keyword.indexOf('{') + 1,
+                keyword.indexOf('}'));
+    }
+
+    public String extractParameter(String value) {
+
+        if ( value.indexOf('(') != -1 )
+        {
+            return value.substring(value.indexOf('(') + 1,
+                    value.indexOf(')'));
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String extractKeywordName(String value) {
+
+        if ( value.indexOf('(') != -1 )
+        {
+            return value.substring(0, value.indexOf('('));
+        }
+        else
+        {
+            return value;
+        }
     }
 
     public String getKeywordResolver(String dslKeyword){
@@ -42,6 +67,17 @@ public class DSLPatternUtil {
 
     public String getKeywordValue(String dslKeyword){
         ArrayList<String> splittedKeyword = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
-        return splittedKeyword.get(1);
+
+        return dslKeyword.substring(dslKeyword.indexOf(DOT) + 1);
+        //return splittedKeyword.get(1);
     }
+
+    public String getKeywordValueName(String dslKeywordValue){
+        return extractKeywordName(dslKeywordValue);
+    }
+
+    public String getKeywordValueParam(String dslKeywordValue){
+        return extractParameter(dslKeywordValue);
+    }
+
 }

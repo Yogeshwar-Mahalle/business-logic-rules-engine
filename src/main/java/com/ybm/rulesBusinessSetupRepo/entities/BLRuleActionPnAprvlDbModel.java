@@ -19,9 +19,9 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BL_RULE_ACTIONS")
-@IdClass(BLRuleActionDbModel.IdClass.class)
-public class BLRuleActionDbModel implements Serializable {
+@Table(name = "BL_RULE_ACTIONS_PN_APRVL")
+@IdClass(BLRuleActionPnAprvlDbModel.IdClass.class)
+public class BLRuleActionPnAprvlDbModel implements Serializable {
 
     @Id
     @Column(name = "RULE_ACTION_ID", length = 128, nullable=false)

@@ -19,7 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BUSINESS_LOGIC_RULE_FUNCTIONS")
+@Table(name = "BL_RULE_FUNCTIONS")
 @IdClass(BLRuleFunctionDbModel.IdClass.class)
 public class BLRuleFunctionDbModel implements Serializable {
 

@@ -13,5 +13,6 @@ import java.util.List;
 @Repository
 public interface BLRuleActionRepository extends JpaRepository<BLRuleActionDbModel, String> {
 
-    List<BLRuleActionDbModel> findAllByRuleId(String ruleID);
+    List<BLRuleActionDbModel> findAllByRuleId(String ruleId);
+    List<BLRuleActionDbModel> findAllByRuleActionId(String ruleActionId);
 }

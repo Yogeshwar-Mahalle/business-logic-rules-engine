@@ -16,14 +16,12 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BusinessLogicRuleTypes implements Serializable {
-    String ruleType;
-    String description;
-    boolean complexRuleFlag;
-    boolean workflowRuleFlag;
-    boolean applyAllFlag;
-    boolean systemRuleFlag;
-    String status;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+public class BusinessLogicRuleAudit implements Serializable {
+    String ruleAuditId;
+    String changedByUserId;
+    String blRuleId;
+    Date changeDateTime;
+    String changeRemark;
+    String approvedByUserId;
+    Date approvedDateTime;
 }

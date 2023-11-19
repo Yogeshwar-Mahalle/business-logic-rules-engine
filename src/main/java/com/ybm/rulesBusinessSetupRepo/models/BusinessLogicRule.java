@@ -27,5 +27,6 @@ public class BusinessLogicRule implements Serializable {
     String description;
     String status;
     Date createTimeStamp;
+    Date effectiveFromDate;
     Date updateTimeStamp;
 }

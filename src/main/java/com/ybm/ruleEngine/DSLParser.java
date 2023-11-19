@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +24,12 @@ public class DSLParser {
     @Autowired
     private DSLPatternUtil dslPatternUtil;
 
-    public String resolveDomainSpecificKeywords(String expression){
-        Map<String, Object> dslKeywordToResolverValueMap = executeDSLResolver(expression);
+    public String resolveDomainSpecificKeywords(String expression, Map<String, Object> inputObjects){
+        Map<String, Object> dslKeywordToResolverValueMap = executeDSLResolver(expression, inputObjects);
         return replaceKeywordsWithValue(expression, dslKeywordToResolverValueMap);
     }
 
-    private Map<String, Object> executeDSLResolver(String expression) {
+    private Map<String, Object> executeDSLResolver(String expression, Map<String, Object> inputObjects) {
         List<String> listOfDslKeyword = dslPatternUtil.getListOfDslKeywords(expression);
         Map<String, Object> dslKeywordToResolverValueMap = new HashMap<>();
         listOfDslKeyword
@@ -37,8 +38,36 @@ public class DSLParser {
                             String extractedDslKeyword = dslPatternUtil.extractKeyword(dslKeyword);
                             String keyResolver = dslPatternUtil.getKeywordResolver(extractedDslKeyword);
                             String keywordValue = dslPatternUtil.getKeywordValue(extractedDslKeyword);
-                            DSLResolver resolver = keywordResolver.getResolver(keyResolver).get();
-                            Object resolveValue = resolver.resolveValue(keywordValue);
+                            String keywordValueName = dslPatternUtil.getKeywordValueName(keywordValue);
+                            String keywordValueParam = dslPatternUtil.getKeywordValueParam(keywordValue);
+                            DSLResolver resolver = keywordResolver.getResolver(keyResolver).orElse(null);
+                            assert resolver != null;
+                            Object resolveValue = null;
+                            if( keywordValueParam == null ) {
+                                resolveValue = resolver.resolveValue(keywordValueName);
+                            }
+                            else {
+                                String strKey = dslPatternUtil.getKeywordResolver(keywordValueParam);
+                                Object objMap = inputObjects.get(strKey);
+
+                                String strValue = dslPatternUtil.getKeywordValue(keywordValueParam);
+
+                                String strParameter = "";
+                                if( strValue != null )
+                                {
+                                    if( objMap instanceof Map<?,?> )
+                                    {
+                                        Object objValue = ((Map<?, ?>) objMap).get(strValue);
+                                        strParameter = objValue != null ? objValue.toString() : keywordValueParam;
+                                    }
+                                }
+                                else
+                                {
+                                    strParameter = objMap != null ? objMap.toString() : keywordValueParam;
+                                }
+                                resolveValue = resolver.resolveValueByParameter(keywordValueName, strParameter);
+                            }
+
                             dslKeywordToResolverValueMap.put(dslKeyword, resolveValue);
                         }
                 );
@@ -49,8 +78,21 @@ public class DSLParser {
         List<String> keyList = dslKeywordToResolverValueMap.keySet().stream().toList();
         for (int index = 0; index < keyList.size(); index++){
             String key = keyList.get(index);
-            String dslResolveValue = dslKeywordToResolverValueMap.get(key).toString();
-            expression = expression.replace(key, dslResolveValue);
+            Object dslResolveValue = dslKeywordToResolverValueMap.get(key);
+
+            String strResolveValue = "null";
+
+            if( dslResolveValue instanceof String ) {
+                strResolveValue = "\"" + dslResolveValue.toString() + "\"";
+            }
+            else if( dslResolveValue instanceof Date) {
+                strResolveValue = "\"" + dslResolveValue.toString() + "\"";
+            }
+            else {
+                strResolveValue = dslResolveValue != null ? dslResolveValue.toString() : strResolveValue;
+            }
+
+            expression = expression.replace(key, strResolveValue);
         }
         return expression;
     }

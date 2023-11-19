@@ -16,7 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BUSINESS_LOGIC_RULES")
+@Table(name = "BL_RULES")
 @IdClass(BLRuleDbModel.IdClass.class)
 public class BLRuleDbModel implements Serializable {
 
@@ -51,8 +51,12 @@ public class BLRuleDbModel implements Serializable {
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 
+    @Column(name = "EFFECTIVE_FROM_DATE", nullable=false)
+    private Date effectiveFromDate;
+
     @Column(name = "UPDATE_TIME_STAMP")
     private Date updateTimeStamp;
+
 
     @Data
     static class IdClass implements Serializable {

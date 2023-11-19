@@ -35,4 +35,10 @@ public class BankDSLResolver implements DSLResolver {
 
         return null;
     }
+
+    @Override
+    public Object resolveValueByParameter(String keyword, String parameter) {
+        //TODO:: Implementation Pending
+        return null;
+    }
 }

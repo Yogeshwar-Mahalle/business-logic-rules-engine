@@ -35,11 +35,10 @@ public class BusinessLogicRestController {
     @Autowired
     private ExchangeDataService exchangeDataService;
 
-    @PostMapping(value = "/loan")
-    public ResponseEntity<?> postUserLoanDetails(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
+    @PostMapping(value = "/edo")
+    public ResponseEntity<?> postPaymentDetails(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
         UUID uuid = UUID.randomUUID();
         Map<String, Object> properties = new HashMap<>();
-        properties.put("LOAN_TYPE", "HOUSE_LOAN");
 
         ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
@@ -61,46 +60,14 @@ public class BusinessLogicRestController {
         ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
-        DataExchangeObject result = (DataExchangeObject) ruleEngine.run("LOAN", dataExchangeObject, true);
+        String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
+        DataExchangeObject result = (DataExchangeObject) ruleEngine.run(ruleType, dataExchangeObject, true);
 
         exchangeData = mapExchangeData(result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         return ResponseEntity.ok(result);
     }
-
-    @PostMapping(value = "/insurance")
-    public ResponseEntity<?> postInsuranceDetails(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
-        UUID uuid = UUID.randomUUID();
-        Map<String, Object> properties = new HashMap<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String strPayload = map.toString();
-        try {
-            strPayload = objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        Payload payload = new Payload(strPayload, ContentType.JSON, map );
-        DataObject dataObject = new DataObject( headers, payload);
-        DataExchangeObject dataExchangeObject = new DataExchangeObject(
-                uuid.toString(),
-                properties,
-                dataObject,
-                dataObject
-        );
-
-        ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
-        exchangeData = exchangeDataService.saveExchangeData(exchangeData);
-
-        DataExchangeObject result = (DataExchangeObject) ruleEngine.run("INSURANCE", dataExchangeObject, true);
-
-        exchangeData = mapExchangeData(result);
-        exchangeData = exchangeDataService.saveExchangeData(exchangeData);
-
-        return ResponseEntity.ok(result.getDataObject().getPayload().getDataMap());
-    }
-
 
     private static ExchangeData mapExchangeData(DataExchangeObject dataExchangeObject) {
         ObjectMapper objectMapper = new ObjectMapper();

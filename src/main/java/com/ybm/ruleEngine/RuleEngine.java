@@ -48,7 +48,7 @@ public class RuleEngine {
         List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByType(ruleType);
 
         if (null == listOfBusinessLogicRules || listOfBusinessLogicRules.isEmpty()){
-            return null;
+            return dataExchangeObject;
         }
 
         //STEP 1 (MATCH) : Match the facts and data against the set of rules.
@@ -61,7 +61,7 @@ public class RuleEngine {
             //STEP 3 (FIND FIRST) : Apply only first matched rule using priority from the selected rules.
             BusinessLogicRule resolvedBusinessLogicRule = resolve(matchedSortedRulesSet);
             if (null == resolvedBusinessLogicRule) {
-                return null;
+                return dataExchangeObject;
             }
 
             //STEP 4 (EXECUTE) : Run the action of the selected rule on given data and return the output.
@@ -144,7 +144,7 @@ public class RuleEngine {
     /**
      * Parsing in given priority/steps.
      *
-     * Step 1. Resolve domain specific keywords first: $(domainName.keyword)
+     * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
      * Step 2. Evaluate MVEL expression.
      *
      * @param expression
@@ -152,23 +152,24 @@ public class RuleEngine {
      */
     public boolean evaluateCondition(String expression, DataExchangeObject inputData) {
 
-        //Step 1. Resolve domain specific keywords first: $(domainName.keyword)
-        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(expression);
-
-        //Step 2. Evaluate MVEL expression.
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(INPUT_ORG_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
         dataMap.put(INPUT_ORG_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
         dataMap.put(INPUT_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
         dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
+
+        //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
+        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(expression, dataMap);
+
+        //Step 2. Evaluate MVEL expression.
         return mvelInterpreter.evaluateMvelExpression(resolvedDslExpression, dataMap);
     }
 
     /**
      * Execute selected businessLogicRule on input data.
      *
-     * Step 1. Resolve domain specific keywords: $(domainName.keyword)
+     * Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}
      * Step 2. Evaluate MVEL expression.
      *
      * @param businessLogicRule
@@ -182,10 +183,6 @@ public class RuleEngine {
         outputResult.getDataObject().getHeaders().clear();
         outputResult.getProperties().clear();
 
-        //Step 1. Resolve domain specific keywords: $(domainName.keyword)
-        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(businessLogicRule.getAction());
-
-        //Step 2. Evaluate MVEL expression.
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(INPUT_ORG_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
         dataMap.put(INPUT_ORG_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
@@ -195,6 +192,11 @@ public class RuleEngine {
         dataMap.put(OUTPUT_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());
         dataMap.put(OUTPUT_HEADERS, outputResult.getDataObject().getHeaders());
         dataMap.put(OUTPUT_PROPERTIES, outputResult.getProperties());
+
+        //Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}
+        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(businessLogicRule.getAction(), dataMap);
+
+        //Step 2. Evaluate MVEL expression.
         mvelInterpreter.deriveMvelExpressionAction(resolvedDslExpression, dataMap);
 
         return outputResult;

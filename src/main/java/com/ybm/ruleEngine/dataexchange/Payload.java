@@ -8,6 +8,7 @@ import com.ybm.exchangeDataRepo.ContentType;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 public class Payload implements Serializable {
     protected String strMessage;
     protected ContentType contentType;
-    protected Map<String, Object> dataMap;
+    protected Map<String, Object> dataMap = new HashMap<>(); ;
 
     public Payload(String  strMessage, ContentType contentType, Map<String, Object> dataMap) {
         this.strMessage = strMessage;
@@ -27,8 +28,7 @@ public class Payload implements Serializable {
     public Payload(Payload payload) {
         this.strMessage = String.valueOf(payload.strMessage);
         this.contentType = payload.contentType;
-        this.dataMap = payload.dataMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.dataMap.putAll(payload.dataMap);
     }
 
     public void setStrMessage(String strOrgMessage) {
