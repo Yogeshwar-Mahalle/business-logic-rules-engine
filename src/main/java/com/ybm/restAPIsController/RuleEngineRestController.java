@@ -5,11 +5,8 @@
 package com.ybm.restAPIsController;
 
 import com.ybm.rulesBusinessSetupRepo.*;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRule;
+import com.ybm.rulesBusinessSetupRepo.models.*;
 
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleAction;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleCondition;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +18,9 @@ import java.util.List;
 @RestController
 public class RuleEngineRestController {
     @Autowired
+    private BusinessRuleTypesService businessRuleTypesService;
+
+    @Autowired
     private BusinessRulesService businessRulesService;
 
     @Autowired
@@ -31,6 +31,38 @@ public class RuleEngineRestController {
 
     @Autowired
     private BusinessRuleFunctionService businessRuleFunctionService;
+
+    @GetMapping(value = "/get-all-rule-type")
+    public ResponseEntity<?> getAllRuleType() {
+        List<BusinessLogicRuleType> allBusinessLogicRuleType = businessRuleTypesService.getAllRuleTypes();
+        return ResponseEntity.ok(allBusinessLogicRuleType);
+    }
+
+    @GetMapping(value = "/get-rule-type/{ruleTypeId}")
+    public ResponseEntity<?> getRuleTypeByTypeId(@PathVariable("ruleTypeId") String ruleTypeId) {
+        BusinessLogicRuleType businessLogicRuleType = businessRuleTypesService.getRuleType(ruleTypeId);
+        return ResponseEntity.ok(businessLogicRuleType);
+    }
+
+    @PostMapping(value = "/update-rule-type")
+    public ResponseEntity<?> updateRuleType(@RequestBody BusinessLogicRuleType businessLogicRuleType) {
+
+        BusinessLogicRuleType businessLogicRuleTypeUpdated = businessRuleTypesService.saveRuleType(businessLogicRuleType);
+        return ResponseEntity.ok(businessLogicRuleTypeUpdated);
+    }
+
+    @PostMapping(value = "/update-all-rule-type")
+    public ResponseEntity<?> updateRuleType(@RequestBody List<BusinessLogicRuleType> businessLogicRuleTypes) {
+
+        List<BusinessLogicRuleType> rulesUpdated = businessRuleTypesService.saveRuleTypes(businessLogicRuleTypes);
+        return ResponseEntity.ok(rulesUpdated);
+    }
+
+    @DeleteMapping(value = "/remove-rule-type/{ruleTypeId}")
+    public ResponseEntity<?> removeRuleTypeByTypeId(@PathVariable("ruleTypeId") String ruleTypeId) {
+        List<BusinessLogicRuleType> allRemainingBusinessLogicRuleTypes = businessRuleTypesService.removeRuleTypesById(ruleTypeId);
+        return ResponseEntity.ok(allRemainingBusinessLogicRuleTypes);
+    }
 
     @GetMapping(value = "/get-rule/{ruleId}")
     public ResponseEntity<?> getRuleById(@PathVariable("ruleId") String ruleId) {

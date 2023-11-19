@@ -66,10 +66,10 @@ public class DSLPatternUtil {
     }
 
     public String getKeywordValue(String dslKeyword){
-        ArrayList<String> splittedKeyword = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
-
+//        ArrayList<String> splittedKeyword = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
+//        return splittedKeyword.get(1);
         return dslKeyword.substring(dslKeyword.indexOf(DOT) + 1);
-        //return splittedKeyword.get(1);
+
     }
 
     public String getKeywordValueName(String dslKeywordValue){

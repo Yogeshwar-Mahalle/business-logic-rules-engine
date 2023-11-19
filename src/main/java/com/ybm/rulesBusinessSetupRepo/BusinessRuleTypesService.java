@@ -4,9 +4,9 @@
 
 package com.ybm.rulesBusinessSetupRepo;
 
-import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleTypesRepository;
-import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypesDbModel;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleTypes;
+import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleTypeRepository;
+import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypeDbModel;
+import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,66 +20,83 @@ import java.util.stream.Collectors;
 public class BusinessRuleTypesService {
 
     @Autowired
-    private BLRuleTypesRepository blRuleTypesRepository;
+    private BLRuleTypeRepository blRuleTypeRepository;
 
-    public List<BusinessLogicRuleTypes> getAllRuleTypes() {
-        return blRuleTypesRepository.findAll().stream()
+    public List<BusinessLogicRuleType> getAllRuleTypes() {
+        return blRuleTypeRepository.findAll().stream()
                 .map(
                         this::mapRuleTypesFromDbModel
                 )
                 .collect(Collectors.toList());
     }
 
-    public BusinessLogicRuleTypes getRuleType(String ruleType) {
-        Optional<BLRuleTypesDbModel> blRuleTypesDbModel = blRuleTypesRepository.findById(ruleType);
+    public BusinessLogicRuleType getRuleType(String ruleType) {
+        Optional<BLRuleTypeDbModel> blRuleTypesDbModel = blRuleTypeRepository.findByRuleType(ruleType);
         return blRuleTypesDbModel.map(this::mapRuleTypesFromDbModel).orElse(null);
     }
 
     @Transactional
-    public BusinessLogicRuleTypes saveRuleTypes(BusinessLogicRuleTypes businessLogicRuleTypes) {
-        BLRuleTypesDbModel blRuleTypesDbModel = mapRuleTypesToDbModel(businessLogicRuleTypes);
-        blRuleTypesDbModel = blRuleTypesRepository.save(blRuleTypesDbModel);
-        return mapRuleTypesFromDbModel(blRuleTypesDbModel);
+    public BusinessLogicRuleType saveRuleType(BusinessLogicRuleType businessLogicRuleType) {
+        BLRuleTypeDbModel blRuleTypeDbModel = mapRuleTypesToDbModel(businessLogicRuleType);
+        blRuleTypeDbModel = blRuleTypeRepository.save(blRuleTypeDbModel);
+        return mapRuleTypesFromDbModel(blRuleTypeDbModel);
     }
 
-    public List<BusinessLogicRuleTypes> removeRuleTypesById(String ruleType) {
+    @Transactional
+    public List<BusinessLogicRuleType> saveRuleTypes(List<BusinessLogicRuleType> businessLogicRuleTypes) {
 
-        blRuleTypesRepository.deleteById(ruleType);
+        List<BLRuleTypeDbModel> listBLRuleTypeDBModel = businessLogicRuleTypes.stream()
+                .map(
+                        this::mapRuleTypesToDbModel
+                )
+                .collect(Collectors.toList());
 
-        return blRuleTypesRepository.findAll().stream()
+        return blRuleTypeRepository.saveAll(listBLRuleTypeDBModel).stream()
+                .map(
+                        this::mapRuleTypesFromDbModel
+                )
+                .collect(Collectors.toList());
+
+    }
+
+    public List<BusinessLogicRuleType> removeRuleTypesById(String ruleType) {
+
+        blRuleTypeRepository.deleteById(ruleType);
+
+        return blRuleTypeRepository.findAll().stream()
                 .map(
                         this::mapRuleTypesFromDbModel
                 )
                 .collect(Collectors.toList());
     }
 
-    private BusinessLogicRuleTypes mapRuleTypesFromDbModel(BLRuleTypesDbModel blRuleTypesDbModel){
+    private BusinessLogicRuleType mapRuleTypesFromDbModel(BLRuleTypeDbModel blRuleTypeDbModel){
 
-        return BusinessLogicRuleTypes.builder()
-                .ruleType(blRuleTypesDbModel.getRuleType())
-                .description(blRuleTypesDbModel.getDescription())
-                .complexRuleFlag(blRuleTypesDbModel.isComplexRuleFlag())
-                .workflowRuleFlag(blRuleTypesDbModel.isWorkflowRuleFlag())
-                .systemRuleFlag(blRuleTypesDbModel.isSystemRuleFlag())
-                .applyAllFlag(blRuleTypesDbModel.isApplyAllFlag())
-                .status(blRuleTypesDbModel.getStatus())
-                .createTimeStamp(blRuleTypesDbModel.getCreateTimeStamp())
-                .updateTimeStamp(blRuleTypesDbModel.getUpdateTimeStamp())
+        return BusinessLogicRuleType.builder()
+                .ruleType(blRuleTypeDbModel.getRuleType())
+                .description(blRuleTypeDbModel.getDescription())
+                .complexRuleFlag(blRuleTypeDbModel.isComplexRuleFlag())
+                .workflowRuleFlag(blRuleTypeDbModel.isWorkflowRuleFlag())
+                .systemRuleFlag(blRuleTypeDbModel.isSystemRuleFlag())
+                .applyAllFlag(blRuleTypeDbModel.isApplyAllFlag())
+                .status(blRuleTypeDbModel.getStatus())
+                .createTimeStamp(blRuleTypeDbModel.getCreateTimeStamp())
+                .updateTimeStamp(blRuleTypeDbModel.getUpdateTimeStamp())
                 .build();
 
     }
 
-    private BLRuleTypesDbModel mapRuleTypesToDbModel(BusinessLogicRuleTypes businessLogicRuleTypes){
+    private BLRuleTypeDbModel mapRuleTypesToDbModel(BusinessLogicRuleType businessLogicRuleType){
 
-        return BLRuleTypesDbModel.builder()
-                .ruleType(businessLogicRuleTypes.getRuleType())
-                .description(businessLogicRuleTypes.getDescription())
-                .complexRuleFlag(businessLogicRuleTypes.isComplexRuleFlag())
-                .workflowRuleFlag(businessLogicRuleTypes.isWorkflowRuleFlag())
-                .systemRuleFlag(businessLogicRuleTypes.isSystemRuleFlag())
-                .applyAllFlag(businessLogicRuleTypes.isApplyAllFlag())
-                .status(businessLogicRuleTypes.getStatus())
-                .createTimeStamp(businessLogicRuleTypes.getCreateTimeStamp() == null ? new Date() : businessLogicRuleTypes.getCreateTimeStamp())
+        return BLRuleTypeDbModel.builder()
+                .ruleType(businessLogicRuleType.getRuleType())
+                .description(businessLogicRuleType.getDescription())
+                .complexRuleFlag(businessLogicRuleType.isComplexRuleFlag())
+                .workflowRuleFlag(businessLogicRuleType.isWorkflowRuleFlag())
+                .systemRuleFlag(businessLogicRuleType.isSystemRuleFlag())
+                .applyAllFlag(businessLogicRuleType.isApplyAllFlag())
+                .status(businessLogicRuleType.getStatus())
+                .createTimeStamp(businessLogicRuleType.getCreateTimeStamp() == null ? new Date() : businessLogicRuleType.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();
 

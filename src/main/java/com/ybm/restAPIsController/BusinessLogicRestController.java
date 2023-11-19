@@ -61,7 +61,7 @@ public class BusinessLogicRestController {
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
-        DataExchangeObject result = (DataExchangeObject) ruleEngine.run(ruleType, dataExchangeObject, true);
+        DataExchangeObject result = (DataExchangeObject) ruleEngine.run(ruleType, dataExchangeObject);
 
         exchangeData = mapExchangeData(result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
@@ -87,7 +87,7 @@ public class BusinessLogicRestController {
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
         exchangeData.setLinkedEntity("IN");
         exchangeData.setSource("IN-GW");
-        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"LOAN\"]}");
+        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"BOOK\"]}");
         exchangeData.setOriginalContentType(ContentType.JSON);
         exchangeData.setOriginalData(dataExchangeObject.getOriginalDataObject().getPayload().getStrMessage());
         exchangeData.setOriginalHeaders(strOrgHeaders);

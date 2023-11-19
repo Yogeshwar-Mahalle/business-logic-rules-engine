@@ -4,6 +4,8 @@
 
 package com.ybm.ruleEngine;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.ruleEngine.dslResolver.DSLKeywordResolver;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +55,7 @@ public class DSLParser {
                                 String strValue = dslPatternUtil.getKeywordValue(keywordValueParam);
 
                                 String strParameter = "";
-                                if( strValue != null )
+                                if( objMap != null )
                                 {
                                     if( objMap instanceof Map<?,?> )
                                     {
@@ -63,7 +65,7 @@ public class DSLParser {
                                 }
                                 else
                                 {
-                                    strParameter = objMap != null ? objMap.toString() : keywordValueParam;
+                                    strParameter = keywordValueParam;
                                 }
                                 resolveValue = resolver.resolveValueByParameter(keywordValueName, strParameter);
                             }
@@ -88,8 +90,13 @@ public class DSLParser {
             else if( dslResolveValue instanceof Date) {
                 strResolveValue = "\"" + dslResolveValue.toString() + "\"";
             }
-            else {
-                strResolveValue = dslResolveValue != null ? dslResolveValue.toString() : strResolveValue;
+            else if( dslResolveValue != null ) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    strResolveValue = objectMapper.writeValueAsString(dslResolveValue);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             expression = expression.replace(key, strResolveValue);

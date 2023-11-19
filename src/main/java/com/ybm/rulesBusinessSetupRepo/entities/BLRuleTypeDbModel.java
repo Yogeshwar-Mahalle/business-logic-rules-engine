@@ -20,8 +20,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @Table(name = "BL_RULE_TYPES")
-@IdClass(BLRuleTypesDbModel.IdClass.class)
-public class BLRuleTypesDbModel implements Serializable {
+@IdClass(BLRuleTypeDbModel.IdClass.class)
+public class BLRuleTypeDbModel implements Serializable {
 
     @Id
     @Column(name = "RULE_TYPE", length = 25, nullable=false)

@@ -7,8 +7,10 @@ package com.ybm.ruleEngine;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
+import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRulesService;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRule;
+import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,13 +27,15 @@ public class RuleEngine {
     @Autowired
     protected MVELInterpreter mvelInterpreter;
     @Autowired
+    private BusinessRuleTypesService businessRuleTypesService;
+    @Autowired
     private BusinessRulesService businessRulesService;
 
-    private final String INPUT_ORG_MESSAGE = "inOrgMessage";
-    private final String INPUT_ORG_PAYLOAD = "inOrgPayload";
+    private final String INPUT_MESSAGE = "inMessage";
     private final String INPUT_PAYLOAD = "inPayload";
     private final String INPUT_HEADERS = "inHeaders";
     private final String INPUT_PROPERTIES = "inProperties";
+    private final String PROCESSING_PAYLOAD = "payload";
     private final String OUTPUT_PAYLOAD = "outPayload";
     private final String OUTPUT_HEADERS = "outHeaders";
     private final String OUTPUT_PROPERTIES = "outProperties";
@@ -43,8 +47,9 @@ public class RuleEngine {
      * @param applyOnlyFirstMatch
      * @return
      */
-    public DataExchangeObject run(String ruleType, DataExchangeObject dataExchangeObject, boolean applyOnlyFirstMatch) {
+    public DataExchangeObject run(String ruleType, DataExchangeObject dataExchangeObject) {
         //TODO: Here for each call, we are fetching all rules from dbRepository. It should be cache.
+        BusinessLogicRuleType businessLogicRuleTypes = businessRuleTypesService.getRuleType(ruleType);
         List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByType(ruleType);
 
         if (null == listOfBusinessLogicRules || listOfBusinessLogicRules.isEmpty()){
@@ -57,7 +62,7 @@ public class RuleEngine {
         //STEP 2 (SORT) : Sort the matched rules based on priority
         List<BusinessLogicRule> matchedSortedRulesSet = sortMatchedRulesSet(matchedRulesSet);
 
-        if( applyOnlyFirstMatch ) {
+        if( !businessLogicRuleTypes.isApplyAllFlag() ) {
             //STEP 3 (FIND FIRST) : Apply only first matched rule using priority from the selected rules.
             BusinessLogicRule resolvedBusinessLogicRule = resolve(matchedSortedRulesSet);
             if (null == resolvedBusinessLogicRule) {
@@ -153,9 +158,9 @@ public class RuleEngine {
     public boolean evaluateCondition(String expression, DataExchangeObject inputData) {
 
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(INPUT_ORG_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
-        dataMap.put(INPUT_ORG_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
+        dataMap.put(INPUT_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
+        dataMap.put(INPUT_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
+        dataMap.put(PROCESSING_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
         dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
 
@@ -184,9 +189,9 @@ public class RuleEngine {
         outputResult.getProperties().clear();
 
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(INPUT_ORG_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
-        dataMap.put(INPUT_ORG_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
+        dataMap.put(INPUT_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
+        dataMap.put(INPUT_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
+        dataMap.put(PROCESSING_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
         dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
         dataMap.put(OUTPUT_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());

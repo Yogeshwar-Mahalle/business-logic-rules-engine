@@ -4,11 +4,14 @@
 
 package com.ybm.rulesBusinessSetupRepo.dbRepository;
 
-import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypesDbModel;
+import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypeDbModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public interface BLRuleTypesRepository extends JpaRepository<BLRuleTypesDbModel, String> {
+public interface BLRuleTypeRepository extends JpaRepository<BLRuleTypeDbModel, String> {
+    Optional<BLRuleTypeDbModel> findByRuleType(String ruleType);
 
 }

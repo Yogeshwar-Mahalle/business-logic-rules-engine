@@ -16,6 +16,9 @@ public class IndustryDataDSLResolver implements DSLResolver {
     private static final String NCC_TYPE = "ncctype";
     private static final String NCC_BIC = "nccbic";
 
+    private static final String NCC_TYPE_VALUE = "ncctypevalue";
+    private static final String NCC_BIC_VALUE = "nccbicvalue";
+
     @Autowired
     private IndustryDataRepository industryDataRepository;
 
@@ -33,20 +36,31 @@ public class IndustryDataDSLResolver implements DSLResolver {
     @Override
     public Object resolveValueByParameter(String keyword, String parameter) {
         IndustryDataDbModel industryDataDbModel = null;
-
-        String result = null;
+        Object result = null;
 
         //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(NCC_TYPE)){
             industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_TYPE", parameter);
+            result = industryDataDbModel;
         }
 
         //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(NCC_BIC)){
             industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_BIC", parameter);
+            result = industryDataDbModel;
         }
 
-        result = industryDataDbModel != null ? industryDataDbModel.getValueField() : "null";
+        //By using this keyword external interfaces APIs or DB service can be called
+        if (keyword.equalsIgnoreCase(NCC_TYPE_VALUE)){
+            industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_TYPE", parameter);
+            result = industryDataDbModel != null ? industryDataDbModel.getValueField() : "null";
+        }
+
+        //By using this keyword external interfaces APIs or DB service can be called
+        if (keyword.equalsIgnoreCase(NCC_BIC_VALUE)){
+            industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_BIC", parameter);
+            result = industryDataDbModel != null ? industryDataDbModel.getValueField() : "null";
+        }
 
         return result;
     }

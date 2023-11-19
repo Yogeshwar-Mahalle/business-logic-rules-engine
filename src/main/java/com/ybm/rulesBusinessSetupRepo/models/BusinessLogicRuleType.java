@@ -16,7 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BusinessLogicRuleTypes implements Serializable {
+public class BusinessLogicRuleType implements Serializable {
     String ruleType;
     String description;
     boolean complexRuleFlag;
