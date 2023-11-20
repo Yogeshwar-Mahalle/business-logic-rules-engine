@@ -17,8 +17,11 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class DSLPatternUtil {
-    private static final Pattern DSL_PATTERN = Pattern.compile("\\$\\{((\\w+\\.\\w+\\(\\w+\\))|(\\w+\\.\\w+\\(\\w+\\.\\w+\\))|(\\w+\\.\\w+))\\}"); //${ruletype.keyword(parameter)} or ${ruletype.keyword}
+    //${dsr.keyword(parameter1, ...)} or ${dsr.keyword[index]} or ${dsr.keyword} or ${dsr}
+    private static final String expr = "\\$\\{((\\w+\\.\\w+\\(([.,_a-zA-Z0-9\\s\\[\\]]+)\\)([0-9\\s\\[\\]]*))|(\\w+\\.\\w+\\[([0-9\\s]+)\\])|(\\w+\\.\\w+)|(\\w+))\\}";
+    private static final Pattern DSL_PATTERN = Pattern.compile(expr);
     private static final String DOT = ".";
+    private static final String COMMA = ",";
 
     public List<String> getListOfDslKeywords(String expression) {
         Matcher matcher = DSL_PATTERN.matcher(expression);
@@ -31,53 +34,119 @@ public class DSLPatternUtil {
     }
 
     public String extractKeyword(String keyword) {
-        return keyword.substring(keyword.indexOf('{') + 1,
-                keyword.indexOf('}'));
+
+        if ( keyword != null && keyword.indexOf('{') != -1 )
+        {
+            return keyword.substring(keyword.indexOf('{') + 1,  keyword.indexOf('}'));
+        }
+
+        return null;
     }
 
     public String extractParameter(String value) {
 
-        if ( value.indexOf('(') != -1 )
+        if ( value != null && value.indexOf('(') != -1 )
         {
-            return value.substring(value.indexOf('(') + 1,
-                    value.indexOf(')'));
+            return value.substring(value.indexOf('(') + 1, value.indexOf(')'));
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
-    public String extractKeywordName(String value) {
+    public Integer[] extractIndices(String value) {
 
-        if ( value.indexOf('(') != -1 )
+        if(value == null)
+            return null;
+
+        Integer[] indexRange = null;
+        if ( value.indexOf('[') != -1 )
+        {
+            String strIndex = value.substring(value.indexOf('[') + 1, value.indexOf(']'));
+            if (strIndex.contains(".."))
+            {
+                String strStartIndex = strIndex.substring(0, strIndex.indexOf('.'));
+                String strEndIndex = strIndex.substring(strIndex.lastIndexOf('.') + 1);
+
+                indexRange = new Integer[]{Integer.parseInt(strStartIndex),Integer.parseInt(strEndIndex)};
+            }
+            else
+            {
+                indexRange = new Integer[]{Integer.parseInt(strIndex)};
+            }
+        }
+
+        return indexRange;
+    }
+
+    public String extractKeyName(String value) {
+
+        if ( value != null && value.indexOf('(') != -1 )
         {
             return value.substring(0, value.indexOf('('));
         }
-        else
+        else if ( value != null && value.indexOf('[') != -1 )
         {
-            return value;
+            return value.substring(0, value.indexOf('['));
         }
+
+        return value;
     }
 
     public String getKeywordResolver(String dslKeyword){
-        ArrayList<String> splittedKeyword = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
-        return splittedKeyword.get(0);
+        if ( dslKeyword == null )
+            return null;
+
+        ArrayList<String> keywords = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
+        return keywords.get(0);
     }
 
     public String getKeywordValue(String dslKeyword){
-//        ArrayList<String> splittedKeyword = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
-//        return splittedKeyword.get(1);
-        return dslKeyword.substring(dslKeyword.indexOf(DOT) + 1);
+//        ArrayList<String> values = Lists.newArrayList(Splitter.on(DOT).omitEmptyStrings().split(dslKeyword));
+//        return values.get(1);
+        if(dslKeyword == null || !dslKeyword.contains(DOT))
+        {
+            return null;
+        }
 
+        return dslKeyword.substring(dslKeyword.indexOf(DOT) + 1);
     }
 
     public String getKeywordValueName(String dslKeywordValue){
-        return extractKeywordName(dslKeywordValue);
+        return extractKeyName(dslKeywordValue);
     }
 
-    public String getKeywordValueParam(String dslKeywordValue){
-        return extractParameter(dslKeywordValue);
+    public String[] getKeywordValueParams(String dslKeywordValue){
+        String strParameters = extractParameter(dslKeywordValue);
+        if( strParameters == null )
+        {
+            return null;
+        }
+
+        ArrayList<String> parameters = Lists.newArrayList(Splitter.on(COMMA).omitEmptyStrings().split(strParameters));
+        return parameters.toArray(new String[0]);
+    }
+
+    public Integer getKeywordValueIndex(String dslKeywordValue){
+        if( dslKeywordValue == null )
+            return null;
+
+        String strIndexValue = dslKeywordValue;
+        if ( dslKeywordValue.indexOf('(') != -1 )
+        {
+            strIndexValue = dslKeywordValue.substring(dslKeywordValue.lastIndexOf(')'));
+
+            if(strIndexValue.lastIndexOf('[') != -1)
+            {
+                strIndexValue = strIndexValue.substring(strIndexValue.lastIndexOf('['));
+                return extractIndices(strIndexValue)[0];
+            }
+        }
+
+        return null;
+    }
+
+    public Integer[] getKeywordValueIndices(String dslKeywordValue){
+        return extractIndices(dslKeywordValue);
     }
 
 }

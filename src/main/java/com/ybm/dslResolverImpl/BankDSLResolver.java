@@ -19,6 +19,12 @@ public class BankDSLResolver implements DSLResolver {
     }
 
     @Override
+    public Object resolveValue() {
+        //TODO:: Implementation Pending
+        return null;
+    }
+
+    @Override
     public Object resolveValue(String keyword) {
 
         //TODO:: By using this keyword external interfaces APIs or DB service can be called
@@ -37,8 +43,20 @@ public class BankDSLResolver implements DSLResolver {
     }
 
     @Override
-    public Object resolveValueByParameter(String keyword, String parameter) {
+    public Object resolveValue(String keyword, Integer index) {
+        //TODO:: By using this keyword external interfaces APIs or DB service can be called
+        return null;
+    }
+
+    @Override
+    public Object resolveValue(String keyword, String[] parameters) {
         //TODO:: Implementation Pending
+        return null;
+    }
+
+    @Override
+    public Object resolveValue(String keyword, String[] parameters, Integer index) {
+        //TODO:: By using this keyword external interfaces APIs or DB service can be called
         return null;
     }
 }

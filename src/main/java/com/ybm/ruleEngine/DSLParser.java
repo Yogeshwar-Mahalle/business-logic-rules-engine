@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -41,33 +39,84 @@ public class DSLParser {
                             String keyResolver = dslPatternUtil.getKeywordResolver(extractedDslKeyword);
                             String keywordValue = dslPatternUtil.getKeywordValue(extractedDslKeyword);
                             String keywordValueName = dslPatternUtil.getKeywordValueName(keywordValue);
-                            String keywordValueParam = dslPatternUtil.getKeywordValueParam(keywordValue);
+                            String[] keywordValueParams = dslPatternUtil.getKeywordValueParams(keywordValue);
+                            Integer index = dslPatternUtil.getKeywordValueIndex(keywordValue);
                             DSLResolver resolver = keywordResolver.getResolver(keyResolver).orElse(null);
                             assert resolver != null;
                             Object resolveValue = null;
-                            if( keywordValueParam == null ) {
+                            if( keywordValue == null ) {
+                                resolveValue = resolver.resolveValue();
+                            }
+                            else if( keywordValueParams == null && index == null ) {
                                 resolveValue = resolver.resolveValue(keywordValueName);
                             }
+                            else if( keywordValueParams == null ) {
+                                resolveValue = resolver.resolveValue(keywordValueName, index);
+                            }
                             else {
-                                String strKey = dslPatternUtil.getKeywordResolver(keywordValueParam);
-                                Object objMap = inputObjects.get(strKey);
+                                String[] strParameters = new String[keywordValueParams.length];
+                                int i = 0;
+                                for (String parameter : keywordValueParams) {
+                                    String strKey = dslPatternUtil.getKeywordResolver(parameter);
+                                    Object objMap = inputObjects.get(strKey);
 
-                                String strValue = dslPatternUtil.getKeywordValue(keywordValueParam);
+                                    String strValue = dslPatternUtil.getKeywordValue(parameter);
+                                    String valueKeyName = dslPatternUtil.getKeywordValueName(strValue);
 
-                                String strParameter = "";
-                                if( objMap != null )
-                                {
-                                    if( objMap instanceof Map<?,?> )
-                                    {
-                                        Object objValue = ((Map<?, ?>) objMap).get(strValue);
-                                        strParameter = objValue != null ? objValue.toString() : keywordValueParam;
+                                    if (objMap != null) {
+                                        Integer[] indices = dslPatternUtil.getKeywordValueIndices(strValue);
+                                        if (objMap instanceof Map<?, ?>) {
+                                            Object objValue = ((Map<?, ?>) objMap).get(valueKeyName);
+                                            if(objValue == null)
+                                            {
+                                                strParameters[i++] = parameter;
+                                            }
+                                            else if( indices != null && (objValue instanceof ArrayList || objValue.getClass().isArray() ) )
+                                            {
+                                                Object [] objArray = null;
+
+                                                // Cast to Object array from array Object
+                                                if (objValue.getClass().isArray()) {
+                                                    List<Object> objArrayList = new ArrayList<>();
+                                                    for (int k = 0; k < Array.getLength(objValue); i++) {
+                                                        objArrayList.add(Array.get(objValue, k));
+                                                    }
+                                                    objArray = objArrayList.toArray();
+                                                }
+                                                else {
+                                                    objArray = (Object []) ((ArrayList<?>) objValue).toArray();
+                                                }
+
+                                                if(indices.length > 1)
+                                                {
+                                                    Object[] objArrayInRange = Arrays.copyOfRange(objArray,
+                                                            indices[0],
+                                                            indices[1] + 1);
+
+                                                    strParameters[i++] = Arrays.toString(objArrayInRange);
+                                                }
+                                                else {
+                                                    strParameters[i++] = objArray[indices[0]].toString();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                strParameters[i++] = objValue.toString();
+                                            }
+                                        }
+                                    } else {
+                                        strParameters[i++] = parameter;
                                     }
+                                }
+
+                                if(index == null)
+                                {
+                                    resolveValue = resolver.resolveValue(keywordValueName, strParameters);
                                 }
                                 else
                                 {
-                                    strParameter = keywordValueParam;
+                                    resolveValue = resolver.resolveValue(keywordValueName, strParameters, index);
                                 }
-                                resolveValue = resolver.resolveValueByParameter(keywordValueName, strParameter);
                             }
 
                             dslKeywordToResolverValueMap.put(dslKeyword, resolveValue);

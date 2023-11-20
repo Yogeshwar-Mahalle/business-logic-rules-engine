@@ -6,7 +6,10 @@ package com.ybm.ruleEngine.dslResolver;
 
 public interface DSLResolver {
     String getResolverKeyword();
+    Object resolveValue();
     Object resolveValue(String keyword);
+    Object resolveValue(String keyword, Integer index);
 
-    Object resolveValueByParameter(String keyword, String parameter);
+    Object resolveValue(String keyword, String[] parameters);
+    Object resolveValue(String keyword, String[] parameters, Integer index);
 }
