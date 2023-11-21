@@ -133,18 +133,17 @@ public class DSLParser {
 
             String strResolveValue = "null";
 
-            if( dslResolveValue instanceof String ) {
-                strResolveValue = "\"" + dslResolveValue.toString() + "\"";
-            }
-            else if( dslResolveValue instanceof Date) {
-                strResolveValue = "\"" + dslResolveValue.toString() + "\"";
-            }
-            else if( dslResolveValue != null ) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    strResolveValue = objectMapper.writeValueAsString(dslResolveValue);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+            if( dslResolveValue != null ) {
+                if (dslResolveValue instanceof Class) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        strResolveValue = objectMapper.writeValueAsString(dslResolveValue);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                else {
+                    strResolveValue = dslResolveValue.toString();
                 }
             }
 
