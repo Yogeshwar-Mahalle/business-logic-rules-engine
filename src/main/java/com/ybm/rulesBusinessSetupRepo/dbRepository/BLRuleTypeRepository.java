@@ -8,10 +8,13 @@ import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypeDbModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BLRuleTypeRepository extends JpaRepository<BLRuleTypeDbModel, String> {
     Optional<BLRuleTypeDbModel> findByRuleType(String ruleType);
+
+    List<BLRuleTypeDbModel>  findByWorkflowRuleFlag(boolean flag);
 
 }

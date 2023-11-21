@@ -13,6 +13,7 @@ import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.ruleEngine.dataexchange.DataObject;
 import com.ybm.ruleEngine.dataexchange.Payload;
 import com.ybm.ruleEngine.RuleEngine;
+import com.ybm.workflow.WorkflowManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,10 @@ public class BusinessLogicRestController {
 
     @Autowired
     private RuleEngine ruleEngine;
+
+    @Autowired
+    private WorkflowManager workflowManager;
+
 
     @Autowired
     private ExchangeDataService exchangeDataService;
@@ -61,7 +66,40 @@ public class BusinessLogicRestController {
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
-        DataExchangeObject result = (DataExchangeObject) ruleEngine.run(ruleType, dataExchangeObject);
+        DataExchangeObject result = ruleEngine.run(ruleType, dataExchangeObject);
+
+        exchangeData = mapExchangeData(result);
+        exchangeData = exchangeDataService.saveExchangeData(exchangeData);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping(value = "/wrkflow")
+    public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
+        UUID uuid = UUID.randomUUID();
+        Map<String, Object> properties = new HashMap<>();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String strPayload = map.toString();
+        try {
+            strPayload = objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        Payload payload = new Payload(strPayload, ContentType.JSON, map );
+        DataObject dataObject = new DataObject( headers, payload);
+        DataExchangeObject dataExchangeObject = new DataExchangeObject(
+                uuid.toString(),
+                properties,
+                dataObject,
+                dataObject
+        );
+
+        ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
+        exchangeData = exchangeDataService.saveExchangeData(exchangeData);
+
+        DataExchangeObject result = workflowManager.run( dataExchangeObject );
 
         exchangeData = mapExchangeData(result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);

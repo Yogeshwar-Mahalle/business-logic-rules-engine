@@ -35,6 +35,14 @@ public class BusinessRuleTypesService {
         return blRuleTypesDbModel.map(this::mapRuleTypesFromDbModel).orElse(null);
     }
 
+    public List<BusinessLogicRuleType> getAllRuleTypeByWrkFlowFlag() {
+        return blRuleTypeRepository.findByWorkflowRuleFlag(true).stream()
+                .map(
+                        this::mapRuleTypesFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public BusinessLogicRuleType saveRuleType(BusinessLogicRuleType businessLogicRuleType) {
         BLRuleTypeDbModel blRuleTypeDbModel = mapRuleTypesToDbModel(businessLogicRuleType);

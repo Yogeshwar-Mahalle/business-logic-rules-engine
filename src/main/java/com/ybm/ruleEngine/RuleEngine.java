@@ -44,14 +44,16 @@ public class RuleEngine {
      * Run BusinessLogicRule engine on set of rules for given data.
      * @param ruleType
      * @param dataExchangeObject
-     * @param applyOnlyFirstMatch
      * @return
      */
     public DataExchangeObject run(String ruleType, DataExchangeObject dataExchangeObject) {
         //TODO: Here for each call, we are fetching all rules from dbRepository. It should be cache.
         BusinessLogicRuleType businessLogicRuleTypes = businessRuleTypesService.getRuleType(ruleType);
-        List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByType(ruleType);
+        if (businessLogicRuleTypes == null){
+            return dataExchangeObject;
+        }
 
+        List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByType(ruleType);
         if (null == listOfBusinessLogicRules || listOfBusinessLogicRules.isEmpty()){
             return dataExchangeObject;
         }
@@ -191,9 +193,9 @@ public class RuleEngine {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(INPUT_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
         dataMap.put(INPUT_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
-        dataMap.put(PROCESSING_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
         dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
+        dataMap.put(PROCESSING_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());
         dataMap.put(OUTPUT_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());
         dataMap.put(OUTPUT_HEADERS, outputResult.getDataObject().getHeaders());
         dataMap.put(OUTPUT_PROPERTIES, outputResult.getProperties());
