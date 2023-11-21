@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class IndustryDataDSLResolver implements DSLResolver {
     private static final String DSL_RESOLVER_KEYWORD = "industry";
-    private static final String WORKFLOW = "workflow";
     private static final String NCC_TYPE = "ncctype";
     private static final String NCC_BIC = "nccbic";
 
@@ -50,12 +49,6 @@ public class IndustryDataDSLResolver implements DSLResolver {
     public Object resolveValue(String keyword, String[] parameters) {
         IndustryDataDbModel industryDataDbModel = null;
         Object result = null;
-
-        //By using this keyword external interfaces APIs or DB service can be called
-        if (keyword.equalsIgnoreCase(WORKFLOW)){
-            industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "WRK_FLOW_TYPE", parameters[0]);
-            result = industryDataDbModel.getValueField();
-        }
 
         //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(NCC_TYPE)){
