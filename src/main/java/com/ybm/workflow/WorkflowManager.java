@@ -29,6 +29,8 @@ public class WorkflowManager {
 
     public DataExchangeObject run(DataExchangeObject dataExchangeObject) {
 
+        DataExchangeObject wrkflwDataExchangeObject = dataExchangeObject.copy();
+
         List<BusinessLogicRuleType> listBusinessLogicRuleTypes = businessRuleTypesService.getAllRuleTypeByWrkFlowFlag();
         if (null == listBusinessLogicRuleTypes || listBusinessLogicRuleTypes.isEmpty()){
             return dataExchangeObject;
@@ -36,9 +38,9 @@ public class WorkflowManager {
 
         for ( BusinessLogicRuleType businessLogicRuleType : listBusinessLogicRuleTypes ) {
 
-            DataExchangeObject wrkFlowRules = ruleEngine.run(businessLogicRuleType.getRuleType(), dataExchangeObject);
+            DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run(businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject);
 
-            String strRuleTypeList = (String) wrkFlowRules.getDataObject().getPayload().getDataMap().get(WORKFLOW_RULE_TYPE_LIST);
+            String strRuleTypeList = (String) wrkFlowRulesXchangeObj.getOutDataObject().getPayload().getDataMap().get(WORKFLOW_RULE_TYPE_LIST);
             if( strRuleTypeList != null )
             {
                 List<String> ruleTypeList = Stream.of(strRuleTypeList.split(","))
@@ -46,12 +48,22 @@ public class WorkflowManager {
                         .toList();
                 for ( String ruleType : ruleTypeList ) {
 
-                    //TODO: Implementation of WorkFlow RuleTypes sequence flow pending by using java stream or chain function.
-                    dataExchangeObject = ruleEngine.run(ruleType, dataExchangeObject);
+                    wrkflwDataExchangeObject = ruleEngine.run(ruleType, wrkflwDataExchangeObject);
 
+                    //Set output payload of previous rule to input payload of next rule in the workflow
+                    wrkflwDataExchangeObject = new DataExchangeObject(
+                            dataExchangeObject.getUniqueExchangeId(),
+                            wrkflwDataExchangeObject.getProperties(),
+                            wrkflwDataExchangeObject.getOutDataObject(),
+                            wrkflwDataExchangeObject.getOutDataObject()
+                    );
                 }
             }
         }
+
+        //Set output payload of last rule to input exchange object without modification in the input payload
+        dataExchangeObject.setOutDataObject(wrkflwDataExchangeObject.getOutDataObject());
+        dataExchangeObject.setProperties(wrkflwDataExchangeObject.getProperties());
 
         return dataExchangeObject;
     }

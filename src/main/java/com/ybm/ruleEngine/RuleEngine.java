@@ -87,7 +87,7 @@ public class RuleEngine {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> dataMap = dataExchangeObject.getDataObject().getPayload().getDataMap();
+        Map<String, Object> dataMap = dataExchangeObject.getOutDataObject().getPayload().getDataMap();
         String strPayload = dataMap.toString();
         try {
             strPayload = objectMapper.writeValueAsString(dataMap);
@@ -95,7 +95,7 @@ public class RuleEngine {
             throw new RuntimeException(e);
         }
 
-        dataExchangeObject.getDataObject().getPayload().setStrMessage(strPayload);
+        dataExchangeObject.getOutDataObject().getPayload().setStrMessage(strPayload);
 
         return dataExchangeObject;
     }
@@ -160,11 +160,11 @@ public class RuleEngine {
     public boolean evaluateCondition(String expression, DataExchangeObject inputData) {
 
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(INPUT_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
-        dataMap.put(INPUT_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
-        dataMap.put(PROCESSING_PAYLOAD, inputData.getDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
+        dataMap.put(INPUT_MESSAGE, inputData.getInDataObject().getPayload().getStrMessage());
+        dataMap.put(INPUT_PAYLOAD, inputData.getInDataObject().getPayload().getDataMap());
+        dataMap.put(INPUT_HEADERS, inputData.getOutDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
+        dataMap.put(PROCESSING_PAYLOAD, inputData.getOutDataObject().getPayload().getDataMap());
 
         //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
         String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(expression, dataMap);
@@ -186,18 +186,15 @@ public class RuleEngine {
     public DataExchangeObject executeRule(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
         DataExchangeObject outputResult = inputData.copy();
-        outputResult.getDataObject().getPayload().getDataMap().clear();
-        outputResult.getDataObject().getHeaders().clear();
-        outputResult.getProperties().clear();
 
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(INPUT_MESSAGE, inputData.getOriginalDataObject().getPayload().getStrMessage());
-        dataMap.put(INPUT_PAYLOAD, inputData.getOriginalDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_HEADERS, inputData.getDataObject().getHeaders());
+        dataMap.put(INPUT_MESSAGE, inputData.getInDataObject().getPayload().getStrMessage());
+        dataMap.put(INPUT_PAYLOAD, inputData.getInDataObject().getPayload().getDataMap());
+        dataMap.put(INPUT_HEADERS, inputData.getOutDataObject().getHeaders());
         dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
-        dataMap.put(PROCESSING_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());
-        dataMap.put(OUTPUT_PAYLOAD, outputResult.getDataObject().getPayload().getDataMap());
-        dataMap.put(OUTPUT_HEADERS, outputResult.getDataObject().getHeaders());
+        dataMap.put(PROCESSING_PAYLOAD, outputResult.getOutDataObject().getPayload().getDataMap());
+        dataMap.put(OUTPUT_PAYLOAD, outputResult.getOutDataObject().getPayload().getDataMap());
+        dataMap.put(OUTPUT_HEADERS, outputResult.getOutDataObject().getHeaders());
         dataMap.put(OUTPUT_PROPERTIES, outputResult.getProperties());
 
         //Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}

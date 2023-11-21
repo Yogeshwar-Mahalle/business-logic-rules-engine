@@ -110,13 +110,13 @@ public class BusinessLogicRestController {
     private static ExchangeData mapExchangeData(DataExchangeObject dataExchangeObject) {
         ObjectMapper objectMapper = new ObjectMapper();
         String strProperties = dataExchangeObject.getProperties().toString();
-        String strOrgHeaders = dataExchangeObject.getOriginalDataObject().getHeaders().toString();
-        String strProcessedHeaders = dataExchangeObject.getDataObject().getHeaders().toString();
+        String strOrgHeaders = dataExchangeObject.getInDataObject().getHeaders().toString();
+        String strProcessedHeaders = dataExchangeObject.getOutDataObject().getHeaders().toString();
 
         try {
             strProperties = objectMapper.writeValueAsString(dataExchangeObject.getProperties());
-            strOrgHeaders = objectMapper.writeValueAsString(dataExchangeObject.getOriginalDataObject().getHeaders());
-            strProcessedHeaders = objectMapper.writeValueAsString(dataExchangeObject.getDataObject().getHeaders());
+            strOrgHeaders = objectMapper.writeValueAsString(dataExchangeObject.getInDataObject().getHeaders());
+            strProcessedHeaders = objectMapper.writeValueAsString(dataExchangeObject.getOutDataObject().getHeaders());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -125,12 +125,12 @@ public class BusinessLogicRestController {
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
         exchangeData.setLinkedEntity("IN");
         exchangeData.setSource("IN-GW");
-        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"BOOK\"]}");
+        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@-@@@@@@@@@@-@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
         exchangeData.setOriginalContentType(ContentType.JSON);
-        exchangeData.setOriginalData(dataExchangeObject.getOriginalDataObject().getPayload().getStrMessage());
+        exchangeData.setOriginalData(dataExchangeObject.getInDataObject().getPayload().getStrMessage());
         exchangeData.setOriginalHeaders(strOrgHeaders);
         exchangeData.setContentType(ContentType.JSON);
-        exchangeData.setProcessedData(dataExchangeObject.getDataObject().getPayload().getStrMessage());
+        exchangeData.setProcessedData(dataExchangeObject.getOutDataObject().getPayload().getStrMessage());
         exchangeData.setProcessedHeaders(strProcessedHeaders);
         exchangeData.setProperties(strProperties);
         exchangeData.setStatus("AC");

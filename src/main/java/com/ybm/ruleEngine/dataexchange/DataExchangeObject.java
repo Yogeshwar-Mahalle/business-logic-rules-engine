@@ -13,36 +13,32 @@ import java.util.stream.Collectors;
 
 @Getter
 public class DataExchangeObject implements Serializable {
-    private String uniqueExchangeId;
+    private final String uniqueExchangeId;
+    private final DataObject inDataObject;
+    private DataObject outDataObject;
     private Map<String, Object> properties;
-    private DataObject dataObject;
-    private final DataObject originalDataObject;
 
-    public DataExchangeObject(String uniqueExchangeId, Map<String, Object> properties, DataObject dataObject, DataObject originalDataObject) {
+    public DataExchangeObject(String uniqueExchangeId, Map<String, Object> properties, DataObject inDataObject, DataObject outDataObject ) {
         this.uniqueExchangeId = uniqueExchangeId;
         this.properties = properties;
-        this.dataObject = dataObject;
-        this.originalDataObject = originalDataObject.copy();
+        this.inDataObject = inDataObject.copy();
+        this.outDataObject = outDataObject;
     }
 
     public DataExchangeObject(DataExchangeObject dataExchangeObject) {
         this.uniqueExchangeId = dataExchangeObject.uniqueExchangeId;
         this.properties = dataExchangeObject.properties.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        this.dataObject = dataExchangeObject.dataObject.copy();
-        this.originalDataObject = dataExchangeObject.originalDataObject.copy();
-    }
-
-    public void setUniqueExchangeId(String uniqueExchangeId) {
-        this.uniqueExchangeId = uniqueExchangeId;
+        this.inDataObject = dataExchangeObject.inDataObject.copy();
+        this.outDataObject = dataExchangeObject.outDataObject.copy();
     }
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 
-    public void setDataObject(DataObject dataObject) {
-        this.dataObject = dataObject;
+    public void setOutDataObject(DataObject outDataObject) {
+        this.outDataObject = outDataObject;
     }
 
     @Override
@@ -50,8 +46,8 @@ public class DataExchangeObject implements Serializable {
         return "DataExchangeObject{" +
                 "uniqueExchangeId='" + uniqueExchangeId + '\'' +
                 ", properties=" + properties +
-                ", dataObject=" + dataObject +
-                ", orignalDataObject=" + originalDataObject +
+                ", inDataObject=" + inDataObject +
+                ", outDataObject=" + outDataObject +
                 '}';
     }
 
@@ -59,12 +55,15 @@ public class DataExchangeObject implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DataExchangeObject that)) return false;
-        return Objects.equals(uniqueExchangeId, that.uniqueExchangeId) && Objects.equals(properties, that.properties) && Objects.equals(dataObject, that.dataObject) && Objects.equals(originalDataObject, that.originalDataObject);
+        return Objects.equals(uniqueExchangeId, that.uniqueExchangeId) &&
+                Objects.equals(properties, that.properties) &&
+                Objects.equals(inDataObject, that.inDataObject) &&
+                Objects.equals(outDataObject, that.outDataObject);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uniqueExchangeId, properties, dataObject, originalDataObject);
+        return Objects.hash(uniqueExchangeId, properties, inDataObject, outDataObject);
     }
 
     public DataExchangeObject copy() {
