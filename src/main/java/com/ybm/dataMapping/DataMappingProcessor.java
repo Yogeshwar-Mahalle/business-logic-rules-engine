@@ -8,10 +8,7 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.payloadtypes.*;
 import com.ybm.dataMapping.processor.DataEnrichmentProcessing;
 import com.ybm.dataMapping.processor.DataMapProcessing;
-import com.ybm.dataMapping.visitor.ToJsonTransformerVisitor;
-import com.ybm.dataMapping.visitor.ToTextTransformerVisitor;
-import com.ybm.dataMapping.visitor.ToXmlTransformerVisitor;
-import com.ybm.dataMapping.visitor.ToYamlTransformerVisitor;
+import com.ybm.dataMapping.visitor.*;
 
 public class DataMappingProcessor {
     public static enum MessageFormat {JSON, XML, TEXT, YAML}
@@ -68,6 +65,8 @@ public class DataMappingProcessor {
                 return null;
         }
 
-        return returnResult;
+        //If configured apply default common wrapper around the payload
+        payloadMessageInterface = new MessageWrapper( returnResult );
+        return payloadMessageInterface.accept( new ProcessingVisitor() );
     }
 }
