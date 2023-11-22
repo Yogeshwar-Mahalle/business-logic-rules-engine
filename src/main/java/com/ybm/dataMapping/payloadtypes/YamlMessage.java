@@ -14,8 +14,8 @@ public class YamlMessage implements PayloadMessageInterface {
 
     @Override
     public String accept(TransformVisitorInterface transformVisitorInterface) {
-
-        return "YamlMessage";
+        transformVisitorInterface.visit(this);
+        return dataMap.toString();
     }
 
     @Override

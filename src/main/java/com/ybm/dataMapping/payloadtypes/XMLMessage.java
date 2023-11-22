@@ -14,8 +14,8 @@ public class XMLMessage implements PayloadMessageInterface {
 
     @Override
     public String accept(TransformVisitorInterface transformVisitorInterface) {
-
-        return "XMLMessage";
+        transformVisitorInterface.visit(this);
+        return dataMap.toString();
     }
 
     @Override

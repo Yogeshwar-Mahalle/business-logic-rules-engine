@@ -14,8 +14,8 @@ public class JsonMessage implements PayloadMessageInterface {
 
     @Override
     public String accept(TransformVisitorInterface transformVisitorInterface) {
-
-        return "JsonMessage";
+        transformVisitorInterface.visit(this);
+        return dataMap.toString();
     }
 
     @Override

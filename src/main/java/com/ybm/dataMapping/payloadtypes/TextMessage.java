@@ -14,8 +14,8 @@ public class TextMessage implements PayloadMessageInterface {
 
     @Override
     public String accept(TransformVisitorInterface transformVisitorInterface) {
-
-        return "TextMessage";
+        transformVisitorInterface.visit(this);
+        return dataMap.toString();
     }
 
     @Override
