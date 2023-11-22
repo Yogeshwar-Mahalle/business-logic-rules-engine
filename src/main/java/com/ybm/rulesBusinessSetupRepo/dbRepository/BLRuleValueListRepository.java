@@ -17,5 +17,5 @@ public interface BLRuleValueListRepository extends JpaRepository<BLRuleValueList
 
     List<BLRuleValueListDbModel> findByDataTypeOrderBySequenceNumber(@Param("dataType") String dataType);
     BLRuleValueListDbModel findByDataTypeAndKeyField(@Param("dataType") String dataType, @Param("keyField") String keyField);
-
+    void deleteByDataTypeAndKeyField(@Param("dataType") String dataType, @Param("keyField") String keyField);
 }

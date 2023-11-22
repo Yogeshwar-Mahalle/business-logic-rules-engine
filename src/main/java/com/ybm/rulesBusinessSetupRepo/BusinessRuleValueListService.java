@@ -45,7 +45,14 @@ public class BusinessRuleValueListService {
     }
 
     @Transactional
-    public List<BusinessLogicRuleValueList> saveRuleValueLists(List<BusinessLogicRuleValueList> businessLogicRuleValueLists) {
+    public BusinessLogicRuleValueList saveRuleValue(BusinessLogicRuleValueList businessLogicRuleValue) {
+        BLRuleValueListDbModel blRuleValueListDbModel = mapRuleValueListToDbModel(businessLogicRuleValue);
+        blRuleValueListDbModel = blRuleValueListRepository.save(blRuleValueListDbModel);
+        return mapRuleValueListFromDbModel(blRuleValueListDbModel);
+    }
+
+    @Transactional
+    public List<BusinessLogicRuleValueList> saveRuleValuesList(List<BusinessLogicRuleValueList> businessLogicRuleValueLists) {
 
         List<BLRuleValueListDbModel> listBLRuleValueListDbModel = businessLogicRuleValueLists.stream()
                 .map(
@@ -54,6 +61,16 @@ public class BusinessRuleValueListService {
                 .collect(Collectors.toList());
 
         return blRuleValueListRepository.saveAll(listBLRuleValueListDbModel).stream()
+                .map(
+                        this::mapRuleValueListFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    public List<BusinessLogicRuleValueList> removeRuleValueByFieldId(String dataType, String keyField) {
+        blRuleValueListRepository.deleteByDataTypeAndKeyField(dataType, keyField);
+
+        return blRuleValueListRepository.findAll().stream()
                 .map(
                         this::mapRuleValueListFromDbModel
                 )
@@ -86,5 +103,6 @@ public class BusinessRuleValueListService {
                 .build();
 
     }
+
 
 }

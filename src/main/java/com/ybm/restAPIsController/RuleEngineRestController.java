@@ -32,6 +32,9 @@ public class RuleEngineRestController {
     @Autowired
     private BusinessRuleFunctionService businessRuleFunctionService;
 
+    @Autowired
+    private BusinessRuleValueListService businessRuleValueListService;
+
     @GetMapping(value = "/get-all-rule-type")
     public ResponseEntity<?> getAllRuleType() {
         List<BusinessLogicRuleType> allBusinessLogicRuleType = businessRuleTypesService.getAllRuleTypes();
@@ -162,6 +165,43 @@ public class RuleEngineRestController {
     public ResponseEntity<?> removeRuleFunctionById(@PathVariable("functionId") String functionId) {
         List<BusinessLogicRuleFunction> allRemainingRuleFunctions = businessRuleFunctionService.removeRuleFunctionById(functionId);
         return ResponseEntity.ok(allRemainingRuleFunctions);
+    }
+
+    @GetMapping(value = "/get-all-rule-values")
+    public ResponseEntity<?> getAllRuleValueList() {
+        List<BusinessLogicRuleValueList> allBusinessLogicRuleValueList = businessRuleValueListService.getAllRuleValueList();
+        return ResponseEntity.ok(allBusinessLogicRuleValueList);
+    }
+
+    @GetMapping(value = "/get-rule-values/{dataType}")
+    public ResponseEntity<?> getRuleValuesByDataType(@PathVariable("dataType") String dataType) {
+        List<BusinessLogicRuleValueList> businessLogicRuleValueListByDataType = businessRuleValueListService.getRuleValueListByDataType(dataType);
+        return ResponseEntity.ok(businessLogicRuleValueListByDataType);
+    }
+
+    @GetMapping(value = "/get-rule-values/{dataType}/{keyField}")
+    public ResponseEntity<?> getRuleValueByFieldId(@PathVariable("dataType") String dataType, @PathVariable("keyField") String keyField) {
+        BusinessLogicRuleValueList businessLogicRuleValueList = businessRuleValueListService.getRuleValueByDataTypeAndKeyField(dataType, keyField);
+        return ResponseEntity.ok(businessLogicRuleValueList);
+    }
+
+    @PostMapping(value = "/update-rule-value")
+    public ResponseEntity<?> updateRuleValue(@RequestBody BusinessLogicRuleValueList businessLogicRuleValue) {
+        BusinessLogicRuleValueList businessLogicRuleValueListUpdated = businessRuleValueListService.saveRuleValue(businessLogicRuleValue);
+        return ResponseEntity.ok(businessLogicRuleValueListUpdated);
+    }
+
+    @PostMapping(value = "/update-all-rule-values")
+    public ResponseEntity<?> updateRuleValues(@RequestBody List<BusinessLogicRuleValueList> businessLogicRuleValueList) {
+
+        List<BusinessLogicRuleValueList> ruleValueListUpdated = businessRuleValueListService.saveRuleValuesList(businessLogicRuleValueList);
+        return ResponseEntity.ok(ruleValueListUpdated);
+    }
+
+    @DeleteMapping(value = "/remove-rule-value-list/{dataType}/{keyField}")
+    public ResponseEntity<?> removeRuleValueByFieldId(@PathVariable("dataType") String dataType, @PathVariable("keyField") String keyField) {
+        List<BusinessLogicRuleValueList> allRemainingBusinessLogicRuleValueList = businessRuleValueListService.removeRuleValueByFieldId(dataType, keyField);
+        return ResponseEntity.ok(allRemainingBusinessLogicRuleValueList);
     }
 
 }
