@@ -45,6 +45,9 @@ public class BLRuleActionPnAprvlDbModel implements Serializable {
     @Column(name = "OTHER_ASSIGNOR", length = 5120, nullable=false)
     private String otherAssignor;
 
+    @Column(name = "INCLUDE_FUNCTIONS_NAME_LIST", length = 2048)
+    private String includeFuncNameList;
+
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 

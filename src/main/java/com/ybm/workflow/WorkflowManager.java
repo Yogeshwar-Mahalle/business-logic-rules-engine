@@ -55,7 +55,8 @@ public class WorkflowManager {
                             dataExchangeObject.getUniqueExchangeId(),
                             wrkflwDataExchangeObject.getProperties(),
                             wrkflwDataExchangeObject.getOutDataObject(),
-                            wrkflwDataExchangeObject.getOutDataObject()
+                            wrkflwDataExchangeObject.getOutDataObject(),
+                            wrkflwDataExchangeObject.getExtData()
                     );
                 }
             }
@@ -64,6 +65,7 @@ public class WorkflowManager {
         //Set output payload of last rule to input exchange object without modification in the input payload
         dataExchangeObject.setOutDataObject(wrkflwDataExchangeObject.getOutDataObject());
         dataExchangeObject.setProperties(wrkflwDataExchangeObject.getProperties());
+        dataExchangeObject.setExtData(wrkflwDataExchangeObject.getExtData());
 
         return dataExchangeObject;
     }

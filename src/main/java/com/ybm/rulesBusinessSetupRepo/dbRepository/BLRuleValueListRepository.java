@@ -10,12 +10,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
 public interface BLRuleValueListRepository extends JpaRepository<BLRuleValueListDbModel, String> {
 
     List<BLRuleValueListDbModel> findByDataTypeOrderBySequenceNumber(@Param("dataType") String dataType);
-    BLRuleValueListDbModel findByDataTypeAndKeyField(@Param("dataType") String dataType, @Param("keyField") String keyField);
+    Optional<BLRuleValueListDbModel> findByDataTypeAndKeyField(@Param("dataType") String dataType, @Param("keyField") String keyField);
     void deleteByDataTypeAndKeyField(@Param("dataType") String dataType, @Param("keyField") String keyField);
 }

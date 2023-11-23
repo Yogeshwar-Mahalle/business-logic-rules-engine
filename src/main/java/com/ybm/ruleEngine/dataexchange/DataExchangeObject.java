@@ -17,12 +17,14 @@ public class DataExchangeObject implements Serializable {
     private final DataObject inDataObject;
     private DataObject outDataObject;
     private Map<String, Object> properties;
+    private Map<String, Object> extData;
 
-    public DataExchangeObject(String uniqueExchangeId, Map<String, Object> properties, DataObject inDataObject, DataObject outDataObject ) {
+    public DataExchangeObject(String uniqueExchangeId, Map<String, Object> properties, DataObject inDataObject, DataObject outDataObject, Map<String, Object> extData ) {
         this.uniqueExchangeId = uniqueExchangeId;
         this.properties = properties;
         this.inDataObject = inDataObject.copy();
         this.outDataObject = outDataObject;
+        this.extData = extData;
     }
 
     public DataExchangeObject(DataExchangeObject dataExchangeObject) {
@@ -31,10 +33,15 @@ public class DataExchangeObject implements Serializable {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         this.inDataObject = dataExchangeObject.inDataObject.copy();
         this.outDataObject = dataExchangeObject.outDataObject.copy();
+        this.extData = dataExchangeObject.extData.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+    public void setExtData(Map<String, Object> extData) {
+        this.extData = extData;
     }
 
     public void setOutDataObject(DataObject outDataObject) {
@@ -48,6 +55,7 @@ public class DataExchangeObject implements Serializable {
                 ", properties=" + properties +
                 ", inDataObject=" + inDataObject +
                 ", outDataObject=" + outDataObject +
+                ", extData=" + extData +
                 '}';
     }
 
@@ -58,12 +66,13 @@ public class DataExchangeObject implements Serializable {
         return Objects.equals(uniqueExchangeId, that.uniqueExchangeId) &&
                 Objects.equals(properties, that.properties) &&
                 Objects.equals(inDataObject, that.inDataObject) &&
-                Objects.equals(outDataObject, that.outDataObject);
+                Objects.equals(outDataObject, that.outDataObject) &&
+                Objects.equals(extData, that.extData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uniqueExchangeId, properties, inDataObject, outDataObject);
+        return Objects.hash(uniqueExchangeId, properties, inDataObject, outDataObject, extData);
     }
 
     public DataExchangeObject copy() {

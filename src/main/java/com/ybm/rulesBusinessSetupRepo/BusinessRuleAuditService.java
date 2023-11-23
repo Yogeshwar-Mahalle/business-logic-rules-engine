@@ -22,6 +22,9 @@ public class BusinessRuleAuditService {
     private BLRuleAuditRepository blRuleAuditRepository;
 
     public List<BusinessLogicRuleAudit> getRuleAuditById(String ruleAuditId) {
+        if( ruleAuditId == null )
+            return null;
+
         return blRuleAuditRepository.findAllByRuleAuditId(ruleAuditId).stream()
                 .map(
                         this::mapRuleAuditFromDbModel

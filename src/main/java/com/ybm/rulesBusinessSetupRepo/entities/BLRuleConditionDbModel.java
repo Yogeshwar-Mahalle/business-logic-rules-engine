@@ -60,6 +60,9 @@ public class BLRuleConditionDbModel implements Serializable {
     @Column(name = "LOGICAL_OPERATOR", length = 25)
     private String logicalOperator;
 
+    @Column(name = "INCLUDE_FUNCTIONS_NAME_LIST", length = 1024)
+    private String includeFuncNameList;
+
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 

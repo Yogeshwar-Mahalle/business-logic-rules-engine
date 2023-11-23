@@ -25,11 +25,17 @@ public class DSLParser {
     private DSLPatternUtil dslPatternUtil;
 
     public String resolveDomainSpecificKeywords(String expression, Map<String, Object> inputObjects){
+        if( expression == null || inputObjects == null)
+            return expression;
+
         Map<String, Object> dslKeywordToResolverValueMap = executeDSLResolver(expression, inputObjects);
         return replaceKeywordsWithValue(expression, dslKeywordToResolverValueMap);
     }
 
     private Map<String, Object> executeDSLResolver(String expression, Map<String, Object> inputObjects) {
+        if( expression == null )
+            return null;
+
         List<String> listOfDslKeyword = dslPatternUtil.getListOfDslKeywords(expression);
         Map<String, Object> dslKeywordToResolverValueMap = new HashMap<>();
         listOfDslKeyword
@@ -53,7 +59,7 @@ public class DSLParser {
                             else if( keywordValueParams == null ) {
                                 resolveValue = resolver.resolveValue(keywordValueName, index);
                             }
-                            else {
+                            else if( inputObjects != null ) {
                                 String[] strParameters = new String[keywordValueParams.length];
                                 int i = 0;
                                 for (String parameter : keywordValueParams) {
@@ -118,6 +124,16 @@ public class DSLParser {
                                     resolveValue = resolver.resolveValue(keywordValueName, strParameters, index);
                                 }
                             }
+                            else {
+                                if(index == null)
+                                {
+                                    resolveValue = resolver.resolveValue(keywordValueName, keywordValueParams);
+                                }
+                                else
+                                {
+                                    resolveValue = resolver.resolveValue(keywordValueName, keywordValueParams, index);
+                                }
+                            }
 
                             dslKeywordToResolverValueMap.put(dslKeyword, resolveValue);
                         }
@@ -126,6 +142,9 @@ public class DSLParser {
     }
 
     private String replaceKeywordsWithValue(String expression, Map<String, Object> dslKeywordToResolverValueMap){
+        if( expression == null || dslKeywordToResolverValueMap == null)
+            return expression;
+
         List<String> keyList = dslKeywordToResolverValueMap.keySet().stream().toList();
         for (int index = 0; index < keyList.size(); index++){
             String key = keyList.get(index);

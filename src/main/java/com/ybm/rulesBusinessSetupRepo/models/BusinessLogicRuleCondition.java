@@ -32,6 +32,7 @@ public class BusinessLogicRuleCondition implements Serializable {
     OperandType rightOperandType;
     String closeConditionScope;
     LogicalOperator logicalOperator;
+    String includeFuncNameList;
     Date createTimeStamp;
     Date updateTimeStamp;
 }

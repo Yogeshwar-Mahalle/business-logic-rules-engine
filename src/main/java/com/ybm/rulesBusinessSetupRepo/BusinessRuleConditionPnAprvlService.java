@@ -22,8 +22,11 @@ public class BusinessRuleConditionPnAprvlService {
     @Autowired
     private BLRuleConditionPnAprvlRepository blRuleConditionPnAprvlRepository;
 
-    public List<BusinessLogicRuleCondition> getRuleConditionById(String ruleId) {
-        return blRuleConditionPnAprvlRepository.findAllByRuleId(ruleId).stream()
+    public List<BusinessLogicRuleCondition> getRuleConditionById(String ruleCondId) {
+        if( ruleCondId == null )
+            return null;
+
+        return blRuleConditionPnAprvlRepository.findAllByRuleId(ruleCondId).stream()
                 .map(
                         this::mapRuleConditionPnAprvlFromDbModel
                 )

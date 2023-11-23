@@ -22,8 +22,11 @@ public class BusinessRuleConditionService {
     @Autowired
     private BLRuleConditionRepository blRuleConditionRepository;
 
-    public List<BusinessLogicRuleCondition> getRuleConditionById(String ruleId) {
-        return blRuleConditionRepository.findAllByRuleId(ruleId).stream()
+    public List<BusinessLogicRuleCondition> getRuleConditionById(String ruleCondId) {
+        if( ruleCondId == null )
+            return null;
+
+        return blRuleConditionRepository.findAllByRuleId(ruleCondId).stream()
                 .map(
                         this::mapRuleConditionFromDbModel
                 )
@@ -70,6 +73,7 @@ public class BusinessRuleConditionService {
                 .rightOperandType(rightOperandType)
                 .closeConditionScope(blRuleConditionDbModel.getCloseConditionScope())
                 .logicalOperator(logicalOperator)
+                .includeFuncNameList(blRuleConditionDbModel.getIncludeFuncNameList())
                 .createTimeStamp(blRuleConditionDbModel.getCreateTimeStamp() == null ? new Date() : blRuleConditionDbModel.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();
@@ -94,6 +98,7 @@ public class BusinessRuleConditionService {
                 .rightOperandType(businessLogicRuleCondition.getRightOperandType().name())
                 .closeConditionScope(businessLogicRuleCondition.getCloseConditionScope())
                 .logicalOperator(businessLogicRuleCondition.getLogicalOperator().name())
+                .includeFuncNameList(businessLogicRuleCondition.getIncludeFuncNameList())
                 .createTimeStamp(businessLogicRuleCondition.getCreateTimeStamp())
                 .updateTimeStamp(businessLogicRuleCondition.getUpdateTimeStamp())
                 .build();

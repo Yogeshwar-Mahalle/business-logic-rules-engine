@@ -24,6 +24,7 @@ public class BusinessLogicRuleAction implements Serializable {
     String ruleConditionId;
     String assignor;
     String otherAssignor;
+    String includeFuncNameList;
     Date createTimeStamp;
     Date updateTimeStamp;
 }

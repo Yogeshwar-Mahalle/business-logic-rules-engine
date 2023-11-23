@@ -40,7 +40,7 @@ public class BusinessRuleValueListService {
 
     public BusinessLogicRuleValueList getRuleValueByDataTypeAndKeyField(String dataType, String keyField) {
 
-        Optional<BLRuleValueListDbModel> blRuleValueListDbModel = Optional.ofNullable(blRuleValueListRepository.findByDataTypeAndKeyField(dataType, keyField));
+        Optional<BLRuleValueListDbModel> blRuleValueListDbModel = blRuleValueListRepository.findByDataTypeAndKeyField(dataType, keyField);
         return blRuleValueListDbModel.map(this::mapRuleValueListFromDbModel).orElse(null);
     }
 

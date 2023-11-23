@@ -19,25 +19,33 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BL_RULE_FUNCTIONS")
-@IdClass(BLRuleFunctionPnAprvlDbModel.IdClass.class)
-public class BLRuleFunctionPnAprvlDbModel implements Serializable {
+@Table(name = "BL_RULE_FUNCTION_TEMPLATE")
+@IdClass(BLRuleFunctionTemplateDbModel.IdClass.class)
+public class BLRuleFunctionTemplateDbModel implements Serializable {
 
     @Id
     @Column(name = "FUNCTION_ID", length = 128, nullable=false)
     private String functionId;
 
-    @Column(name = "FUNCTION_NAME", length = 50, nullable=false)
+    @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
+    @Id
+    @Column(name = "FUNCTION_NAME", length = 64, nullable=false)
     private String functionName;
+
+    @Column(name = "DESCRIPTION", length = 256)
+    private String description;
 
     @Column(name = "FUNCTION_PARAMETERS", length = 256)
     private String functionParameters;
 
+    @Column(name = "INCLUDE_FUNCTIONS_NAME_LIST", length = 5120)
+    private String includeFunctionsNameList;
+
     @Column(name = "FUNCTION_LOGIC", length = 2097152)
     private String functionLogic;
-
-    @Column(name = "DESCRIPTION", length = 256)
-    private String description;
 
     @Column(name = "STATUS", length = 25, nullable=false)
     private String status;
@@ -51,6 +59,8 @@ public class BLRuleFunctionPnAprvlDbModel implements Serializable {
     @Data
     static class IdClass implements Serializable {
         private String functionId;
+        private String linkedEntity;
+        private String functionName;
     }
 
 }

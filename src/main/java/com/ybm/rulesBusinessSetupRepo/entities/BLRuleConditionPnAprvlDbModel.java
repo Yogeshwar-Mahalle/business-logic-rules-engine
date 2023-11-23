@@ -19,7 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BL_RULE_CONDITIONS")
+@Table(name = "BL_RULE_CONDITIONS_PN_APRVL")
 @IdClass(BLRuleConditionPnAprvlDbModel.IdClass.class)
 public class BLRuleConditionPnAprvlDbModel implements Serializable {
 
@@ -59,6 +59,9 @@ public class BLRuleConditionPnAprvlDbModel implements Serializable {
 
     @Column(name = "LOGICAL_OPERATOR", length = 25)
     private String logicalOperator;
+
+    @Column(name = "INCLUDE_FUNCTIONS_NAME_LIST", length = 1024)
+    private String includeFuncNameList;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;

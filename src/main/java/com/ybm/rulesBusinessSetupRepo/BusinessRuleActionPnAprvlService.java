@@ -22,6 +22,9 @@ public class BusinessRuleActionPnAprvlService {
     private BLRuleActionPnAprvlRepository blRuleActionPnAprvlRepository;
 
     public List<BusinessLogicRuleAction> getRuleActionById(String ruleId) {
+        if( ruleId == null )
+            return null;
+
         return blRuleActionPnAprvlRepository.findAllByRuleId(ruleId).stream()
                 .map(
                         this::mapRuleActionPnAprvlFromDbModel

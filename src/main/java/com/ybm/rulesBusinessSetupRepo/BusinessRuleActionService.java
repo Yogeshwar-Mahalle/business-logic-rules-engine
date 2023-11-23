@@ -21,8 +21,11 @@ public class BusinessRuleActionService {
     @Autowired
     private BLRuleActionRepository blRuleActionRepository;
 
-    public List<BusinessLogicRuleAction> getRuleActionById(String ruleId) {
-        return blRuleActionRepository.findAllByRuleId(ruleId).stream()
+    public List<BusinessLogicRuleAction> getRuleActionById(String ruleActionId) {
+        if( ruleActionId == null )
+            return null;
+
+        return blRuleActionRepository.findAllByRuleId(ruleActionId).stream()
                 .map(
                         this::mapRuleActionFromDbModel
                 )
@@ -56,6 +59,7 @@ public class BusinessRuleActionService {
                 .assignee(blRuleActionDbModel.getAssignee())
                 .assignor(blRuleActionDbModel.getAssignor())
                 .otherAssignor(blRuleActionDbModel.getOtherAssignor())
+                .includeFuncNameList(blRuleActionDbModel.getIncludeFuncNameList())
                 .createTimeStamp(blRuleActionDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleActionDbModel.getUpdateTimeStamp())
                 .build();
@@ -74,6 +78,7 @@ public class BusinessRuleActionService {
                 .assignee(businessLogicRuleAction.getAssignee())
                 .assignor(businessLogicRuleAction.getAssignor())
                 .otherAssignor(businessLogicRuleAction.getOtherAssignor())
+                .includeFuncNameList(businessLogicRuleAction.getIncludeFuncNameList())
                 .createTimeStamp(businessLogicRuleAction.getCreateTimeStamp() == null ? new Date() : businessLogicRuleAction.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

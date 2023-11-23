@@ -4,6 +4,8 @@
 
 package com.ybm.restAPIsController;
 
+import com.ybm.ruleEngine.RuleEngine;
+import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.*;
 import com.ybm.rulesBusinessSetupRepo.models.*;
 
@@ -17,21 +19,19 @@ import java.util.List;
 @Slf4j
 @RestController
 public class RuleEngineRestController {
+
+    @Autowired
+    private RuleEngine ruleEngine;
     @Autowired
     private BusinessRuleTypesService businessRuleTypesService;
-
     @Autowired
     private BusinessRulesService businessRulesService;
-
     @Autowired
     private BusinessRuleConditionService businessRuleConditionService;
-
     @Autowired
     private BusinessRuleActionService businessRuleActionService;
-
     @Autowired
-    private BusinessRuleFunctionService businessRuleFunctionService;
-
+    private BusinessRuleFunctionTemplateService businessRuleFunctionTemplateService;
     @Autowired
     private BusinessRuleValueListService businessRuleValueListService;
 
@@ -97,10 +97,31 @@ public class RuleEngineRestController {
         return ResponseEntity.ok(allBusinessLogicRules);
     }
 
-    @PostMapping(value = "/update-rules")
+    @PostMapping(value = "/update-rule")
     public ResponseEntity<?> updateRule(@RequestBody BusinessLogicRule businessLogicRule) {
-
         BusinessLogicRule businessLogicRuleUpdated = businessRulesService.saveRule(businessLogicRule);
+
+        String condInitTemplateFunId = businessLogicRule.getCondInitTemplate();
+        if( condInitTemplateFunId != null ) {
+            BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(condInitTemplateFunId);
+            if( businessLogicRuleFunctionTemplate != null )
+                ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+        }
+
+        String actionInitTemplateFunId = businessLogicRule.getActionInitTemplate();
+        if( actionInitTemplateFunId != null ) {
+            BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(actionInitTemplateFunId);
+            if( businessLogicRuleFunctionTemplate != null )
+                ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+        }
+
+        String actionFinalTemplateFunId = businessLogicRule.getActionFinalTemplate();
+        if( actionFinalTemplateFunId != null ) {
+            BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(actionFinalTemplateFunId);
+            if( businessLogicRuleFunctionTemplate != null )
+                ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+        }
+
         return ResponseEntity.ok(businessLogicRuleUpdated);
     }
 
@@ -108,6 +129,30 @@ public class RuleEngineRestController {
     public ResponseEntity<?> updateRule(@RequestBody List<BusinessLogicRule> businessLogicRules) {
 
         List<BusinessLogicRule> rulesUpdated = businessRulesService.saveRules(businessLogicRules);
+
+        for ( BusinessLogicRule businessLogicRule : businessLogicRules ) {
+            String condInitTemplateFunId = businessLogicRule.getCondInitTemplate();
+            if( condInitTemplateFunId != null ) {
+                BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(condInitTemplateFunId);
+                if( businessLogicRuleFunctionTemplate != null )
+                    ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+            }
+
+            String actionInitTemplateFunId = businessLogicRule.getActionInitTemplate();
+            if( actionInitTemplateFunId != null ) {
+                BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(actionInitTemplateFunId);
+                if( businessLogicRuleFunctionTemplate != null )
+                    ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+            }
+
+            String actionFinalTemplateFunId = businessLogicRule.getActionFinalTemplate();
+            if( actionFinalTemplateFunId != null ) {
+                BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(actionFinalTemplateFunId);
+                if( businessLogicRuleFunctionTemplate != null )
+                    ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
+            }
+        }
+
         return ResponseEntity.ok(rulesUpdated);
     }
 
@@ -145,25 +190,29 @@ public class RuleEngineRestController {
 
     @GetMapping(value = "/get-all-functions")
     public ResponseEntity<?> getAllRuleFunction() {
-        List<BusinessLogicRuleFunction> allBusinessLogicRuleFunction = businessRuleFunctionService.getAllRuleFunction();
-        return ResponseEntity.ok(allBusinessLogicRuleFunction);
+        List<BusinessLogicRuleFunctionTemplate> allBusinessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getAllRuleFunction();
+        return ResponseEntity.ok(allBusinessLogicRuleFunctionTemplate);
     }
 
     @GetMapping(value = "/get-function/{functionId}")
     public ResponseEntity<?> getRuleFunction(@PathVariable("functionId") String functionId) {
-        BusinessLogicRuleFunction businessLogicRuleFunction = businessRuleFunctionService.getRuleFunction(functionId);
-        return ResponseEntity.ok(businessLogicRuleFunction);
+        BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(functionId);
+        return ResponseEntity.ok(businessLogicRuleFunctionTemplate);
     }
 
     @PostMapping(value = "/update-rule-function")
-    public ResponseEntity<?> updateRuleFunction(@RequestBody BusinessLogicRuleFunction businessLogicRuleFunction) {
-        BusinessLogicRuleFunction ruleFunctionUpdated = businessRuleFunctionService.saveRuleFunction(businessLogicRuleFunction);
+    public ResponseEntity<?> updateRuleFunction(@RequestBody BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate) {
+        BusinessLogicRuleFunctionTemplate ruleFunctionUpdated = businessRuleFunctionTemplateService.saveRuleFunction(businessLogicRuleFunctionTemplate);
+
+        if( ruleFunctionUpdated != null && ruleFunctionUpdated.getFunctionParameters() == null )
+            ruleEngine.compileTemplateFunction(ruleFunctionUpdated.getFunctionId(), ruleFunctionUpdated.getFunctionLogic());
+
         return ResponseEntity.ok(ruleFunctionUpdated);
     }
 
     @DeleteMapping(value = "/remove-rule-function/{functionId}")
     public ResponseEntity<?> removeRuleFunctionById(@PathVariable("functionId") String functionId) {
-        List<BusinessLogicRuleFunction> allRemainingRuleFunctions = businessRuleFunctionService.removeRuleFunctionById(functionId);
+        List<BusinessLogicRuleFunctionTemplate> allRemainingRuleFunctions = businessRuleFunctionTemplateService.removeRuleFunctionById(functionId);
         return ResponseEntity.ok(allRemainingRuleFunctions);
     }
 

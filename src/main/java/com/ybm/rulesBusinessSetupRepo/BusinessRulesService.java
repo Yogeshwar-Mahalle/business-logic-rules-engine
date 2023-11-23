@@ -50,6 +50,8 @@ public class BusinessRulesService {
     }
 
     public List<BusinessLogicRule> removeRuleById(String ruleId){
+        if( ruleId == null )
+            return null;
 
         blRulesRepository.deleteById(ruleId);
 
@@ -70,12 +72,18 @@ public class BusinessRulesService {
 
 
     public BusinessLogicRule getRuleById(String ruleId){
+        if( ruleId == null )
+            return null;
+
         Optional<BLRuleDbModel> ruleDbModel = blRulesRepository.findById(ruleId);
         return ruleDbModel.map(this::mapRuleFromDbModel).orElse(null);
     }
 
 
     public List<BusinessLogicRule> getAllRulesByType(String ruleType){
+        if( ruleType == null )
+            return null;
+
         return blRulesRepository.findByRuleType(ruleType).stream()
                 .map(
                         this::mapRuleFromDbModel
@@ -85,6 +93,9 @@ public class BusinessRulesService {
     }
 
     public List<BusinessLogicRule> getAllEntityRules(String entity){
+        if( entity == null )
+            return null;
+
         return blRulesRepository.findByLinkedEntity(entity).stream()
                 .map(
                         this::mapRuleFromDbModel
@@ -95,6 +106,9 @@ public class BusinessRulesService {
 
 
     public List<BusinessLogicRule> getAllEntityRulesByType(String entity, String ruleType){
+        if( entity == null || ruleType == null)
+            return null;
+
         return blRulesRepository.findByLinkedEntityAndRuleType(entity, ruleType).stream()
                 .map(
                         this::mapRuleFromDbModel
@@ -103,7 +117,6 @@ public class BusinessRulesService {
 
     }
 
-
     private BusinessLogicRule mapRuleFromDbModel(BLRuleDbModel blRuleDbModel){
 
         return BusinessLogicRule.builder()
@@ -111,8 +124,13 @@ public class BusinessRulesService {
                 .ruleId(blRuleDbModel.getRuleId())
                 .linkedEntity(blRuleDbModel.getLinkedEntity())
                 .ruleName(blRuleDbModel.getRuleName())
+                .condInclFuncNameList(blRuleDbModel.getCondInclFuncNameList())
+                .condInitTemplate(blRuleDbModel.getCondInitTemplate())
                 .condition(blRuleDbModel.getCondition())
+                .actionInclFuncNameList(blRuleDbModel.getActionInclFuncNameList())
+                .actionInitTemplate(blRuleDbModel.getActionInitTemplate())
                 .action(blRuleDbModel.getAction())
+                .actionFinalTemplate(blRuleDbModel.getActionFinalTemplate())
                 .description(blRuleDbModel.getDescription())
                 .priority(blRuleDbModel.getPriority())
                 .status(blRuleDbModel.getStatus())
@@ -132,8 +150,13 @@ public class BusinessRulesService {
                         businessLogicRule.getRuleId() )
                 .linkedEntity(businessLogicRule.getLinkedEntity())
                 .ruleName(businessLogicRule.getRuleName())
+                .condInclFuncNameList(businessLogicRule.getCondInclFuncNameList())
+                .condInitTemplate(businessLogicRule.getCondInitTemplate())
                 .condition(businessLogicRule.getCondition())
+                .actionInclFuncNameList(businessLogicRule.getActionInclFuncNameList())
+                .actionInitTemplate(businessLogicRule.getActionInitTemplate())
                 .action(businessLogicRule.getAction())
+                .actionFinalTemplate(businessLogicRule.getActionFinalTemplate())
                 .description(businessLogicRule.getDescription())
                 .priority(businessLogicRule.getPriority())
                 .status(businessLogicRule.getStatus())

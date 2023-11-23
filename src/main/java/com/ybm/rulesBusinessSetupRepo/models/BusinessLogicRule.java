@@ -4,6 +4,7 @@
 
 package com.ybm.rulesBusinessSetupRepo.models;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +22,13 @@ public class BusinessLogicRule implements Serializable {
     String ruleType;
     String linkedEntity;
     String ruleName;
+    String condInclFuncNameList;
+    String condInitTemplate;
     String condition;
+    String actionInclFuncNameList;
+    String actionInitTemplate;
     String action;
+    String actionFinalTemplate;
     Integer priority;
     String description;
     String status;

@@ -29,14 +29,10 @@ import java.util.UUID;
 @Slf4j
 @RestController
 public class BusinessLogicRestController {
-
     @Autowired
     private RuleEngine ruleEngine;
-
     @Autowired
     private WorkflowManager workflowManager;
-
-
     @Autowired
     private ExchangeDataService exchangeDataService;
 
@@ -44,6 +40,7 @@ public class BusinessLogicRestController {
     public ResponseEntity<?> postPaymentDetails(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
         UUID uuid = UUID.randomUUID();
         Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> extData = new HashMap<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
@@ -59,7 +56,8 @@ public class BusinessLogicRestController {
                 uuid.toString(),
                 properties,
                 dataObject,
-                dataObject
+                dataObject,
+                extData
         );
 
         ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
@@ -78,6 +76,7 @@ public class BusinessLogicRestController {
     public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
         UUID uuid = UUID.randomUUID();
         Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> extData = new HashMap<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
@@ -93,7 +92,8 @@ public class BusinessLogicRestController {
                 uuid.toString(),
                 properties,
                 dataObject,
-                dataObject
+                dataObject,
+                extData
         );
 
         ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
