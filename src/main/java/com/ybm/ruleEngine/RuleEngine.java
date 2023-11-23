@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -183,10 +184,7 @@ public class RuleEngine {
     }
 
     /**
-     * Parsing in given priority/steps.
-     *
-     * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
-     * Step 2. Evaluate MVEL expression.
+     * Compile MVEL Template.
      *
      * @param templateId
      * @param template
@@ -196,10 +194,10 @@ public class RuleEngine {
     }
 
     /*
-     * Parsing in given priority/steps.
+     * Execute precompiled Template.
      *
-     * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
-     * Step 2. Evaluate MVEL expression.
+     * Step 1. Check if precompiled template already exist in the memory map
+     * Step 2. Execute precompiled MVEL template.
      *
      * @param templateName
      * @param inputData
@@ -221,11 +219,68 @@ public class RuleEngine {
         return mvelInterpreter.execPreCompiledMvelTemplate(templateId, dataMap);
     }
 
+    private StringBuilder getIncludedFunctionChain(String includedFunctionList)
+    {
+        StringBuilder includedFuntions = new StringBuilder();
+
+        if ( includedFunctionList != null ) {
+            List<String> functionIdList = Stream.of(includedFunctionList.split(","))
+                    .map(String::trim)
+                    .toList();
+
+            for (String functionId : functionIdList) {
+
+                BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate =
+                        businessRuleFunctionTemplateService.getRuleFunction(functionId);
+
+                if( businessLogicRuleFunctionTemplate != null ) {
+                    
+                    if (businessLogicRuleFunctionTemplate.getIncludeFunctionsNameList() != null )
+                    {
+                        includedFuntions.append(getIncludedFunctionChain(businessLogicRuleFunctionTemplate.getIncludeFunctionsNameList()));
+                    }
+                    
+                    includedFuntions.append(businessLogicRuleFunctionTemplate.getFunctionName());
+                    includedFuntions.append("(");
+                    if ( businessLogicRuleFunctionTemplate.getFunctionParameters() != null )
+                    {
+                        includedFuntions.append(businessLogicRuleFunctionTemplate.getFunctionParameters());
+                    }
+                    includedFuntions.append(")");
+                    includedFuntions.append("{");
+                    if ( businessLogicRuleFunctionTemplate.getFunctionLogic() != null )
+                    {
+                        includedFuntions.append(businessLogicRuleFunctionTemplate.getFunctionLogic());
+                    }
+                    includedFuntions.append("}");
+                }
+            }
+        }
+
+        return includedFuntions;
+    }
+
+    private String getConditionExpressionWithFunction(BusinessLogicRule businessLogicRule)
+    {
+        StringBuilder resultConditionExpression = getIncludedFunctionChain(businessLogicRule.getCondInclFuncNameList());
+        resultConditionExpression.append(businessLogicRule.getCondition());
+        return resultConditionExpression.toString();
+    }
+
+    private String getActionExpressionWithFunction(BusinessLogicRule businessLogicRule)
+    {
+        StringBuilder resultActionExpression = getIncludedFunctionChain(businessLogicRule.getActionInclFuncNameList());
+        resultActionExpression.append(businessLogicRule.getAction());
+        return resultActionExpression.toString();
+    }
+
     /**
      * Parsing in given priority/steps.
      *
      * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
-     * Step 2. Evaluate MVEL expression.
+     * Step 2. Execute precompiled MVEL template initialization.
+     * Step 3. Prefix MVEL template initialization to condition MVEL expression.
+     * Step 4. Evaluate MVEL expression.
      *
      * @param businessLogicRule
      * @param inputData
@@ -241,7 +296,8 @@ public class RuleEngine {
         dataMap.put(INPUT_EXTENSION_DATA, inputData.getExtData());
 
         //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
-        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(businessLogicRule.getCondition(), dataMap);
+        String mvelConditionExpression = getConditionExpressionWithFunction(businessLogicRule);
+        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(mvelConditionExpression, dataMap);
 
         //Step 2. Execute precompiled MVEL template for initialization.
         String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getCondInitTemplate(), dataMap);
@@ -265,8 +321,12 @@ public class RuleEngine {
     /**
      * Execute selected businessLogicRule on input data.
      *
-     * Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}
-     * Step 2. Evaluate MVEL expression.
+     * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
+     * Step 2. Execute precompiled MVEL template initialization.
+     * Step 3. Prefix MVEL template initialization to condition MVEL expression.
+     * Step 4. Apply MVEL action expression.
+     * Step 5. Execute final precompiled MVEL template.
+     * Step 6. Add result of final template result in to extension data block.
      *
      * @param businessLogicRule
      * @param inputData
@@ -289,7 +349,8 @@ public class RuleEngine {
         dataMap.put(OUTPUT_EXTENSION_DATA, outputResult.getExtData());
 
         //Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}
-        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(businessLogicRule.getAction(), dataMap);
+        String mvelActionExpression = getActionExpressionWithFunction(businessLogicRule);
+        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(mvelActionExpression, dataMap);
 
         //Step 2. Execute precompiled MVEL template for initialization.
         String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getActionInitTemplate(), dataMap);
@@ -312,12 +373,9 @@ public class RuleEngine {
         //Step 5. Execute final precompiled MVEL template for extension.
         String finalExtensionData = execPreCompiledTemplateFunction(businessLogicRule.getActionFinalTemplate(), dataMap);
 
-        Map<String, Object> customFieldsMap = new HashMap<>();
-        customFieldsMap.put("fullNameUpperCase", finalExtensionData);
-
-        //Step 6. Prefix Initialization expression to condition expression
+        //Step 6. Add result of final template result in to extension data block.
         if( finalExtensionData != null )
-            outputResult.getExtData().put(CUSTOM_FIELDS, customFieldsMap);
+            outputResult.getExtData().put(CUSTOM_FIELDS, finalExtensionData);
 
         return outputResult;
     }

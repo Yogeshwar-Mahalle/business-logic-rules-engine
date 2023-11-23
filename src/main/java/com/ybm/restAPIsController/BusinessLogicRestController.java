@@ -109,6 +109,7 @@ public class BusinessLogicRestController {
 
     private static ExchangeData mapExchangeData(DataExchangeObject dataExchangeObject) {
         ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> headers = dataExchangeObject.getInDataObject().getHeaders();
         String strProperties = dataExchangeObject.getProperties().toString();
         String strOrgHeaders = dataExchangeObject.getInDataObject().getHeaders().toString();
         String strProcessedHeaders = dataExchangeObject.getOutDataObject().getHeaders().toString();
@@ -121,12 +122,18 @@ public class BusinessLogicRestController {
             throw new RuntimeException(e);
         }
 
+        String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
+        String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
+        sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
+        String entity = headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY");
+        entity = entity == null ? "BLRuleEngine" : entity;
+
         ExchangeData exchangeData = new ExchangeData();
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
-        exchangeData.setLinkedEntity("IN");
-        exchangeData.setSource("IN-GW");
+        exchangeData.setLinkedEntity(entity);
+        exchangeData.setSource(sourceSys);
         exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@-@@@@@@@@@@-@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
-        exchangeData.setOriginalContentType(ContentType.JSON);
+        exchangeData.setOriginalContentType(ContentType.setLabel(strOrgContentType));
         exchangeData.setOriginalData(dataExchangeObject.getInDataObject().getPayload().getStrMessage());
         exchangeData.setOriginalHeaders(strOrgHeaders);
         exchangeData.setContentType(ContentType.JSON);

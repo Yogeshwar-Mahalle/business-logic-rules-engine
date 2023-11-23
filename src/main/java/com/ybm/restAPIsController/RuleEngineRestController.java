@@ -170,7 +170,6 @@ public class RuleEngineRestController {
 
     @PostMapping(value = "/update-rule-conditions")
     public ResponseEntity<?> updateRuleConditions(@RequestBody List<BusinessLogicRuleCondition> businessLogicRuleConditions) {
-
         List<BusinessLogicRuleCondition> ruleConditionsUpdated = businessRuleConditionService.saveRuleConditions(businessLogicRuleConditions);
         return ResponseEntity.ok(ruleConditionsUpdated);
     }
@@ -183,7 +182,6 @@ public class RuleEngineRestController {
 
     @PostMapping(value = "/update-rule-actions")
     public ResponseEntity<?> updateRuleActions(@RequestBody List<BusinessLogicRuleAction> businessLogicRuleActions) {
-
         List<BusinessLogicRuleAction> ruleActionsUpdated = businessRuleActionService.saveRuleActions(businessLogicRuleActions);
         return ResponseEntity.ok(ruleActionsUpdated);
     }
@@ -242,7 +240,6 @@ public class RuleEngineRestController {
 
     @PostMapping(value = "/update-all-rule-values")
     public ResponseEntity<?> updateRuleValues(@RequestBody List<BusinessLogicRuleValueList> businessLogicRuleValueList) {
-
         List<BusinessLogicRuleValueList> ruleValueListUpdated = businessRuleValueListService.saveRuleValuesList(businessLogicRuleValueList);
         return ResponseEntity.ok(ruleValueListUpdated);
     }
