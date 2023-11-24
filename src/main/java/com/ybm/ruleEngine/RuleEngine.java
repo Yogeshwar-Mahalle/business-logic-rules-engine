@@ -33,7 +33,6 @@ public class RuleEngine {
     private BusinessRuleTypesService businessRuleTypesService;
     @Autowired
     private BusinessRulesService businessRulesService;
-
     @Autowired
     private BusinessRuleFunctionTemplateService businessRuleFunctionTemplateService;
 
@@ -163,24 +162,21 @@ public class RuleEngine {
      * Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
      * Step 2. Evaluate MVEL expression.
      *
-     * @param template
-     * @param inputData
+     * @param templateId
+     * @param dataMap
      */
-    public String evaluateTemplateFunction(String template, DataExchangeObject inputData) {
+    public String evaluateTemplateFunction(String templateId, Map<String, Object> dataMap) {
 
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(INPUT_MESSAGE, inputData.getInDataObject().getPayload().getStrMessage());
-        dataMap.put(INPUT_PAYLOAD, inputData.getInDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_HEADERS, inputData.getOutDataObject().getHeaders());
-        dataMap.put(INPUT_PROPERTIES, inputData.getProperties());
-        dataMap.put(PROCESSING_PAYLOAD, inputData.getOutDataObject().getPayload().getDataMap());
-        dataMap.put(INPUT_EXTENSION_DATA, inputData.getExtData());
+        BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(templateId);
+        if( businessLogicRuleFunctionTemplate != null ) {
+            //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
+            String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(businessLogicRuleFunctionTemplate.getFunctionLogic(), dataMap);
 
-        //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
-        String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(template, dataMap);
+            //Step 2. Evaluate MVEL template.
+            return mvelInterpreter.evaluateMvelTemplate(resolvedDslExpression, dataMap);
+        }
 
-        //Step 2. Evaluate MVEL template.
-        return mvelInterpreter.evaluateMvelTemplate(resolvedDslExpression, dataMap);
+        return null;
     }
 
     /**
@@ -300,7 +296,8 @@ public class RuleEngine {
         String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(mvelConditionExpression, dataMap);
 
         //Step 2. Execute precompiled MVEL template for initialization.
-        String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getCondInitTemplate(), dataMap);
+        //String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getCondInitTemplate(), dataMap);
+        String initializationExpression = evaluateTemplateFunction(businessLogicRule.getCondInitTemplate(), dataMap);
 
         //Step 3. Prefix Initialization expression to condition expression
         String finalExpression = null;
@@ -353,7 +350,8 @@ public class RuleEngine {
         String resolvedDslExpression = dslParser.resolveDomainSpecificKeywords(mvelActionExpression, dataMap);
 
         //Step 2. Execute precompiled MVEL template for initialization.
-        String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getActionInitTemplate(), dataMap);
+        //String initializationExpression = execPreCompiledTemplateFunction(businessLogicRule.getActionInitTemplate(), dataMap);
+        String initializationExpression = evaluateTemplateFunction(businessLogicRule.getActionInitTemplate(), dataMap);
 
         //Step 3. Prefix Initialization expression to condition expression
         String finalExpression = null;
@@ -371,7 +369,8 @@ public class RuleEngine {
         mvelInterpreter.applyMvelExpressionAction(finalExpression, dataMap);
 
         //Step 5. Execute final precompiled MVEL template for extension.
-        String finalExtensionData = execPreCompiledTemplateFunction(businessLogicRule.getActionFinalTemplate(), dataMap);
+        //String finalExtensionData = execPreCompiledTemplateFunction(businessLogicRule.getActionFinalTemplate(), dataMap);
+        String finalExtensionData = evaluateTemplateFunction(businessLogicRule.getActionFinalTemplate(), dataMap);
 
         //Step 6. Add result of final template result in to extension data block.
         if( finalExtensionData != null )

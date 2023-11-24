@@ -101,7 +101,7 @@ public class RuleEngineRestController {
     public ResponseEntity<?> updateRule(@RequestBody BusinessLogicRule businessLogicRule) {
         BusinessLogicRule businessLogicRuleUpdated = businessRulesService.saveRule(businessLogicRule);
 
-        String condInitTemplateFunId = businessLogicRule.getCondInitTemplate();
+        /*String condInitTemplateFunId = businessLogicRule.getCondInitTemplate();
         if( condInitTemplateFunId != null ) {
             BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(condInitTemplateFunId);
             if( businessLogicRuleFunctionTemplate != null )
@@ -120,7 +120,7 @@ public class RuleEngineRestController {
             BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(actionFinalTemplateFunId);
             if( businessLogicRuleFunctionTemplate != null )
                 ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
-        }
+        }*/
 
         return ResponseEntity.ok(businessLogicRuleUpdated);
     }
@@ -130,7 +130,7 @@ public class RuleEngineRestController {
 
         List<BusinessLogicRule> rulesUpdated = businessRulesService.saveRules(businessLogicRules);
 
-        for ( BusinessLogicRule businessLogicRule : businessLogicRules ) {
+        /*for ( BusinessLogicRule businessLogicRule : businessLogicRules ) {
             String condInitTemplateFunId = businessLogicRule.getCondInitTemplate();
             if( condInitTemplateFunId != null ) {
                 BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(condInitTemplateFunId);
@@ -151,7 +151,7 @@ public class RuleEngineRestController {
                 if( businessLogicRuleFunctionTemplate != null )
                     ruleEngine.compileTemplateFunction(businessLogicRuleFunctionTemplate.getFunctionId(), businessLogicRuleFunctionTemplate.getFunctionLogic());
             }
-        }
+        }*/
 
         return ResponseEntity.ok(rulesUpdated);
     }
