@@ -82,6 +82,7 @@ public class BusinessRuleTypesService {
 
         return BusinessLogicRuleType.builder()
                 .ruleType(blRuleTypeDbModel.getRuleType())
+                .linkedEntity(blRuleTypeDbModel.getLinkedEntity())
                 .description(blRuleTypeDbModel.getDescription())
                 .complexRuleFlag(blRuleTypeDbModel.isComplexRuleFlag())
                 .workflowRuleFlag(blRuleTypeDbModel.isWorkflowRuleFlag())
@@ -98,6 +99,7 @@ public class BusinessRuleTypesService {
 
         return BLRuleTypeDbModel.builder()
                 .ruleType(businessLogicRuleType.getRuleType())
+                .linkedEntity(businessLogicRuleType.getLinkedEntity())
                 .description(businessLogicRuleType.getDescription())
                 .complexRuleFlag(businessLogicRuleType.isComplexRuleFlag())
                 .workflowRuleFlag(businessLogicRuleType.isWorkflowRuleFlag())

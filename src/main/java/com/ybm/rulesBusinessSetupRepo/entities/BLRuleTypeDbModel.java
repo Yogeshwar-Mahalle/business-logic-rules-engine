@@ -27,6 +27,10 @@ public class BLRuleTypeDbModel implements Serializable {
     @Column(name = "RULE_TYPE", length = 25, nullable=false)
     private String ruleType;
 
+    @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
     @Column(name = "DESCRIPTION", length = 256)
     private String description;
 
@@ -54,6 +58,7 @@ public class BLRuleTypeDbModel implements Serializable {
     @Data
     static class IdClass implements Serializable {
         private String ruleType;
+        private String linkedEntity;
     }
 
 }

@@ -21,11 +21,32 @@ public class BusinessRuleActionService {
     @Autowired
     private BLRuleActionRepository blRuleActionRepository;
 
-    public List<BusinessLogicRuleAction> getRuleActionById(String ruleActionId) {
-        if( ruleActionId == null )
+    public List<BusinessLogicRuleAction> getRuleActionsByRuleId(String ruleId) {
+        if( ruleId == null )
             return null;
 
-        return blRuleActionRepository.findAllByRuleId(ruleActionId).stream()
+        return blRuleActionRepository.findAllByRuleId(ruleId).stream()
+                .map(
+                        this::mapRuleActionFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<BusinessLogicRuleAction> saveRuleActions(String ruleId, List<BusinessLogicRuleAction> businessLogicRuleActions) {
+        if(businessLogicRuleActions == null)
+            return null;
+
+        List<BLRuleActionDbModel> listBLRuleActionDbModel = businessLogicRuleActions.stream()
+                .map(
+                        blRuleActionDbModel -> {
+                            blRuleActionDbModel.setRuleId(ruleId);
+                            return mapRuleActionToDbModel(blRuleActionDbModel);
+                        }
+                )
+                .collect(Collectors.toList());
+
+        return blRuleActionRepository.saveAll(listBLRuleActionDbModel).stream()
                 .map(
                         this::mapRuleActionFromDbModel
                 )
@@ -34,6 +55,8 @@ public class BusinessRuleActionService {
 
     @Transactional
     public List<BusinessLogicRuleAction> saveRuleActions(List<BusinessLogicRuleAction> businessLogicRuleActions) {
+        if(businessLogicRuleActions == null)
+            return null;
 
         List<BLRuleActionDbModel> listBLRuleActionDbModel = businessLogicRuleActions.stream()
                 .map(
@@ -42,6 +65,20 @@ public class BusinessRuleActionService {
                 .collect(Collectors.toList());
 
         return blRuleActionRepository.saveAll(listBLRuleActionDbModel).stream()
+                .map(
+                        this::mapRuleActionFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<BusinessLogicRuleAction> removeActionsByRuleId(String ruleId) {
+        if( ruleId == null )
+            return null;
+
+        blRuleActionRepository.deleteByRuleId(ruleId);
+
+        return blRuleActionRepository.findAll().stream()
                 .map(
                         this::mapRuleActionFromDbModel
                 )

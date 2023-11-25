@@ -166,7 +166,7 @@ public class RuleEngineRestController {
 
     @GetMapping(value = "/get-rule-conditions/{ruleId}")
     public ResponseEntity<?> getRuleConditionById(@PathVariable("ruleId") String ruleId) {
-        List<BusinessLogicRuleCondition> businessLogicRuleConditions = businessRuleConditionService.getRuleConditionById(ruleId);
+        List<BusinessLogicRuleCondition> businessLogicRuleConditions = businessRuleConditionService.getRuleConditionsByRuleId(ruleId);
         return ResponseEntity.ok(businessLogicRuleConditions);
     }
 
@@ -178,7 +178,7 @@ public class RuleEngineRestController {
 
     @GetMapping(value = "/get-rule-actions/{ruleId}")
     public ResponseEntity<?> getRuleActionByID(@PathVariable("ruleId") String ruleId) {
-        List<BusinessLogicRuleAction> businessLogicRuleActions = businessRuleActionService.getRuleActionById(ruleId);
+        List<BusinessLogicRuleAction> businessLogicRuleActions = businessRuleActionService.getRuleActionsByRuleId(ruleId);
         return ResponseEntity.ok(businessLogicRuleActions);
     }
 

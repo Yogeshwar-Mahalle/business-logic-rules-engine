@@ -22,11 +22,32 @@ public class BusinessRuleConditionService {
     @Autowired
     private BLRuleConditionRepository blRuleConditionRepository;
 
-    public List<BusinessLogicRuleCondition> getRuleConditionById(String ruleCondId) {
-        if( ruleCondId == null )
+    public List<BusinessLogicRuleCondition> getRuleConditionsByRuleId(String ruleId) {
+        if( ruleId == null )
             return null;
 
-        return blRuleConditionRepository.findAllByRuleId(ruleCondId).stream()
+        return blRuleConditionRepository.findAllByRuleId(ruleId).stream()
+                .map(
+                        this::mapRuleConditionFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<BusinessLogicRuleCondition> saveRuleConditions(String ruleId, List<BusinessLogicRuleCondition> businessLogicRuleConditions) {
+        if(businessLogicRuleConditions == null)
+            return null;
+
+        List<BLRuleConditionDbModel> listBLRuleConditionDbModel = businessLogicRuleConditions.stream()
+                .map(
+                        blRuleConditionDbModel -> {
+                            blRuleConditionDbModel.setRuleId(ruleId);
+                            return mapRuleConditionToDbModel(blRuleConditionDbModel);
+                        }
+                )
+                .collect(Collectors.toList());
+
+        return blRuleConditionRepository.saveAll(listBLRuleConditionDbModel).stream()
                 .map(
                         this::mapRuleConditionFromDbModel
                 )
@@ -35,6 +56,9 @@ public class BusinessRuleConditionService {
 
     @Transactional
     public List<BusinessLogicRuleCondition> saveRuleConditions(List<BusinessLogicRuleCondition> businessLogicRuleConditions) {
+        if(businessLogicRuleConditions == null)
+            return null;
+
         List<BLRuleConditionDbModel> listBLRuleConditionDbModel = businessLogicRuleConditions.stream()
                 .map(
                         this::mapRuleConditionToDbModel
@@ -48,6 +72,19 @@ public class BusinessRuleConditionService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<BusinessLogicRuleCondition> removeConditionsByRuleId(String ruleId) {
+        if( ruleId == null )
+            return null;
+
+        blRuleConditionRepository.deleteByRuleId(ruleId);
+
+        return blRuleConditionRepository.findAll().stream()
+                .map(
+                        this::mapRuleConditionFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
 
     private BusinessLogicRuleCondition mapRuleConditionFromDbModel(BLRuleConditionDbModel blRuleConditionDbModel){
 
@@ -66,9 +103,11 @@ public class BusinessRuleConditionService {
                 .ruleId(blRuleConditionDbModel.getRuleId())
                 .sequenceNumber(blRuleConditionDbModel.getSequenceNumber())
                 .openConditionScope(blRuleConditionDbModel.getOpenConditionScope())
+                .leftDataObject(blRuleConditionDbModel.getLeftDataObject())
                 .leftOperand(blRuleConditionDbModel.getLeftOperand())
                 .leftOperandType(leftOperandType)
                 .operator(operator)
+                .rightDataObject(blRuleConditionDbModel.getRightDataObject())
                 .rightOperand(blRuleConditionDbModel.getRightOperand())
                 .rightOperandType(rightOperandType)
                 .closeConditionScope(blRuleConditionDbModel.getCloseConditionScope())
@@ -91,9 +130,11 @@ public class BusinessRuleConditionService {
                 .ruleId(businessLogicRuleCondition.getRuleId())
                 .sequenceNumber(businessLogicRuleCondition.getSequenceNumber())
                 .openConditionScope(businessLogicRuleCondition.getOpenConditionScope())
+                .leftDataObject(businessLogicRuleCondition.getLeftDataObject())
                 .leftOperand(businessLogicRuleCondition.getLeftOperand())
                 .leftOperandType(businessLogicRuleCondition.getLeftOperandType().name())
                 .operator(businessLogicRuleCondition.getOperator().name())
+                .rightDataObject(businessLogicRuleCondition.getRightDataObject())
                 .rightOperand(businessLogicRuleCondition.getRightOperand())
                 .rightOperandType(businessLogicRuleCondition.getRightOperandType().name())
                 .closeConditionScope(businessLogicRuleCondition.getCloseConditionScope())
@@ -104,5 +145,6 @@ public class BusinessRuleConditionService {
                 .build();
 
     }
+
 
 }

@@ -39,6 +39,9 @@ public class BLRuleConditionPnAprvlDbModel implements Serializable {
     @Column(name = "OPEN_CONDITION_SCOPE", length = 1)
     private String openConditionScope;
 
+    @Column(name = "LEFT_DATA_OBJECT", length = 64)
+    private String leftDataObject;
+
     @Column(name = "LEFT_OPERAND", length = 512)
     private String leftOperand;
 
@@ -47,6 +50,9 @@ public class BLRuleConditionPnAprvlDbModel implements Serializable {
 
     @Column(name = "OPERATOR", length = 25)
     private String operator;
+
+    @Column(name = "RIGHT_DATA_OBJECT", length = 64)
+    private String rightDataObject;
 
     @Column(name = "RIGHT_OPERAND", length = 512)
     private String rightOperand;

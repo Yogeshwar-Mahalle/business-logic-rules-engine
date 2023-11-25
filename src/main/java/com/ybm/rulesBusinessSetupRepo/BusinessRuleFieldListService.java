@@ -81,6 +81,7 @@ public class BusinessRuleFieldListService {
     private BusinessLogicRuleFieldList mapRuleFieldListFromDbModel(BLRuleFieldListDbModel blRuleFieldListDbModel){
 
         return BusinessLogicRuleFieldList.builder()
+                .linkedEntity(blRuleFieldListDbModel.getLinkedEntity())
                 .ruleType(blRuleFieldListDbModel.getDataType())
                 .fieldName(blRuleFieldListDbModel.getFieldName())
                 .description(blRuleFieldListDbModel.getDescription())
@@ -98,6 +99,7 @@ public class BusinessRuleFieldListService {
     private BLRuleFieldListDbModel mapRuleFieldListToDbModel(BusinessLogicRuleFieldList businessLogicRuleFieldList){
 
         return BLRuleFieldListDbModel.builder()
+                .linkedEntity(businessLogicRuleFieldList.getLinkedEntity())
                 .ruleType(businessLogicRuleFieldList.getDataType())
                 .fieldName(businessLogicRuleFieldList.getFieldName())
                 .description(businessLogicRuleFieldList.getDescription())

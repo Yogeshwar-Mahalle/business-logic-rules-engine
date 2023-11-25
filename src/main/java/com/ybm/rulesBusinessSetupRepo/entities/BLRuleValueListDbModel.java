@@ -24,6 +24,10 @@ import java.util.Date;
 public class BLRuleValueListDbModel implements Serializable {
 
     @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
+    @Id
     @Column(name = "DATA_TYPE", length = 25, nullable=false)
     private String dataType;
 
@@ -48,6 +52,7 @@ public class BLRuleValueListDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
+        private String linkedEntity;
         private String dataType;
         private String keyField;
     }

@@ -18,6 +18,7 @@ import java.util.Date;
 @Data
 public class BusinessLogicRuleType implements Serializable {
     String ruleType;
+    String linkedEntity;
     String description;
     boolean complexRuleFlag;
     boolean workflowRuleFlag;

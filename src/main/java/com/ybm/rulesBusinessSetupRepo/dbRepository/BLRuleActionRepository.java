@@ -15,4 +15,6 @@ public interface BLRuleActionRepository extends JpaRepository<BLRuleActionDbMode
 
     List<BLRuleActionDbModel> findAllByRuleId(String ruleId);
     List<BLRuleActionDbModel> findAllByRuleActionId(String ruleActionId);
+
+    void deleteByRuleId(String ruleId);
 }

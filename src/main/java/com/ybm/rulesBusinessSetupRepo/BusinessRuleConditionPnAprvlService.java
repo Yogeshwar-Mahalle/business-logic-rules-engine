@@ -48,6 +48,20 @@ public class BusinessRuleConditionPnAprvlService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<BusinessLogicRuleCondition> removeConditionsByRuleId(String ruleId) {
+        if( ruleId == null )
+            return null;
+
+        blRuleConditionPnAprvlRepository.deleteByRuleId(ruleId);
+
+        return blRuleConditionPnAprvlRepository.findAll().stream()
+                .map(
+                        this::mapRuleConditionPnAprvlFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
 
     private BusinessLogicRuleCondition mapRuleConditionPnAprvlFromDbModel(BLRuleConditionPnAprvlDbModel blRuleConditionPnAprvlDbModel){
 
@@ -66,9 +80,11 @@ public class BusinessRuleConditionPnAprvlService {
                 .ruleId(blRuleConditionPnAprvlDbModel.getRuleId())
                 .sequenceNumber(blRuleConditionPnAprvlDbModel.getSequenceNumber())
                 .openConditionScope(blRuleConditionPnAprvlDbModel.getOpenConditionScope())
+                .leftDataObject(blRuleConditionPnAprvlDbModel.getLeftDataObject())
                 .leftOperand(blRuleConditionPnAprvlDbModel.getLeftOperand())
                 .leftOperandType(leftOperandType)
                 .operator(operator)
+                .rightDataObject(blRuleConditionPnAprvlDbModel.getRightDataObject())
                 .rightOperand(blRuleConditionPnAprvlDbModel.getRightOperand())
                 .rightOperandType(rightOperandType)
                 .closeConditionScope(blRuleConditionPnAprvlDbModel.getCloseConditionScope())
@@ -90,9 +106,11 @@ public class BusinessRuleConditionPnAprvlService {
                 .ruleId(businessLogicRuleCondition.getRuleId())
                 .sequenceNumber(businessLogicRuleCondition.getSequenceNumber())
                 .openConditionScope(businessLogicRuleCondition.getOpenConditionScope())
+                .leftDataObject(businessLogicRuleCondition.getLeftDataObject())
                 .leftOperand(businessLogicRuleCondition.getLeftOperand())
                 .leftOperandType(businessLogicRuleCondition.getLeftOperandType().name())
                 .operator(businessLogicRuleCondition.getOperator().name())
+                .rightDataObject(businessLogicRuleCondition.getRightDataObject())
                 .rightOperand(businessLogicRuleCondition.getRightOperand())
                 .rightOperandType(businessLogicRuleCondition.getRightOperandType().name())
                 .closeConditionScope(businessLogicRuleCondition.getCloseConditionScope())

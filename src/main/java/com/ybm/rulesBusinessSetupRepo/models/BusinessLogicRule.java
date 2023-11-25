@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -35,4 +36,8 @@ public class BusinessLogicRule implements Serializable {
     Date createTimeStamp;
     Date effectiveFromDate;
     Date updateTimeStamp;
+
+    List<BusinessLogicRuleCondition> conditionList;
+    List<BusinessLogicRuleAction> actionList;
+
 }

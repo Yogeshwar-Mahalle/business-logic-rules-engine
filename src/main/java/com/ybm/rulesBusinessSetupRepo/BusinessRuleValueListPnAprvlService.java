@@ -81,6 +81,7 @@ public class BusinessRuleValueListPnAprvlService {
     private BusinessLogicRuleValueList mapRuleValueListPnAprvlFromDbModel(BLRuleValueListPnAprvlDbModel blRuleValueListPnAprvlDbModel){
 
         return BusinessLogicRuleValueList.builder()
+                .linkedEntity(blRuleValueListPnAprvlDbModel.getLinkedEntity())
                 .dataType(blRuleValueListPnAprvlDbModel.getDataType())
                 .keyField(blRuleValueListPnAprvlDbModel.getKeyField())
                 .valueField(blRuleValueListPnAprvlDbModel.getValueField())
@@ -95,6 +96,7 @@ public class BusinessRuleValueListPnAprvlService {
     private BLRuleValueListPnAprvlDbModel mapRuleValueListPnAprvlToDbModel(BusinessLogicRuleValueList businessLogicRuleValueList){
 
         return BLRuleValueListPnAprvlDbModel.builder()
+                .linkedEntity(businessLogicRuleValueList.getLinkedEntity())
                 .dataType(businessLogicRuleValueList.getDataType())
                 .keyField(businessLogicRuleValueList.getKeyField())
                 .valueField(businessLogicRuleValueList.getValueField())

@@ -14,4 +14,6 @@ import java.util.List;
 public interface BLRuleConditionRepository extends JpaRepository<BLRuleConditionDbModel, String> {
 
     List<BLRuleConditionDbModel> findAllByRuleId(String ruleID);
+
+    void deleteByRuleId(String ruleId);
 }

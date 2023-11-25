@@ -25,9 +25,11 @@ public class BusinessLogicRuleCondition implements Serializable {
     String ruleId;
     Integer sequenceNumber;
     String openConditionScope;
+    String leftDataObject;
     String leftOperand;
     OperandType leftOperandType;
     Operator operator;
+    String rightDataObject;
     String rightOperand;
     OperandType rightOperandType;
     String closeConditionScope;

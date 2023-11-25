@@ -17,6 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class BusinessLogicRuleValueList implements Serializable {
+    private String linkedEntity;
     private String dataType;
     private String keyField;
     private String valueField;

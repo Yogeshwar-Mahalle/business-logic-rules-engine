@@ -48,6 +48,19 @@ public class BusinessRuleActionPnAprvlService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<BusinessLogicRuleAction> removeActionsByRuleId(String ruleId) {
+        if( ruleId == null )
+            return null;
+
+        blRuleActionPnAprvlRepository.deleteByRuleId(ruleId);
+
+        return blRuleActionPnAprvlRepository.findAll().stream()
+                .map(
+                        this::mapRuleActionPnAprvlFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
 
     private BusinessLogicRuleAction mapRuleActionPnAprvlFromDbModel(BLRuleActionPnAprvlDbModel blRuleActionPnAprvlDbModel){
 
