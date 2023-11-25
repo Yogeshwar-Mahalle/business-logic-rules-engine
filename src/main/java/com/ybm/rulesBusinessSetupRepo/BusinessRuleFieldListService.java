@@ -30,7 +30,7 @@ public class BusinessRuleFieldListService {
                 .collect(Collectors.toList());
     }
 
-    public List<BusinessLogicRuleFieldList> getRuleFieldListByDataType(String ruleType) {
+    public List<BusinessLogicRuleFieldList> getRuleFieldListByRuleType(String ruleType) {
         return blRuleFieldListRepository.findByRuleType(ruleType).stream()
                 .map(
                         this::mapRuleFieldListFromDbModel
@@ -38,21 +38,21 @@ public class BusinessRuleFieldListService {
                 .collect(Collectors.toList());
     }
 
-    public BusinessLogicRuleFieldList getRuleValueByDataTypeAndKeyField(String ruleType, String fieldName) {
+    public BusinessLogicRuleFieldList getRuleFieldByRuleTypeAndFieldName(String ruleType, String fieldName) {
 
         Optional<BLRuleFieldListDbModel> blRuleFieldListDbModel = blRuleFieldListRepository.findByRuleTypeAndFieldName(ruleType, fieldName);
         return blRuleFieldListDbModel.map(this::mapRuleFieldListFromDbModel).orElse(null);
     }
 
     @Transactional
-    public BusinessLogicRuleFieldList saveRuleValue(BusinessLogicRuleFieldList businessLogicRuleValue) {
+    public BusinessLogicRuleFieldList saveRuleField(BusinessLogicRuleFieldList businessLogicRuleValue) {
         BLRuleFieldListDbModel blRuleFieldListDbModel = mapRuleFieldListToDbModel(businessLogicRuleValue);
         blRuleFieldListDbModel = blRuleFieldListRepository.save(blRuleFieldListDbModel);
         return mapRuleFieldListFromDbModel(blRuleFieldListDbModel);
     }
 
     @Transactional
-    public List<BusinessLogicRuleFieldList> saveRuleValuesList(List<BusinessLogicRuleFieldList> businessLogicRuleFieldLists) {
+    public List<BusinessLogicRuleFieldList> saveRuleFieldList(List<BusinessLogicRuleFieldList> businessLogicRuleFieldLists) {
 
         List<BLRuleFieldListDbModel> listBLRuleFieldListDbModel = businessLogicRuleFieldLists.stream()
                 .map(
@@ -67,7 +67,7 @@ public class BusinessRuleFieldListService {
                 .collect(Collectors.toList());
     }
 
-    public List<BusinessLogicRuleFieldList> removeRuleValueByFieldId(String ruleType, String keyField) {
+    public List<BusinessLogicRuleFieldList> removeRuleFieldByFieldId(String ruleType, String keyField) {
         blRuleFieldListRepository.deleteByRuleTypeAndFieldName(ruleType, keyField);
 
         return blRuleFieldListRepository.findAll().stream()
