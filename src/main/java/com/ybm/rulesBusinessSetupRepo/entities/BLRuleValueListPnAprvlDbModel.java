@@ -37,6 +37,9 @@ public class BLRuleValueListPnAprvlDbModel implements Serializable {
     @Column(name = "SEQUENCE_NUMBER", nullable=false)
     private Integer sequenceNumber;
 
+    @Column(name = "STATUS", length = 25, nullable=false)
+    private String status;
+
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 
