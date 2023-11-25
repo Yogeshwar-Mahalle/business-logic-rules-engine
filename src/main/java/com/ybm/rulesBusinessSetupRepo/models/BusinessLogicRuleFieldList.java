@@ -16,11 +16,14 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BusinessLogicRuleValueList implements Serializable {
+public class BusinessLogicRuleFieldList implements Serializable {
+    private String ruleType;
+    private String fieldName;
+    private String description;
+    private String labelName;
     private String dataType;
-    private String keyField;
-    private String valueField;
-    private Integer sequenceNumber;
+    private String dataFormat;
+    private String defaultValue;
     private String status;
     private Date createTimeStamp;
     private Date updateTimeStamp;

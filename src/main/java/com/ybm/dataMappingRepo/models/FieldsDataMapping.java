@@ -32,6 +32,7 @@ public class FieldsDataMapping implements Serializable {
     String separator;
     String startDelimiter;
     String endDelimiter;
+    @Builder.Default
     DataTrimType dataTrimType = DataTrimType.NONE;
     Date createTimeStamp;
     Date updateTimeStamp;

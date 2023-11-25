@@ -85,6 +85,7 @@ public class BusinessRuleValueListService {
                 .keyField(blRuleValueListDbModel.getKeyField())
                 .valueField(blRuleValueListDbModel.getValueField())
                 .sequenceNumber(blRuleValueListDbModel.getSequenceNumber())
+                .status(blRuleValueListDbModel.getStatus())
                 .createTimeStamp(blRuleValueListDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleValueListDbModel.getUpdateTimeStamp())
                 .build();
@@ -98,6 +99,7 @@ public class BusinessRuleValueListService {
                 .keyField(businessLogicRuleValueList.getKeyField())
                 .valueField(businessLogicRuleValueList.getValueField())
                 .sequenceNumber(businessLogicRuleValueList.getSequenceNumber())
+                .status(businessLogicRuleValueList.getStatus())
                 .createTimeStamp(businessLogicRuleValueList.getCreateTimeStamp() == null ? new Date() : businessLogicRuleValueList.getCreateTimeStamp())
                 .updateTimeStamp(businessLogicRuleValueList.getUpdateTimeStamp())
                 .build();
