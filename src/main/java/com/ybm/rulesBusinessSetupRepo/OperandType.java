@@ -9,5 +9,6 @@ public enum OperandType {
     VARIABLE,
     EXCHANGE,
     FUNCTION,
-    PATH
+    PATH,
+    BASE_RULE
 }

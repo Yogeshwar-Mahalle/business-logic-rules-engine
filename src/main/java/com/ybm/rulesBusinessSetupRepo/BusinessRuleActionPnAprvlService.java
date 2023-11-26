@@ -4,6 +4,7 @@
 
 package com.ybm.rulesBusinessSetupRepo;
 
+import com.google.common.base.Enums;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleActionPnAprvlRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleActionPnAprvlDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleAction;
@@ -64,14 +65,21 @@ public class BusinessRuleActionPnAprvlService {
 
     private BusinessLogicRuleAction mapRuleActionPnAprvlFromDbModel(BLRuleActionPnAprvlDbModel blRuleActionPnAprvlDbModel){
 
+        OperandType assigneeType = Enums.getIfPresent(OperandType.class, blRuleActionPnAprvlDbModel.getAssigneeType().toUpperCase())
+                .or(OperandType.EXCHANGE);
+        OperandType assignorType = Enums.getIfPresent(OperandType.class, blRuleActionPnAprvlDbModel.getAssignorType().toUpperCase())
+                .or(OperandType.EXCHANGE);
+
         return BusinessLogicRuleAction.builder()
                 .ruleActionId(blRuleActionPnAprvlDbModel.getRuleActionId())
                 .ruleId(blRuleActionPnAprvlDbModel.getRuleId())
                 .sequenceNumber(blRuleActionPnAprvlDbModel.getSequenceNumber())
                 .ruleConditionId(blRuleActionPnAprvlDbModel.getRuleConditionId())
                 .assignee(blRuleActionPnAprvlDbModel.getAssignee())
+                .assigneeType(assigneeType)
                 .assignor(blRuleActionPnAprvlDbModel.getAssignor())
-                .otherAssignor(blRuleActionPnAprvlDbModel.getOtherAssignor())
+                .assignorType(assignorType)
+                .includeFuncNameList(blRuleActionPnAprvlDbModel.getIncludeFuncNameList())
                 .createTimeStamp(blRuleActionPnAprvlDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleActionPnAprvlDbModel.getUpdateTimeStamp())
                 .build();
@@ -88,8 +96,9 @@ public class BusinessRuleActionPnAprvlService {
                 .sequenceNumber(businessLogicRuleAction.getSequenceNumber())
                 .ruleConditionId(businessLogicRuleAction.getRuleConditionId())
                 .assignee(businessLogicRuleAction.getAssignee())
+                .assigneeType(businessLogicRuleAction.getAssigneeType().name())
                 .assignor(businessLogicRuleAction.getAssignor())
-                .otherAssignor(businessLogicRuleAction.getOtherAssignor())
+                .assignorType(businessLogicRuleAction.getAssignorType().name())
                 .createTimeStamp(businessLogicRuleAction.getCreateTimeStamp() == null ? new Date() : businessLogicRuleAction.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

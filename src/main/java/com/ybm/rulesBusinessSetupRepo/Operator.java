@@ -7,6 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 public enum Operator {
     EQUAL,
     ASSIGN,
+    SET,
     NOT_EQUAL,
     LESS_THAN,
     GREATER_THAN,

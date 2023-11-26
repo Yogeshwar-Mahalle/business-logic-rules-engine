@@ -36,14 +36,17 @@ public class BLRuleActionPnAprvlDbModel implements Serializable {
     @Column(name = "ASSIGNEE", length = 128, nullable=false)
     private String assignee;
 
+    @Column(name = "ASSIGNEE_TYPE", length = 25)
+    private String assigneeType;
+
     @Column(name = "RULE_CONDITION_ID", length = 128)
     private String ruleConditionId;
 
     @Column(name = "ASSIGNOR", length = 5120, nullable=false)
     private String assignor;
 
-    @Column(name = "OTHER_ASSIGNOR", length = 5120, nullable=false)
-    private String otherAssignor;
+    @Column(name = "ASSIGNOR_TYPE", length = 25)
+    private String assignorType;
 
     @Column(name = "INCLUDE_FUNCTIONS_NAME_LIST", length = 2048)
     private String includeFuncNameList;

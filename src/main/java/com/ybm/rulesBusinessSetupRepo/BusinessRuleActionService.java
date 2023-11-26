@@ -4,6 +4,7 @@
 
 package com.ybm.rulesBusinessSetupRepo;
 
+import com.google.common.base.Enums;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleActionRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleActionDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleAction;
@@ -88,14 +89,20 @@ public class BusinessRuleActionService {
 
     private BusinessLogicRuleAction mapRuleActionFromDbModel(BLRuleActionDbModel blRuleActionDbModel){
 
+        OperandType assigneeType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssigneeType().toUpperCase())
+                .or(OperandType.EXCHANGE);
+        OperandType assignorType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssignorType().toUpperCase())
+                .or(OperandType.EXCHANGE);
+
         return BusinessLogicRuleAction.builder()
                 .ruleActionId(blRuleActionDbModel.getRuleActionId())
                 .ruleId(blRuleActionDbModel.getRuleId())
                 .sequenceNumber(blRuleActionDbModel.getSequenceNumber())
                 .ruleConditionId(blRuleActionDbModel.getRuleConditionId())
                 .assignee(blRuleActionDbModel.getAssignee())
+                .assigneeType(assigneeType)
                 .assignor(blRuleActionDbModel.getAssignor())
-                .otherAssignor(blRuleActionDbModel.getOtherAssignor())
+                .assignorType(assignorType)
                 .includeFuncNameList(blRuleActionDbModel.getIncludeFuncNameList())
                 .createTimeStamp(blRuleActionDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleActionDbModel.getUpdateTimeStamp())
@@ -113,8 +120,9 @@ public class BusinessRuleActionService {
                 .sequenceNumber(businessLogicRuleAction.getSequenceNumber())
                 .ruleConditionId(businessLogicRuleAction.getRuleConditionId())
                 .assignee(businessLogicRuleAction.getAssignee())
+                .assigneeType(businessLogicRuleAction.getAssigneeType().name())
                 .assignor(businessLogicRuleAction.getAssignor())
-                .otherAssignor(businessLogicRuleAction.getOtherAssignor())
+                .assignorType(businessLogicRuleAction.getAssignorType().name())
                 .includeFuncNameList(businessLogicRuleAction.getIncludeFuncNameList())
                 .createTimeStamp(businessLogicRuleAction.getCreateTimeStamp() == null ? new Date() : businessLogicRuleAction.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

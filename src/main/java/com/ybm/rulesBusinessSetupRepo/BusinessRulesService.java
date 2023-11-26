@@ -296,6 +296,9 @@ public class BusinessRulesService {
                         if (!isNumber)
                             leftOperand = "\"" + leftOperand + "\"";
                     }
+                    case BASE_RULE -> {
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in leftOperand
+                    }
 
                 }
 
@@ -316,6 +319,9 @@ public class BusinessRulesService {
                         if (!isNumber)
                             rightOperand = "\"" + rightOperand + "\"";
                     }
+                    case BASE_RULE -> {
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
+                    }
                 }
 
                 switch (businessLogicRuleCondition.getOperator()) {
@@ -324,6 +330,20 @@ public class BusinessRulesService {
                     }
                     case ASSIGN -> {
                         ruleCondition += leftOperand + "=" + rightOperand;
+                    }
+                    case SET -> {
+
+                        leftOperand = businessLogicRuleCondition.getLeftDataObject() != null ?
+                                businessLogicRuleCondition.getLeftDataObject() + ".put( " : "outPayload.put( ";
+                        leftOperand += businessLogicRuleCondition.getLeftOperand() != null ?
+                                businessLogicRuleCondition.getLeftOperand() : "?";
+
+                        rightOperand = businessLogicRuleCondition.getRightDataObject() != null ?
+                                businessLogicRuleCondition.getRightDataObject() : "inPayload";
+                        rightOperand += businessLogicRuleCondition.getRightOperand() != null ?
+                                "." + businessLogicRuleCondition.getRightOperand() : "";
+
+                        ruleCondition += leftOperand + ", " + rightOperand + " )";
                     }
                     case NOT_EQUAL -> {
                         ruleCondition += leftOperand + "!=" + rightOperand;
@@ -384,12 +404,13 @@ public class BusinessRulesService {
                 ruleCondition += businessLogicRuleCondition.getOpenConditionScope() != null ?
                         businessLogicRuleCondition.getOpenConditionScope() : "";
 
-                ruleConditions = ruleConditions == null ? ruleCondition : ruleConditions + ruleCondition;
+                ruleConditions = ruleConditions == null ? ruleCondition : ruleConditions + "; " + ruleCondition;
 
-                if (businessLogicRuleCondition.getIncludeFuncNameList() != null)
+                if (businessLogicRuleCondition.getIncludeFuncNameList() != null &&
+                        !businessLogicRuleCondition.getIncludeFuncNameList().trim().isEmpty())
                     condIncludeFunctionNameList = condIncludeFunctionNameList == null ?
                             businessLogicRuleCondition.getIncludeFuncNameList() :
-                            condIncludeFunctionNameList + businessLogicRuleCondition.getIncludeFuncNameList();
+                            condIncludeFunctionNameList + "," + businessLogicRuleCondition.getIncludeFuncNameList();
             }
         }
 
@@ -398,19 +419,65 @@ public class BusinessRulesService {
         if(businessLogicRuleActionList != null) {
             for (BusinessLogicRuleAction businessLogicRuleAction : businessLogicRuleActionList) {
                 String ruleAction = null;
-                String assignee = businessLogicRuleAction.getAssignee();
-                String assignor = businessLogicRuleAction.getAssignor();
 
-                if (assignee != null) {
-                    ruleAction = "outPayload.put( " + assignee + ", " + assignor + " );";
+                String assigneeScript = null;
+                switch (businessLogicRuleAction.getAssigneeType()) {
+                    case EXCHANGE, PATH -> {
+                        assigneeScript = businessLogicRuleAction.getAssignee() != null ?
+                                "outPayload.put( " + businessLogicRuleAction.getAssignee() : "outPayload.";
 
-                    ruleActions = ruleActions == null ? ruleAction : ruleActions + ruleAction;
+                    }
+                    case VARIABLE, FUNCTION -> {
+                        assigneeScript = businessLogicRuleAction.getAssignee();
+                    }
+                    case CONSTANT -> {
+                        assigneeScript = businessLogicRuleAction.getAssignee();
+                        boolean isNumber = Pattern.matches(decimalPattern, assigneeScript);
+                        if (!isNumber)
+                            assigneeScript = "payload." + "\"" + assigneeScript + "\"";
+                    }
+                    case BASE_RULE -> {
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in leftOperand
+                    }
+
                 }
 
-                if (businessLogicRuleAction.getIncludeFuncNameList() != null)
+                String assignorScript = null;
+                switch (businessLogicRuleAction.getAssignorType()) {
+                    case EXCHANGE, PATH -> {
+                        assignorScript = ", " + (businessLogicRuleAction.getAssignor() != null ?
+                                businessLogicRuleAction.getAssignor() : "inPayload" ) + ")" ;
+                    }
+                    case VARIABLE, FUNCTION -> {
+                        assignorScript = businessLogicRuleAction.getAssignor();
+                    }
+                    case CONSTANT -> {
+                        assignorScript = businessLogicRuleAction.getAssignor();
+                        boolean isNumber = Pattern.matches(decimalPattern, assignorScript);
+                        if (!isNumber)
+                            assignorScript = "payload." + "\"" + assignorScript + "\"";
+                    }
+                    case BASE_RULE -> {
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
+                    }
+                }
+
+                //TODO:: Business logic on businessLogicRuleAction.getRuleConditionId() is pending
+                //TODO:: fetch data mapping rules from RuleCondition table and execute them to change output payload
+                //TODO:: handle action interface by using DSL plugin, by writing defaul API plugin to consume APIs based on derived context
+                //businessLogicRuleAction.getRuleConditionId();
+
+                if (assigneeScript != null) {
+                    ruleAction =  assigneeScript +  assignorScript;
+
+                    ruleActions = ruleActions == null ? ruleAction : ruleActions + "; " + ruleAction;
+                }
+
+                if (businessLogicRuleAction.getIncludeFuncNameList() != null &&
+                        !businessLogicRuleAction.getIncludeFuncNameList().trim().isEmpty())
                     actionIncludeFunctionNameList = actionIncludeFunctionNameList == null ?
                             businessLogicRuleAction.getIncludeFuncNameList() :
-                            actionIncludeFunctionNameList + businessLogicRuleAction.getIncludeFuncNameList();
+                            actionIncludeFunctionNameList + "," + businessLogicRuleAction.getIncludeFuncNameList();
             }
         }
 
