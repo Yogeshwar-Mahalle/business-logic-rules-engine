@@ -4,6 +4,7 @@
 
 package com.ybm.rulesBusinessSetupRepo.models;
 
+import com.ybm.rulesBusinessSetupRepo.ExchangeObjectType;
 import com.ybm.rulesBusinessSetupRepo.LogicalOperator;
 import com.ybm.rulesBusinessSetupRepo.OperandType;
 import com.ybm.rulesBusinessSetupRepo.Operator;
@@ -24,12 +25,13 @@ public class BusinessLogicRuleCondition implements Serializable {
     String parentRuleConditionId;
     String ruleId;
     Integer sequenceNumber;
+    Boolean isNotIndicator = false;
     String openConditionScope;
-    String leftDataObject;
+    ExchangeObjectType leftDataObject;
     String leftOperand;
     OperandType leftOperandType;
     Operator operator;
-    String rightDataObject;
+    ExchangeObjectType rightDataObject;
     String rightOperand;
     OperandType rightOperandType;
     String closeConditionScope;

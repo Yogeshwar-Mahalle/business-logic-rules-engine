@@ -8,6 +8,7 @@ public enum OperandType {
     CONSTANT,
     VARIABLE,
     EXCHANGE,
+    DSL,
     FUNCTION,
     PATH,
     BASE_RULE

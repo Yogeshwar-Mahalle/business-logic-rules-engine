@@ -284,21 +284,29 @@ public class BusinessRulesService {
 
                 String leftOperand = null;
                 switch (businessLogicRuleCondition.getLeftOperandType()) {
-                    case EXCHANGE, PATH -> {
+                    case EXCHANGE -> {
                         leftOperand = businessLogicRuleCondition.getLeftDataObject() != null ?
-                                businessLogicRuleCondition.getLeftDataObject() : "inPayload";
+                                businessLogicRuleCondition.getLeftDataObject().getLabel() : ExchangeObjectType.INPUT_PAYLOAD.getLabel();
                         leftOperand += businessLogicRuleCondition.getLeftOperand() != null ?
                                 ".?" + businessLogicRuleCondition.getLeftOperand() : "";
-
                     }
-                    case VARIABLE, FUNCTION -> {
-                        leftOperand = businessLogicRuleCondition.getLeftOperand();
+                    case VARIABLE -> {
+                        leftOperand = businessLogicRuleCondition.getLeftOperand() != null ?
+                                businessLogicRuleCondition.getLeftOperand() : "";
                     }
                     case CONSTANT -> {
                         leftOperand = businessLogicRuleCondition.getLeftOperand();
-                        boolean isNumber = Pattern.matches(decimalPattern, leftOperand);
-                        if (!isNumber)
-                            leftOperand = "\"" + leftOperand + "\"";
+                        if( leftOperand != null ) {
+                            boolean isNumber = Pattern.matches(decimalPattern, leftOperand);
+                            if (!isNumber)
+                                leftOperand = "\"" + leftOperand + "\"";
+                        }
+                    }
+                    case FUNCTION -> {
+                        //TODO:: Logic to call function by passing input parameter
+                    }
+                    case PATH -> {
+                        //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
                     }
                     case BASE_RULE -> {
                         //TODO:Fetch Base Rule details from DB/Cache and set result in leftOperand
@@ -308,27 +316,38 @@ public class BusinessRulesService {
 
                 String rightOperand = null;
                 switch (businessLogicRuleCondition.getRightOperandType()) {
-                    case EXCHANGE, PATH -> {
+                    case EXCHANGE -> {
                         rightOperand = businessLogicRuleCondition.getRightDataObject() != null ?
-                                businessLogicRuleCondition.getRightDataObject() : "inPayload";
+                                businessLogicRuleCondition.getRightDataObject().getLabel() : ExchangeObjectType.INPUT_PAYLOAD.getLabel();
                         rightOperand += businessLogicRuleCondition.getRightOperand() != null ?
                                 ".?" + businessLogicRuleCondition.getRightOperand() : "";
                     }
-                    case VARIABLE, FUNCTION -> {
-                        rightOperand = businessLogicRuleCondition.getRightOperand();
+                    case VARIABLE -> {
+                        rightOperand = businessLogicRuleCondition.getRightOperand() != null ?
+                                businessLogicRuleCondition.getRightOperand() : "";
                     }
                     case CONSTANT -> {
                         rightOperand = businessLogicRuleCondition.getRightOperand();
-                        boolean isNumber = Pattern.matches(decimalPattern, rightOperand);
-                        if (!isNumber)
-                            rightOperand = "\"" + rightOperand + "\"";
+                        if( rightOperand != null ) {
+                            boolean isNumber = Pattern.matches(decimalPattern, rightOperand);
+                            if (!isNumber)
+                                rightOperand = "\"" + rightOperand + "\"";
+                        }
+                    }
+                    case FUNCTION -> {
+                        //TODO:: Logic to call function by passing input parameter
+                    }
+                    case PATH -> {
+                        //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
                     }
                     case BASE_RULE -> {
                         //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
                     }
                 }
 
-                String ruleCondition = businessLogicRuleCondition.getOpenConditionScope() != null ?
+                String ruleCondition = businessLogicRuleCondition.getIsNotIndicator() != null &&
+                        businessLogicRuleCondition.getIsNotIndicator() ? "!" : "";
+                ruleCondition += businessLogicRuleCondition.getOpenConditionScope() != null ?
                         businessLogicRuleCondition.getOpenConditionScope() : "";
 
                 switch (businessLogicRuleCondition.getOperator()) {
@@ -337,20 +356,6 @@ public class BusinessRulesService {
                     }
                     case ASSIGN -> {
                         ruleCondition += leftOperand + "=" + rightOperand;
-                    }
-                    case SET -> {
-
-                        leftOperand = businessLogicRuleCondition.getLeftDataObject() != null ?
-                                businessLogicRuleCondition.getLeftDataObject() + ".put( " : "outPayload.put( ";
-                        leftOperand += businessLogicRuleCondition.getLeftOperand() != null ?
-                                businessLogicRuleCondition.getLeftOperand() : "?";
-
-                        rightOperand = businessLogicRuleCondition.getRightDataObject() != null ?
-                                businessLogicRuleCondition.getRightDataObject() : "inPayload";
-                        rightOperand += businessLogicRuleCondition.getRightOperand() != null ?
-                                "." + businessLogicRuleCondition.getRightOperand() : "";
-
-                        ruleCondition += leftOperand + ", " + rightOperand + " )";
                     }
                     case NOT_EQUAL -> {
                         ruleCondition += leftOperand + "!=" + rightOperand;
@@ -368,16 +373,16 @@ public class BusinessRulesService {
                         ruleCondition += leftOperand + ">=" + rightOperand;
                     }
                     case EQUAL_IGNORECASE -> {
-                        ruleCondition += leftOperand + ".equalIgnoreCase(" + rightOperand + ")";
+                        ruleCondition += leftOperand + ".equalsIgnoreCase(" + rightOperand + ")";
                     }
                     case NOT_EQUAL_IGNORECASE -> {
-                        ruleCondition += "!" + leftOperand + ".equalIgnoreCase(" + rightOperand + ")";
+                        ruleCondition += "!" + leftOperand + ".equalsIgnoreCase(" + rightOperand + ")";
                     }
                     case CONTAIN -> {
-                        ruleCondition += leftOperand + ".contain(" + rightOperand + ")";
+                        ruleCondition += leftOperand + ".contains(" + rightOperand + ")";
                     }
                     case NOT_CONTAIN -> {
-                        ruleCondition += "!" + leftOperand + ".contain(" + rightOperand + ")";
+                        ruleCondition += "!" + leftOperand + ".contains(" + rightOperand + ")";
                     }
                     case TRIM_EQUAL -> {
                         ruleCondition += leftOperand + "==" + rightOperand + ".trim()";
@@ -386,10 +391,10 @@ public class BusinessRulesService {
                         ruleCondition += "!" + leftOperand + "==" + rightOperand + ".trim()";
                     }
                     case TRIM_EQUAL_IGNORECASE -> {
-                        ruleCondition += leftOperand + ".equalIgnoreCase( " + rightOperand + ".trim() )";
+                        ruleCondition += leftOperand + ".equalsIgnoreCase( " + rightOperand + ".trim() )";
                     }
                     case TRIM_NOT_EQUAL_IGNORECASE -> {
-                        ruleCondition += "!" + leftOperand + ".equalIgnoreCase( " + rightOperand + ".trim() )";
+                        ruleCondition += "!" + leftOperand + ".equalsIgnoreCase( " + rightOperand + ".trim() )";
                     }
                     case TRIM_LESS_THAN -> {
                         ruleCondition += leftOperand + "<" + rightOperand + ".trim()";
@@ -417,15 +422,6 @@ public class BusinessRulesService {
                             case OR -> {
                                 ruleConditions.append(" || ").append(ruleCondition);
                             }
-                            case NAND -> {
-                                ruleConditions = new StringBuilder(" !" + ruleConditions + " && " + ruleCondition );
-                            }
-                            case NOR -> {
-                                ruleConditions = new StringBuilder(" !" + ruleConditions + " || " + ruleCondition );
-                            }
-                            case NOT -> {
-                                ruleConditions.append(" !").append(ruleCondition);
-                            }
                         }
                     }
                 }
@@ -447,58 +443,101 @@ public class BusinessRulesService {
             for (BusinessLogicRuleAction businessLogicRuleAction : businessLogicRuleActionList) {
                 String ruleAction = null;
 
-                String assigneeScript = null;
                 switch (businessLogicRuleAction.getAssigneeType()) {
-                    case EXCHANGE, PATH -> {
-                        assigneeScript = businessLogicRuleAction.getAssignee() != null ?
-                                "outPayload.put( " + businessLogicRuleAction.getAssignee() : "outPayload.";
-
+                    case EXCHANGE -> {
+                        ruleAction = businessLogicRuleAction.getAssigneeDataObject() != null ?
+                                businessLogicRuleAction.getAssigneeDataObject().getLabel() : ExchangeObjectType.OUTPUT_PAYLOAD.getLabel();
+                        ruleAction += ".put(";
+                        ruleAction += businessLogicRuleAction.getAssignee() != null ?
+                                businessLogicRuleAction.getAssignee() : "?";
+                        ruleAction += ", ";
                     }
-                    case VARIABLE, FUNCTION -> {
-                        assigneeScript = businessLogicRuleAction.getAssignee();
+                    case VARIABLE -> {
+                        ruleAction = businessLogicRuleAction.getAssignee();
+                        ruleAction += "=";
                     }
                     case CONSTANT -> {
-                        assigneeScript = businessLogicRuleAction.getAssignee();
-                        boolean isNumber = Pattern.matches(decimalPattern, assigneeScript);
-                        if (!isNumber)
-                            assigneeScript = "payload." + "\"" + assigneeScript + "\"";
+                        //TODO:: Assignee can not be constant, need to handle this scenario later
+                        ruleAction = businessLogicRuleAction.getAssignee();
+                        if( ruleAction != null) {
+                            boolean isNumber = Pattern.matches(decimalPattern, ruleAction);
+                            if (!isNumber)
+                                ruleAction = "\"" + ruleAction + "\"";
+                        }
+                    }
+                    case DSL -> {
+                        ruleAction = "${" ;
+                        ruleAction += businessLogicRuleAction.getAssignee();
+                        ruleAction += "}==";
+                    }
+                    case FUNCTION -> {
+                        //TODO:: Logic to call function by passing input parameter
+                    }
+                    case PATH -> {
+                        //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
                     }
                     case BASE_RULE -> {
-                        //TODO:Fetch Base Rule details from DB/Cache and set result in leftOperand
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
                     }
 
                 }
 
-                String assignorScript = null;
                 switch (businessLogicRuleAction.getAssignorType()) {
-                    case EXCHANGE, PATH -> {
-                        assignorScript = ", " + (businessLogicRuleAction.getAssignor() != null ?
-                                businessLogicRuleAction.getAssignor() : "inPayload" ) + ")" ;
+                    case EXCHANGE -> {
+                        ruleAction += businessLogicRuleAction.getAssignorDataObject() != null ?
+                                businessLogicRuleAction.getAssignorDataObject().getLabel() : ExchangeObjectType.INPUT_PAYLOAD.getLabel();
+                        ruleAction += businessLogicRuleAction.getAssignor() != null ?
+                                "." + businessLogicRuleAction.getAssignor() : "";
                     }
-                    case VARIABLE, FUNCTION -> {
-                        assignorScript = businessLogicRuleAction.getAssignor();
+                    case VARIABLE -> {
+                        ruleAction += businessLogicRuleAction.getAssignor();
                     }
                     case CONSTANT -> {
-                        assignorScript = businessLogicRuleAction.getAssignor();
-                        boolean isNumber = Pattern.matches(decimalPattern, assignorScript);
-                        if (!isNumber)
-                            assignorScript = "payload." + "\"" + assignorScript + "\"";
+                        String assignor = businessLogicRuleAction.getAssignor();
+                        if( assignor != null) {
+                            boolean isNumber = Pattern.matches(decimalPattern, assignor);
+                            if (!isNumber)
+                                assignor = "\"" + assignor + "\"";
+                        }
+                        ruleAction += assignor + "); ";
+                    }
+                    case DSL -> {
+                        ruleAction += "${" ;
+                        ruleAction += businessLogicRuleAction.getAssignor();
+                        ruleAction += "}";
+                    }
+                    case FUNCTION -> {
+                        //TODO:: Logic to call function by passing input parameter
+                    }
+                    case PATH -> {
+                        //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
                     }
                     case BASE_RULE -> {
                         //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
                     }
                 }
 
-                //TODO:: Business logic on businessLogicRuleAction.getRuleConditionId() is pending
-                //TODO:: fetch data mapping rules from RuleCondition table and execute them to change output payload
-                //TODO:: handle action interface by using DSL plugin, by writing defaul API plugin to consume APIs based on derived context
-                //businessLogicRuleAction.getRuleConditionId();
+                //Closing expression string
+                switch (businessLogicRuleAction.getAssigneeType()) {
+                    case EXCHANGE -> {
+                        ruleAction += "); ";
+                    }
+                    case VARIABLE, CONSTANT, DSL -> {
+                        ruleAction += "; ";
+                    }
+                    case FUNCTION -> {
+                        //TODO:: Logic to call function by passing input parameter
+                    }
+                    case PATH -> {
+                        //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
+                    }
+                    case BASE_RULE -> {
+                        //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
+                    }
 
-                if (assigneeScript != null) {
-                    ruleAction =  assigneeScript +  assignorScript;
-
-                    ruleActions = ruleActions == null ? ruleAction : ruleActions + "; " + ruleAction;
                 }
+
+                ruleActions = ruleActions == null ? ruleAction : ruleActions + ruleAction;
 
                 if (businessLogicRuleAction.getIncludeFuncNameList() != null &&
                         !businessLogicRuleAction.getIncludeFuncNameList().trim().isEmpty())

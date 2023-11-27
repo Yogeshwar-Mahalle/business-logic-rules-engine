@@ -89,18 +89,34 @@ public class BusinessRuleActionService {
 
     private BusinessLogicRuleAction mapRuleActionFromDbModel(BLRuleActionDbModel blRuleActionDbModel){
 
-        OperandType assigneeType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssigneeType().toUpperCase())
+        ExchangeObjectType assigneeDataObject = null;
+        if(blRuleActionDbModel.getAssigneeDataObject() != null)
+            assigneeDataObject = Enums.getIfPresent(ExchangeObjectType.class, blRuleActionDbModel.getAssigneeDataObject().toUpperCase())
+                    .or(ExchangeObjectType.OUTPUT_PAYLOAD);
+
+        ExchangeObjectType assignorDataObject = null;
+        if(blRuleActionDbModel.getAssignorDataObject() != null)
+            assignorDataObject = Enums.getIfPresent(ExchangeObjectType.class, blRuleActionDbModel.getAssignorDataObject().toUpperCase())
+                    .or(ExchangeObjectType.OUTPUT_PAYLOAD);
+
+        OperandType assigneeType = null;
+        if(blRuleActionDbModel.getAssigneeType() != null)
+            assigneeType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssigneeType().toUpperCase())
                 .or(OperandType.EXCHANGE);
-        OperandType assignorType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssignorType().toUpperCase())
+
+        OperandType assignorType = null;
+        if(blRuleActionDbModel.getAssignorType() != null)
+            assignorType = Enums.getIfPresent(OperandType.class, blRuleActionDbModel.getAssignorType().toUpperCase())
                 .or(OperandType.EXCHANGE);
 
         return BusinessLogicRuleAction.builder()
                 .ruleActionId(blRuleActionDbModel.getRuleActionId())
                 .ruleId(blRuleActionDbModel.getRuleId())
                 .sequenceNumber(blRuleActionDbModel.getSequenceNumber())
-                .ruleConditionId(blRuleActionDbModel.getRuleConditionId())
+                .assigneeDataObject(assigneeDataObject)
                 .assignee(blRuleActionDbModel.getAssignee())
                 .assigneeType(assigneeType)
+                .assignorDataObject(assignorDataObject)
                 .assignor(blRuleActionDbModel.getAssignor())
                 .assignorType(assignorType)
                 .includeFuncNameList(blRuleActionDbModel.getIncludeFuncNameList())
@@ -118,9 +134,12 @@ public class BusinessRuleActionService {
                         businessLogicRuleAction.getRuleActionId() )
                 .ruleId(businessLogicRuleAction.getRuleId())
                 .sequenceNumber(businessLogicRuleAction.getSequenceNumber())
-                .ruleConditionId(businessLogicRuleAction.getRuleConditionId())
+                .assigneeDataObject(businessLogicRuleAction.getAssigneeDataObject() != null ?
+                        businessLogicRuleAction.getAssigneeDataObject().name() : null)
                 .assignee(businessLogicRuleAction.getAssignee())
                 .assigneeType(businessLogicRuleAction.getAssigneeType().name())
+                .assignorDataObject(businessLogicRuleAction.getAssignorDataObject() != null ?
+                        businessLogicRuleAction.getAssignorDataObject().name() : null)
                 .assignor(businessLogicRuleAction.getAssignor())
                 .assignorType(businessLogicRuleAction.getAssignorType().name())
                 .includeFuncNameList(businessLogicRuleAction.getIncludeFuncNameList())

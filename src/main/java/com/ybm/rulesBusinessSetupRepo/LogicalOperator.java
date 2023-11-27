@@ -6,8 +6,5 @@ package com.ybm.rulesBusinessSetupRepo;
 
 public enum LogicalOperator {
     AND,
-    OR,
-    NAND,
-    NOR,
-    NOT
+    OR
 }

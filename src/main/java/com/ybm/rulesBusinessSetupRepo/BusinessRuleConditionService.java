@@ -88,6 +88,16 @@ public class BusinessRuleConditionService {
 
     private BusinessLogicRuleCondition mapRuleConditionFromDbModel(BLRuleConditionDbModel blRuleConditionDbModel){
 
+        ExchangeObjectType leftDataObject = null;
+        if ( blRuleConditionDbModel.getLeftDataObject() != null )
+            leftDataObject = Enums.getIfPresent(ExchangeObjectType.class, blRuleConditionDbModel.getLeftDataObject().toUpperCase())
+                    .orNull();
+
+        ExchangeObjectType rightDataObject = null;
+        if ( blRuleConditionDbModel.getRightDataObject() != null )
+            rightDataObject = Enums.getIfPresent(ExchangeObjectType.class, blRuleConditionDbModel.getRightDataObject().toUpperCase())
+                    .orNull();
+
         OperandType leftOperandType = null;
         if ( blRuleConditionDbModel.getLeftOperandType() != null )
             leftOperandType = Enums.getIfPresent(OperandType.class, blRuleConditionDbModel.getLeftOperandType().toUpperCase())
@@ -113,12 +123,13 @@ public class BusinessRuleConditionService {
                 .parentRuleConditionId(blRuleConditionDbModel.getParentRuleConditionId())
                 .ruleId(blRuleConditionDbModel.getRuleId())
                 .sequenceNumber(blRuleConditionDbModel.getSequenceNumber())
+                .isNotIndicator(blRuleConditionDbModel.getIsNotIndicator())
                 .openConditionScope(blRuleConditionDbModel.getOpenConditionScope())
-                .leftDataObject(blRuleConditionDbModel.getLeftDataObject())
+                .leftDataObject(leftDataObject)
                 .leftOperand(blRuleConditionDbModel.getLeftOperand())
                 .leftOperandType(leftOperandType)
                 .operator(operator)
-                .rightDataObject(blRuleConditionDbModel.getRightDataObject())
+                .rightDataObject(rightDataObject)
                 .rightOperand(blRuleConditionDbModel.getRightOperand())
                 .rightOperandType(rightOperandType)
                 .closeConditionScope(blRuleConditionDbModel.getCloseConditionScope())
@@ -139,13 +150,16 @@ public class BusinessRuleConditionService {
                 .parentRuleConditionId(businessLogicRuleCondition.getParentRuleConditionId())
                 .ruleId(businessLogicRuleCondition.getRuleId())
                 .sequenceNumber(businessLogicRuleCondition.getSequenceNumber())
+                .isNotIndicator(businessLogicRuleCondition.getIsNotIndicator())
                 .openConditionScope(businessLogicRuleCondition.getOpenConditionScope())
-                .leftDataObject(businessLogicRuleCondition.getLeftDataObject())
+                .leftDataObject(businessLogicRuleCondition.getLeftDataObject() != null ?
+                        businessLogicRuleCondition.getLeftDataObject().name() : null)
                 .leftOperand(businessLogicRuleCondition.getLeftOperand())
                 .leftOperandType(businessLogicRuleCondition.getLeftOperandType() != null ?
                         businessLogicRuleCondition.getLeftOperandType().name() : null)
                 .operator(businessLogicRuleCondition.getOperator().name())
-                .rightDataObject(businessLogicRuleCondition.getRightDataObject())
+                .rightDataObject(businessLogicRuleCondition.getRightDataObject() != null ?
+                        businessLogicRuleCondition.getRightDataObject().name() : null)
                 .rightOperand(businessLogicRuleCondition.getRightOperand())
                 .rightOperandType(businessLogicRuleCondition.getRightOperandType() != null ?
                         businessLogicRuleCondition.getRightOperandType().name() : null)

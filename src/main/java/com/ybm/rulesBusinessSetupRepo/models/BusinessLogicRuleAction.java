@@ -4,6 +4,7 @@
 
 package com.ybm.rulesBusinessSetupRepo.models;
 
+import com.ybm.rulesBusinessSetupRepo.ExchangeObjectType;
 import com.ybm.rulesBusinessSetupRepo.OperandType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +22,10 @@ public class BusinessLogicRuleAction implements Serializable {
     String ruleActionId;
     String ruleId;
     Integer sequenceNumber;
+    ExchangeObjectType assigneeDataObject;
     String assignee;
     OperandType assigneeType;
-    String ruleConditionId;
+    ExchangeObjectType assignorDataObject;
     String assignor;
     OperandType assignorType;
     String includeFuncNameList;

@@ -36,6 +36,9 @@ public class BLRuleConditionDbModel implements Serializable {
     @Column(name = "SEQUENCE_NUMBER", nullable=false)
     private Integer sequenceNumber;
 
+    @Column(name = "IS_NOT_INDICATOR", nullable=false, columnDefinition = "boolean default false")
+    private Boolean isNotIndicator = false;
+
     @Column(name = "OPEN_CONDITION_SCOPE", length = 1)
     private String openConditionScope;
 
