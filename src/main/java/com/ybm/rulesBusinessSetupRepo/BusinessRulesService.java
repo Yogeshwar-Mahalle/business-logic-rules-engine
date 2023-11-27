@@ -37,11 +37,11 @@ public class BusinessRulesService {
         BusinessLogicRule updatedBusinessLogicRule = mapRuleFromDbModel(blRuleDbModel);
 
         List<BusinessLogicRuleCondition> conditionList =
-                businessRuleConditionService.saveRuleConditions(updatedBusinessLogicRule.getRuleId(), updatedBusinessLogicRule.getConditionList());
+                businessRuleConditionService.saveRuleConditions(updatedBusinessLogicRule.getRuleId(), businessLogicRule.getConditionList());
         updatedBusinessLogicRule.setConditionList(conditionList);
 
         List<BusinessLogicRuleAction> actionList =
-                businessRuleActionService.saveRuleActions(updatedBusinessLogicRule.getRuleId(), updatedBusinessLogicRule.getActionList());
+                businessRuleActionService.saveRuleActions(updatedBusinessLogicRule.getRuleId(), businessLogicRule.getActionList());
         updatedBusinessLogicRule.setActionList(actionList);
 
         return updatedBusinessLogicRule;
@@ -64,15 +64,21 @@ public class BusinessRulesService {
                 )
                 .collect(Collectors.toList());
 
-        for ( BusinessLogicRule updatedBusinessLogicRule : updatedBusinessLogicRules )
+        for ( BusinessLogicRule businessLogicRule : businessLogicRules )
         {
-            List<BusinessLogicRuleCondition> conditionList =
-                    businessRuleConditionService.saveRuleConditions(updatedBusinessLogicRule.getRuleId(), updatedBusinessLogicRule.getConditionList());
-            updatedBusinessLogicRule.setConditionList(conditionList);
+            for( BusinessLogicRule updatedBusinessLogicRule : updatedBusinessLogicRules )
+            {
+                if( businessLogicRule.getRuleId().equals(updatedBusinessLogicRule.getRuleId()) )
+                {
+                    List<BusinessLogicRuleCondition> conditionList =
+                            businessRuleConditionService.saveRuleConditions(updatedBusinessLogicRule.getRuleId(), businessLogicRule.getConditionList());
+                    updatedBusinessLogicRule.setConditionList(conditionList);
 
-            List<BusinessLogicRuleAction> actionList =
-                    businessRuleActionService.saveRuleActions(updatedBusinessLogicRule.getRuleId(), updatedBusinessLogicRule.getActionList());
-            updatedBusinessLogicRule.setActionList(actionList);
+                    List<BusinessLogicRuleAction> actionList =
+                            businessRuleActionService.saveRuleActions(updatedBusinessLogicRule.getRuleId(), businessLogicRule.getActionList());
+                    updatedBusinessLogicRule.setActionList(actionList);
+                }
+            }
         }
 
         return updatedBusinessLogicRules;
@@ -241,7 +247,6 @@ public class BusinessRulesService {
 
     private BusinessLogicRule mapRuleFromDbModel(BLRuleDbModel blRuleDbModel)
     {
-
         return BusinessLogicRule.builder()
                 .ruleType(blRuleDbModel.getRuleType().toUpperCase())
                 .ruleId(blRuleDbModel.getRuleId())
@@ -272,11 +277,10 @@ public class BusinessRulesService {
         String decimalPattern = "([-+]*)([0-9]*)|([-+]*)([0-9]*)\\.([0-9]*)";
 
         String condIncludeFunctionNameList = null;
-        String ruleConditions = null;
+        StringBuilder ruleConditions = null;
         if(businessLogicRuleConditionList != null) {
+
             for (BusinessLogicRuleCondition businessLogicRuleCondition : businessLogicRuleConditionList) {
-                String ruleCondition = businessLogicRuleCondition.getOpenConditionScope() != null ?
-                        businessLogicRuleCondition.getOpenConditionScope() : "";
 
                 String leftOperand = null;
                 switch (businessLogicRuleCondition.getLeftOperandType()) {
@@ -284,7 +288,7 @@ public class BusinessRulesService {
                         leftOperand = businessLogicRuleCondition.getLeftDataObject() != null ?
                                 businessLogicRuleCondition.getLeftDataObject() : "inPayload";
                         leftOperand += businessLogicRuleCondition.getLeftOperand() != null ?
-                                "." + businessLogicRuleCondition.getLeftOperand() : "";
+                                ".?" + businessLogicRuleCondition.getLeftOperand() : "";
 
                     }
                     case VARIABLE, FUNCTION -> {
@@ -308,13 +312,13 @@ public class BusinessRulesService {
                         rightOperand = businessLogicRuleCondition.getRightDataObject() != null ?
                                 businessLogicRuleCondition.getRightDataObject() : "inPayload";
                         rightOperand += businessLogicRuleCondition.getRightOperand() != null ?
-                                "." + businessLogicRuleCondition.getRightOperand() : "";
+                                ".?" + businessLogicRuleCondition.getRightOperand() : "";
                     }
                     case VARIABLE, FUNCTION -> {
                         rightOperand = businessLogicRuleCondition.getRightOperand();
                     }
                     case CONSTANT -> {
-                        rightOperand = businessLogicRuleCondition.getLeftOperand();
+                        rightOperand = businessLogicRuleCondition.getRightOperand();
                         boolean isNumber = Pattern.matches(decimalPattern, rightOperand);
                         if (!isNumber)
                             rightOperand = "\"" + rightOperand + "\"";
@@ -323,6 +327,9 @@ public class BusinessRulesService {
                         //TODO:Fetch Base Rule details from DB/Cache and set result in rightOperand
                     }
                 }
+
+                String ruleCondition = businessLogicRuleCondition.getOpenConditionScope() != null ?
+                        businessLogicRuleCondition.getOpenConditionScope() : "";
 
                 switch (businessLogicRuleCondition.getOperator()) {
                     case EQUAL -> {
@@ -398,19 +405,39 @@ public class BusinessRulesService {
                     }
                 }
 
-                ruleCondition += businessLogicRuleCondition.getLogicalOperator() != null ?
-                        businessLogicRuleCondition.getLogicalOperator() : "";
+                ruleCondition += businessLogicRuleCondition.getCloseConditionScope() != null ?
+                        businessLogicRuleCondition.getCloseConditionScope() : "";
 
-                ruleCondition += businessLogicRuleCondition.getOpenConditionScope() != null ?
-                        businessLogicRuleCondition.getOpenConditionScope() : "";
-
-                ruleConditions = ruleConditions == null ? ruleCondition : ruleConditions + "; " + ruleCondition;
+                if (ruleConditions != null) {
+                    if (businessLogicRuleCondition.getLogicalOperator() != null) {
+                        switch (businessLogicRuleCondition.getLogicalOperator()) {
+                            case AND -> {
+                                ruleConditions.append(" && ").append(ruleCondition);
+                            }
+                            case OR -> {
+                                ruleConditions.append(" || ").append(ruleCondition);
+                            }
+                            case NAND -> {
+                                ruleConditions = new StringBuilder(" !" + ruleConditions + " && " + ruleCondition );
+                            }
+                            case NOR -> {
+                                ruleConditions = new StringBuilder(" !" + ruleConditions + " || " + ruleCondition );
+                            }
+                            case NOT -> {
+                                ruleConditions.append(" !").append(ruleCondition);
+                            }
+                        }
+                    }
+                }
+                else {
+                    ruleConditions = new StringBuilder(ruleCondition);
+                }
 
                 if (businessLogicRuleCondition.getIncludeFuncNameList() != null &&
                         !businessLogicRuleCondition.getIncludeFuncNameList().trim().isEmpty())
                     condIncludeFunctionNameList = condIncludeFunctionNameList == null ?
                             businessLogicRuleCondition.getIncludeFuncNameList() :
-                            condIncludeFunctionNameList + "," + businessLogicRuleCondition.getIncludeFuncNameList();
+                            condIncludeFunctionNameList + ", " + businessLogicRuleCondition.getIncludeFuncNameList();
             }
         }
 
@@ -490,7 +517,7 @@ public class BusinessRulesService {
                 .ruleName(businessLogicRule.getRuleName())
                 .condInclFuncNameList(condIncludeFunctionNameList)
                 .condInitTemplate(businessLogicRule.getCondInitTemplate())
-                .condition(ruleConditions != null ? ruleConditions : businessLogicRule.getCondition())
+                .condition(ruleConditions != null ? ruleConditions.toString() : businessLogicRule.getCondition())
                 .actionInclFuncNameList(actionIncludeFunctionNameList)
                 .actionInitTemplate(businessLogicRule.getActionInitTemplate())
                 .action(ruleActions != null ? ruleActions : businessLogicRule.getAction())
@@ -504,6 +531,4 @@ public class BusinessRulesService {
                 .build();
 
     }
-
-
 }

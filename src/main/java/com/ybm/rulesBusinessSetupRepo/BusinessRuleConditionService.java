@@ -88,14 +88,25 @@ public class BusinessRuleConditionService {
 
     private BusinessLogicRuleCondition mapRuleConditionFromDbModel(BLRuleConditionDbModel blRuleConditionDbModel){
 
-        OperandType leftOperandType = Enums.getIfPresent(OperandType.class, blRuleConditionDbModel.getLeftOperandType().toUpperCase())
-                .or(OperandType.EXCHANGE);
-        OperandType rightOperandType = Enums.getIfPresent(OperandType.class, blRuleConditionDbModel.getRightOperandType().toUpperCase())
-                .or(OperandType.EXCHANGE);
-        Operator operator = Enums.getIfPresent(Operator.class, blRuleConditionDbModel.getOperator().toUpperCase())
+        OperandType leftOperandType = null;
+        if ( blRuleConditionDbModel.getLeftOperandType() != null )
+            leftOperandType = Enums.getIfPresent(OperandType.class, blRuleConditionDbModel.getLeftOperandType().toUpperCase())
+                .orNull();
+
+        OperandType rightOperandType = null;
+        if ( blRuleConditionDbModel.getRightOperandType() != null )
+            rightOperandType = Enums.getIfPresent(OperandType.class, blRuleConditionDbModel.getRightOperandType().toUpperCase())
+                .orNull();
+
+        Operator operator = null;
+        if ( blRuleConditionDbModel.getOperator() != null )
+            operator = Enums.getIfPresent(Operator.class, blRuleConditionDbModel.getOperator().toUpperCase())
                 .or(Operator.EQUAL);
-        LogicalOperator logicalOperator = Enums.getIfPresent(LogicalOperator.class, blRuleConditionDbModel.getLogicalOperator().toUpperCase())
-                .or(LogicalOperator.AND);
+
+        LogicalOperator logicalOperator = null;
+        if ( blRuleConditionDbModel.getLogicalOperator() != null )
+            logicalOperator = Enums.getIfPresent(LogicalOperator.class, blRuleConditionDbModel.getLogicalOperator().toUpperCase())
+                    .orNull();
 
         return BusinessLogicRuleCondition.builder()
                 .ruleConditionId(blRuleConditionDbModel.getRuleConditionId())
@@ -113,8 +124,8 @@ public class BusinessRuleConditionService {
                 .closeConditionScope(blRuleConditionDbModel.getCloseConditionScope())
                 .logicalOperator(logicalOperator)
                 .includeFuncNameList(blRuleConditionDbModel.getIncludeFuncNameList())
-                .createTimeStamp(blRuleConditionDbModel.getCreateTimeStamp() == null ? new Date() : blRuleConditionDbModel.getCreateTimeStamp())
-                .updateTimeStamp(new Date())
+                .createTimeStamp(blRuleConditionDbModel.getCreateTimeStamp())
+                .updateTimeStamp(blRuleConditionDbModel.getUpdateTimeStamp())
                 .build();
 
     }
@@ -123,8 +134,7 @@ public class BusinessRuleConditionService {
 
         return BLRuleConditionDbModel.builder()
                 .ruleConditionId( businessLogicRuleCondition.getRuleConditionId() == null ?
-                        businessLogicRuleCondition.getParentRuleConditionId() == null ? businessLogicRuleCondition.getRuleId() : businessLogicRuleCondition.getParentRuleConditionId()
-                                + "~" + businessLogicRuleCondition.getSequenceNumber() :
+                        businessLogicRuleCondition.getRuleId() + "~" + businessLogicRuleCondition.getSequenceNumber() :
                         businessLogicRuleCondition.getRuleConditionId() )
                 .parentRuleConditionId(businessLogicRuleCondition.getParentRuleConditionId())
                 .ruleId(businessLogicRuleCondition.getRuleId())
@@ -132,16 +142,19 @@ public class BusinessRuleConditionService {
                 .openConditionScope(businessLogicRuleCondition.getOpenConditionScope())
                 .leftDataObject(businessLogicRuleCondition.getLeftDataObject())
                 .leftOperand(businessLogicRuleCondition.getLeftOperand())
-                .leftOperandType(businessLogicRuleCondition.getLeftOperandType().name())
+                .leftOperandType(businessLogicRuleCondition.getLeftOperandType() != null ?
+                        businessLogicRuleCondition.getLeftOperandType().name() : null)
                 .operator(businessLogicRuleCondition.getOperator().name())
                 .rightDataObject(businessLogicRuleCondition.getRightDataObject())
                 .rightOperand(businessLogicRuleCondition.getRightOperand())
-                .rightOperandType(businessLogicRuleCondition.getRightOperandType().name())
+                .rightOperandType(businessLogicRuleCondition.getRightOperandType() != null ?
+                        businessLogicRuleCondition.getRightOperandType().name() : null)
                 .closeConditionScope(businessLogicRuleCondition.getCloseConditionScope())
-                .logicalOperator(businessLogicRuleCondition.getLogicalOperator().name())
+                .logicalOperator(businessLogicRuleCondition.getLogicalOperator() != null ?
+                        businessLogicRuleCondition.getLogicalOperator().name() : null)
                 .includeFuncNameList(businessLogicRuleCondition.getIncludeFuncNameList())
-                .createTimeStamp(businessLogicRuleCondition.getCreateTimeStamp())
-                .updateTimeStamp(businessLogicRuleCondition.getUpdateTimeStamp())
+                .createTimeStamp(businessLogicRuleCondition.getCreateTimeStamp() == null ? new Date() : businessLogicRuleCondition.getCreateTimeStamp())
+                .updateTimeStamp(new Date())
                 .build();
 
     }
