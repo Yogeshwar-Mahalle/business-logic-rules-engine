@@ -25,6 +25,7 @@ public class BusinessLogicRuleCondition implements Serializable {
     String parentRuleConditionId;
     String ruleId;
     Integer sequenceNumber;
+    @Builder.Default
     Boolean isNotIndicator = false;
     String openConditionScope;
     ExchangeObjectType leftDataObject;

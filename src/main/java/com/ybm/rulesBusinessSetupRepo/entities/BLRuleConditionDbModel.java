@@ -36,6 +36,7 @@ public class BLRuleConditionDbModel implements Serializable {
     @Column(name = "SEQUENCE_NUMBER", nullable=false)
     private Integer sequenceNumber;
 
+    @Builder.Default
     @Column(name = "IS_NOT_INDICATOR", nullable=false, columnDefinition = "boolean default false")
     private Boolean isNotIndicator = false;
 
