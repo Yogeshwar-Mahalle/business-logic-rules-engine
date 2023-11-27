@@ -471,7 +471,8 @@ public class BusinessRulesService {
                         ruleAction += "}==";
                     }
                     case FUNCTION -> {
-                        //TODO:: Logic to call function by passing input parameter
+                        ruleAction = businessLogicRuleAction.getAssignee();
+                        ruleAction += "==";
                     }
                     case PATH -> {
                         //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
@@ -507,7 +508,7 @@ public class BusinessRulesService {
                         ruleAction += "}";
                     }
                     case FUNCTION -> {
-                        //TODO:: Logic to call function by passing input parameter
+                        ruleAction += businessLogicRuleAction.getAssignor();
                     }
                     case PATH -> {
                         //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
@@ -522,11 +523,8 @@ public class BusinessRulesService {
                     case EXCHANGE -> {
                         ruleAction += "); ";
                     }
-                    case VARIABLE, CONSTANT, DSL -> {
+                    case VARIABLE, CONSTANT, DSL, FUNCTION -> {
                         ruleAction += "; ";
-                    }
-                    case FUNCTION -> {
-                        //TODO:: Logic to call function by passing input parameter
                     }
                     case PATH -> {
                         //TODO:: Logic to fetch data from xml string by using xpath or from json by using jpath
