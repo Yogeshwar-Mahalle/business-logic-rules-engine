@@ -28,7 +28,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-public class BusinessLogicRestController {
+public class BLRuleProcessingRestController {
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired

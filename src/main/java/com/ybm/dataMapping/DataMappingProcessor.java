@@ -4,35 +4,67 @@
 
 package com.ybm.dataMapping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.payloadtypes.*;
 import com.ybm.dataMapping.processor.DataEnrichmentProcessing;
 import com.ybm.dataMapping.processor.DataMapProcessing;
 import com.ybm.dataMapping.visitor.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 public class DataMappingProcessor {
-    public static enum MessageFormat {JSON, XML, TEXT, YAML}
-    public static String transformMessage(MessageFormat fromMessageFormat, MessageFormat toMessageFormat, String message)
-    {
+    public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT}
+    public static String transformMessage(String dataName, MessageFormat fromMessageFormat, MessageFormat toMessageFormat, String message) {
         String returnResult = null;
 
         PayloadMessageInterface payloadMessageInterface = null;
         switch ( fromMessageFormat )
         {
             case JSON: {
-                payloadMessageInterface = new JsonMessage( message );
+                try {
+                    payloadMessageInterface = new JsonMessage( dataName, message );
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             }
             case XML: {
-                payloadMessageInterface = new XMLMessage( message );
-                break;
-            }
-            case TEXT: {
-                payloadMessageInterface = new TextMessage( message );
+                try {
+                    payloadMessageInterface = new XMLMessage( dataName, message );
+                } catch (IOException | ParserConfigurationException | SAXException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             }
             case YAML: {
-                payloadMessageInterface = new YamlMessage( message );
+                try {
+                    payloadMessageInterface = new YamlMessage( dataName, message );
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            }
+            case PROP: {
+                try {
+                    payloadMessageInterface = new PropMessage( dataName, message );
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            }
+            case CSV: {
+                try {
+                    payloadMessageInterface = new CsvMessage( dataName, message );
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            }
+            case TEXT: {
+                payloadMessageInterface = new TextMessage( dataName, message );
                 break;
             }
             default:
@@ -53,20 +85,37 @@ public class DataMappingProcessor {
                 returnResult = payloadMessageInterface.accept( new ToXmlTransformerVisitor() );
                 break;
             }
-            case TEXT: {
-                returnResult = payloadMessageInterface.accept( new ToTextTransformerVisitor() );
-                break;
-            }
             case YAML: {
                 returnResult = payloadMessageInterface.accept( new ToYamlTransformerVisitor() );
+                break;
+            }
+            case PROP: {
+                returnResult = payloadMessageInterface.accept( new ToPropTransformerVisitor() );
+                break;
+            }
+            case CSV: {
+                returnResult = payloadMessageInterface.accept( new ToCsvTransformerVisitor() );
+                break;
+            }
+            case TEXT: {
+                returnResult = payloadMessageInterface.accept( new ToTextTransformerVisitor() );
                 break;
             }
             default:
                 return null;
         }
 
-        //If configured apply default common wrapper around the payload
-        payloadMessageInterface = new MessageWrapper( returnResult );
-        return payloadMessageInterface.accept( new ProcessingVisitor() );
+        //TODO:: If configured apply transformation mapper
+        //returnResult = payloadMessageInterface.accept( new ProcessingVisitor() );
+
+        //TODO:: If configured apply default common wrapper around the payload
+        /*try {
+            payloadMessageInterface = new MessageWrapper( returnResult );
+            returnResult = payloadMessageInterface.accept(new MessageWrapperVisitor() );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }*/
+
+        return returnResult;
     }
 }

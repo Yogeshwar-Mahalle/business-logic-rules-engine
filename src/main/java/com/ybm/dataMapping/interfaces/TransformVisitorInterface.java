@@ -8,4 +8,6 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 
 public interface TransformVisitorInterface {
     public void visit(PayloadMessageInterface payloadMessageInterface);
+
+    String getString();
 }

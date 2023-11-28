@@ -5,18 +5,23 @@
 package com.ybm.dataMapping.payloadtypes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
 
 import java.util.Map;
 
-public class MessageWrapper implements PayloadMessageInterface {
+public class PropMessage implements PayloadMessageInterface {
+
     private Map<String, Object> m_DataMap = null;
-    private String m_RootNodeName;
-    public MessageWrapper(String dataName, String payloadMessage) throws JsonProcessingException {
-        //ObjectMapper m_JsonMapper = new ObjectMapper();
-        //m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<Map<String, Object>>() {});
+    private final String m_RootNodeName;
+
+    public PropMessage(String dataName, String csvMessage) throws JsonProcessingException {
+        JavaPropsMapper m_PropMapper = new JavaPropsMapper();
+        m_DataMap = m_PropMapper.readValue(csvMessage, new TypeReference<Map<String, Object>>(){});
+        m_RootNodeName = dataName;
     }
 
     @Override

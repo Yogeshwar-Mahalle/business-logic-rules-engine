@@ -5,7 +5,6 @@
 package com.ybm.restAPIsController;
 
 import com.ybm.ruleEngine.RuleEngine;
-import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.*;
 import com.ybm.rulesBusinessSetupRepo.models.*;
 
@@ -18,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-public class RuleEngineRestController {
+public class BLRuleEngRestController {
 
     @Autowired
     private RuleEngine ruleEngine;
