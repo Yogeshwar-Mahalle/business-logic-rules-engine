@@ -16,7 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public class DataMappingProcessor {
-    public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT}
+    public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT, UNKNOWN}
     public static String transformMessage(String dataName, MessageFormat fromMessageFormat, MessageFormat toMessageFormat, String message) {
         String returnResult = null;
 
@@ -68,11 +68,12 @@ public class DataMappingProcessor {
                 break;
             }
             default:
-                return null;
+                return "Unknown message format to be transformed.";
         }
 
         //Processing Logic
         payloadMessageInterface.processor( new DataEnrichmentProcessing() );
+        //TODO:: If configured apply transformation mapper
         payloadMessageInterface.processor( new DataMapProcessing() );
 
         switch ( toMessageFormat )
@@ -102,19 +103,19 @@ public class DataMappingProcessor {
                 break;
             }
             default:
-                return null;
+                returnResult = payloadMessageInterface.accept( new DefaultTransformerVisitor() );
         }
 
-        //TODO:: If configured apply transformation mapper
-        //returnResult = payloadMessageInterface.accept( new ProcessingVisitor() );
 
-        //TODO:: If configured apply default common wrapper around the payload
-        /*try {
-            payloadMessageInterface = new MessageWrapper( returnResult );
+        try {
+
+            //TODO:: If configured apply default common wrapper around the payload
+            payloadMessageInterface = new MessageWrapper( dataName, returnResult );
             returnResult = payloadMessageInterface.accept(new MessageWrapperVisitor() );
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }*/
+        }
 
         return returnResult;
     }

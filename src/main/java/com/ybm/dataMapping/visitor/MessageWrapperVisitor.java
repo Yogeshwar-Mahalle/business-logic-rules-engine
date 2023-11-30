@@ -19,10 +19,11 @@ public class MessageWrapperVisitor implements TransformVisitorInterface {
 
     @Override
     public String getString() {
-        try {
-            return m_JsonMapper.writeValueAsString(m_PayloadMessageInterface.getDataMap());
-        } catch (JsonProcessingException e) {
+        //try {
+            //return m_JsonMapper.writeValueAsString(m_PayloadMessageInterface.getDataMap());
+            return (String) m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode());
+        /*} catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 }

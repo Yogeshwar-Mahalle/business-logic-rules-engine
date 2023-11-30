@@ -4,6 +4,7 @@
 
 package com.ybm.restAPIsController;
 
+import com.google.common.base.Enums;
 import com.ybm.dataMapping.DataMappingProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -25,10 +26,10 @@ public class TransformationRestController {
                                            @RequestHeader Map<String, String> headers,
                                            @RequestBody String messageString) {
 
-        DataMappingProcessor.MessageFormat fromMessageFormat =
-                DataMappingProcessor.MessageFormat.valueOf(fromFormat.toUpperCase());
-        DataMappingProcessor.MessageFormat toMessageFormat =
-                DataMappingProcessor.MessageFormat.valueOf(toFormat.toUpperCase());
+        DataMappingProcessor.MessageFormat fromMessageFormat = Enums.getIfPresent(DataMappingProcessor.MessageFormat.class, fromFormat.toUpperCase())
+                .or(DataMappingProcessor.MessageFormat.UNKNOWN);
+        DataMappingProcessor.MessageFormat toMessageFormat = Enums.getIfPresent(DataMappingProcessor.MessageFormat.class, toFormat.toUpperCase())
+                .or(DataMappingProcessor.MessageFormat.UNKNOWN);
 
         String result = DataMappingProcessor.transformMessage(dataName, fromMessageFormat, toMessageFormat, messageString);
 
@@ -63,7 +64,7 @@ public class TransformationRestController {
                 contentType = MediaType.TEXT_PLAIN;
             }
             default -> {
-                contentType = MediaType.ALL;
+                contentType = MediaType.TEXT_HTML;
             }
         }
         return contentType;
