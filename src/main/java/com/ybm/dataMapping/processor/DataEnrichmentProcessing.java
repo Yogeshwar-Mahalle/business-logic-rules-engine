@@ -37,14 +37,13 @@ public class DataEnrichmentProcessing implements ProcessingInterface {
     public void process(PayloadMessageInterface payloadMessageInterface) {
 
         Map<String, Object> dataMap = payloadMessageInterface.getDataMap();
-        Map<String, Object> interfaceDetails = (Map<String, Object>) dataMap.get(StandardFields.INTERFACE.label);
+        Map<String, Object> interfaceDetails =
+                dataMap != null ? (Map<String, Object>) dataMap.get(StandardFields.INTERFACE.label) : null;
 
-        if(interfaceDetails.get(StandardFields.INTERFACE_HTTP_METHOD.label) != null) {
-
+        if( interfaceDetails != null ) {
             String httpMethod = (String) interfaceDetails.get(StandardFields.INTERFACE_HTTP_METHOD.label);
             String contextPath = (String) interfaceDetails.get(StandardFields.INTERFACE_CONTEXT_PATH.label);
             contextPath = contextPath == null ? "" : contextPath;
-
 
             WebClient webClient = WebClient
                     .builder()
@@ -97,6 +96,7 @@ public class DataEnrichmentProcessing implements ProcessingInterface {
                 dataMap.put(StandardFields.INTERFACE_RESPONSE.label, response);
         }
 
-        dataMap.remove(StandardFields.INTERFACE.label);
+        if( dataMap != null )
+            dataMap.remove(StandardFields.INTERFACE.label);
     }
 }
