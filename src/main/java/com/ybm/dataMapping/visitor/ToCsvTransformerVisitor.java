@@ -8,12 +8,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
 import java.util.List;
 import java.util.Map;
 
-public class ToCsvTransformerVisitor implements TransformVisitorInterface {
+public class ToCsvTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final CsvMapper m_CsvMapper = new CsvMapper();
     @Override
@@ -22,7 +22,7 @@ public class ToCsvTransformerVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         try {
 
             List<Map<String, Object>> list = (List<Map<String, Object>>) m_PayloadMessageInterface.getDataMap()

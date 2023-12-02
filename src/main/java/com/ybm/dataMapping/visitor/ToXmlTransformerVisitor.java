@@ -8,9 +8,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-public class ToXmlTransformerVisitor implements TransformVisitorInterface {
+public class ToXmlTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final XmlMapper m_XmlMapper = new XmlMapper();
 
@@ -20,7 +20,7 @@ public class ToXmlTransformerVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         try {
             return m_XmlMapper
                     .configure( ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true )

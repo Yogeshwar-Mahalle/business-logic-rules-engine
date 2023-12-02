@@ -10,14 +10,26 @@ import com.ybm.dataMapping.payloadtypes.*;
 import com.ybm.dataMapping.processor.DataEnrichmentProcessing;
 import com.ybm.dataMapping.processor.DataMapProcessing;
 import com.ybm.dataMapping.visitor.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
+@Component
 public class DataMappingProcessor {
+    @Autowired
+    DataEnrichmentProcessing dataEnrichmentProcessing;
+
+    @Autowired
+    DataMapProcessing dataMapProcessing;
     public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT, UNKNOWN}
-    public static String transformMessage(String dataName, MessageFormat fromMessageFormat, MessageFormat toMessageFormat, String message) {
+    public String transformMessage(String dataName,
+                                          MessageFormat fromMessageFormat,
+                                          MessageFormat toMessageFormat,
+                                          String message,
+                                          String transformMapperName) {
         String returnResult = null;
 
         PayloadMessageInterface payloadMessageInterface = null;
@@ -67,45 +79,93 @@ public class DataMappingProcessor {
                 payloadMessageInterface = new TextMessage( dataName, message );
                 break;
             }
-            default:
-                return "Unknown message format to be transformed.";
+            default: {
+                try {
+                    payloadMessageInterface = new JsonErrMessage( dataName, message );
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
-        //Processing Logic
-        payloadMessageInterface.processor( new DataEnrichmentProcessing() );
-        //TODO:: If configured apply transformation mapper
-        payloadMessageInterface.processor( new DataMapProcessing() );
-
-        switch ( toMessageFormat )
-        {
-            case JSON: {
-                returnResult = payloadMessageInterface.accept( new ToJsonTransformerVisitor() );
-                break;
-            }
-            case XML: {
-                returnResult = payloadMessageInterface.accept( new ToXmlTransformerVisitor() );
-                break;
-            }
-            case YAML: {
-                returnResult = payloadMessageInterface.accept( new ToYamlTransformerVisitor() );
-                break;
-            }
-            case PROP: {
-                returnResult = payloadMessageInterface.accept( new ToPropTransformerVisitor() );
-                break;
-            }
-            case CSV: {
-                returnResult = payloadMessageInterface.accept( new ToCsvTransformerVisitor() );
-                break;
-            }
-            case TEXT: {
-                returnResult = payloadMessageInterface.accept( new ToTextTransformerVisitor() );
-                break;
-            }
-            default:
-                returnResult = payloadMessageInterface.accept( new DefaultTransformerVisitor() );
+        //Validate the input message format and store validation data in the map
+        if ( !payloadMessageInterface.validate() ) {
+            returnResult = payloadMessageInterface.accept(new DefaultTransformerVisitor());
         }
+        else {
 
+            //If configured apply transformation mapper
+            payloadMessageInterface.processor( dataMapProcessing.getInstance( transformMapperName ) );
+
+            //Fetch and enrich additional data by calling external interface if
+            payloadMessageInterface.processor( dataEnrichmentProcessing );
+
+            switch (toMessageFormat) {
+                case JSON: {
+                    returnResult = payloadMessageInterface.accept(new ToJsonTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new JsonMessage( dataName, returnResult );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+                case XML: {
+                    returnResult = payloadMessageInterface.accept(new ToXmlTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new XMLMessage( dataName, returnResult );
+                    } catch (IOException | ParserConfigurationException | SAXException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+                case YAML: {
+                    returnResult = payloadMessageInterface.accept(new ToYamlTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new YamlMessage( dataName, returnResult );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+                case PROP: {
+                    returnResult = payloadMessageInterface.accept(new ToPropTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new PropMessage( dataName, returnResult );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+                case CSV: {
+                    returnResult = payloadMessageInterface.accept(new ToCsvTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new CsvMessage( dataName, returnResult );
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+                case TEXT: {
+                    returnResult = payloadMessageInterface.accept(new ToTextTransformerVisitor());
+                    payloadMessageInterface = new TextMessage( dataName, returnResult );
+                    break;
+                }
+                default: {
+                    returnResult = payloadMessageInterface.accept(new DefaultTransformerVisitor());
+                    try {
+                        payloadMessageInterface = new JsonErrMessage( dataName, returnResult );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            //If configured apply validation on transformed message
+            if ( !payloadMessageInterface.validate() ) {
+                returnResult = payloadMessageInterface.accept(new DefaultTransformerVisitor());
+            }
+        }
 
         try {
 

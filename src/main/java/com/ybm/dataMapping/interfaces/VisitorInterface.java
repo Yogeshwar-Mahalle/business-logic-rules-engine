@@ -4,10 +4,8 @@
 
 package com.ybm.dataMapping.interfaces;
 
-import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-
-public interface TransformVisitorInterface {
+public interface VisitorInterface {
     public void visit(PayloadMessageInterface payloadMessageInterface);
 
-    String getString();
+    public String getResult();
 }

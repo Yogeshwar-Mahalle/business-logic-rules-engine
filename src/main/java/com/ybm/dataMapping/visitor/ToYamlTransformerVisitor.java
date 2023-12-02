@@ -7,9 +7,9 @@ package com.ybm.dataMapping.visitor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-public class ToYamlTransformerVisitor implements TransformVisitorInterface {
+public class ToYamlTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final YAMLMapper m_YamlMapper = new YAMLMapper();
     @Override
@@ -18,7 +18,7 @@ public class ToYamlTransformerVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         try {
             return m_YamlMapper.writeValueAsString(m_PayloadMessageInterface.getDataMap());
         } catch (JsonProcessingException e) {

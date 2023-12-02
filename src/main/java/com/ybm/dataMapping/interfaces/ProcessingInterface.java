@@ -5,5 +5,5 @@
 package com.ybm.dataMapping.interfaces;
 
 public interface ProcessingInterface {
-    public void process();
+    public void process(PayloadMessageInterface payloadMessageInterface);
 }

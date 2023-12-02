@@ -4,12 +4,11 @@
 
 package com.ybm.dataMapping.visitor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-public class DefaultTransformerVisitor implements TransformVisitorInterface {
+public class DefaultTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final ObjectMapper m_JsonMapper = new ObjectMapper();
     @Override
@@ -18,7 +17,7 @@ public class DefaultTransformerVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         //try {
             //return m_JsonMapper.writeValueAsString(m_PayloadMessageInterface.getDataMap());
             return "Transformation for expected message type is not supported.";

@@ -4,13 +4,14 @@
 
 package com.ybm.dataMapping.interfaces;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public interface PayloadMessageInterface {
-    public String accept(TransformVisitorInterface transformVisitorInterface);
+    public String accept(VisitorInterface visitorInterface);
     public void processor(ProcessingInterface processingInterface);
 
-    String getRootNode();
-    Map<String, Object> getDataMap();
+    public boolean validate();
+
+    public String getRootNode();
+    public Map<String, Object> getDataMap();
 }

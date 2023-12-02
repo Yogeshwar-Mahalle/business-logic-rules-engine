@@ -4,12 +4,11 @@
 
 package com.ybm.dataMapping.visitor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-public class MessageWrapperVisitor implements TransformVisitorInterface {
+public class MessageWrapperVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final ObjectMapper m_JsonMapper = new ObjectMapper();
     @Override
@@ -18,7 +17,7 @@ public class MessageWrapperVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         //try {
             //return m_JsonMapper.writeValueAsString(m_PayloadMessageInterface.getDataMap());
             return (String) m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode());

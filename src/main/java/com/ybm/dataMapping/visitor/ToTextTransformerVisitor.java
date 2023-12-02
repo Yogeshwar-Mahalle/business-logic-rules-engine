@@ -5,9 +5,9 @@
 package com.ybm.dataMapping.visitor;
 
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-public class ToTextTransformerVisitor implements TransformVisitorInterface {
+public class ToTextTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     @Override
     public void visit(PayloadMessageInterface payloadMessageInterface) {
@@ -15,7 +15,7 @@ public class ToTextTransformerVisitor implements TransformVisitorInterface {
     }
 
     @Override
-    public String getString() {
+    public String getResult() {
         return null;
     }
 }

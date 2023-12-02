@@ -13,7 +13,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
-import com.ybm.dataMapping.interfaces.TransformVisitorInterface;
+import com.ybm.dataMapping.interfaces.VisitorInterface;
 import lombok.Value;
 
 import org.xml.sax.SAXException;
@@ -23,17 +23,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class XMLMessage implements PayloadMessageInterface {
+    private final String m_OrgMessage;
     private Map<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public XMLMessage(String dataName, String xmlMessage) throws IOException, ParserConfigurationException, SAXException {
+        this.m_OrgMessage = xmlMessage;
         XmlMapper m_xmlMapper = new XmlMapper();
-        m_DataMap = new HashMap<>();
+        this.m_DataMap = new HashMap<>();
 
-        m_RootNodeName = m_xmlMapper.readValue(
+        this.m_RootNodeName = m_xmlMapper.readValue(
                 xmlMessage, XmlWrapper.class
         ).getXmlRootName();
-        m_DataMap.put(m_RootNodeName, m_xmlMapper.readValue(xmlMessage, new TypeReference<Map<String, Object>>(){}));
+        this.m_DataMap.put(this.m_RootNodeName, m_xmlMapper.readValue(xmlMessage, new TypeReference<Map<String, Object>>(){}));
     }
 
     @Value
@@ -50,14 +52,21 @@ public class XMLMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public String accept(TransformVisitorInterface transformVisitorInterface) {
-        transformVisitorInterface.visit(this);
-        return transformVisitorInterface.getString();
+    public String accept(VisitorInterface visitorInterface) {
+        visitorInterface.visit(this);
+        return visitorInterface.getResult();
     }
 
     @Override
     public void processor(ProcessingInterface processingInterface) {
+        processingInterface.process(this);
+    }
 
+    @Override
+    public boolean validate() {
+        //TODO :: Validate original message and enrich map for validation result
+
+        return true;
     }
 
     @Override
@@ -69,4 +78,5 @@ public class XMLMessage implements PayloadMessageInterface {
     public Map<String, Object> getDataMap() {
         return this.m_DataMap;
     }
+
 }

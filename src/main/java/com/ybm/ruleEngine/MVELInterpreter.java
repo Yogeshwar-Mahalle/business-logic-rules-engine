@@ -92,7 +92,7 @@ public class MVELInterpreter {
         try {
             compileMvelInterceptor( expression );
             evaluateMvelTemplate( expression, inputMap );
-            MVEL.eval(expression,inputMap);
+            MVEL.eval(expression, inputMap);
         }catch (Exception e){
             log.error("Can not parse Mvel Expression : {} Error: {}", expression, e.getMessage());
         }
