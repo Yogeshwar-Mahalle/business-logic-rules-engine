@@ -63,11 +63,12 @@ public class DSLParser {
                                 String[] strParameters = new String[keywordValueParams.length];
                                 int i = 0;
                                 for (String parameter : keywordValueParams) {
+                                    parameter = parameter.trim();
                                     String strKey = dslPatternUtil.getKeywordResolver(parameter);
-                                    Object objMap = inputObjects.get(strKey);
+                                    Object objMap = strKey == null ? null : inputObjects.get(strKey.trim());
 
                                     String strValue = dslPatternUtil.getKeywordValue(parameter);
-                                    String valueKeyName = dslPatternUtil.getKeywordValueName(strValue);
+                                    String valueKeyName = strValue == null ? null : dslPatternUtil.getKeywordValueName(strValue.trim());
 
                                     if (objMap != null) {
                                         Integer[] indices = dslPatternUtil.getKeywordValueIndices(strValue);
@@ -75,7 +76,15 @@ public class DSLParser {
                                             Object objValue = ((Map<?, ?>) objMap).get(valueKeyName);
                                             if(objValue == null)
                                             {
-                                                strParameters[i++] = parameter;
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                String jsonParameter = "";
+                                                try {
+                                                    jsonParameter = objectMapper.writeValueAsString(objMap);
+                                                } catch (JsonProcessingException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+
+                                                strParameters[i++] = jsonParameter;
                                             }
                                             else if( indices != null && (objValue instanceof ArrayList || objValue.getClass().isArray() ) )
                                             {
@@ -109,6 +118,14 @@ public class DSLParser {
                                             {
                                                 strParameters[i++] = objValue.toString();
                                             }
+                                        }
+                                        else if (objMap instanceof String)
+                                        {
+                                            strParameters[i++] = (String) objMap;
+                                        }
+                                        else
+                                        {
+                                            strParameters[i++] = objMap.toString();
                                         }
                                     } else {
                                         strParameters[i++] = parameter;

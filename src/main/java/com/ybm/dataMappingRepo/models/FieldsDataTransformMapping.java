@@ -19,6 +19,7 @@ import java.util.Date;
 public class FieldsDataTransformMapping implements Serializable {
     String transformMappingId;
     String transformMapperName;
+    String transformMapperVersion;
     String mappingExpressionScript;
     Date createTimeStamp;
     Date updateTimeStamp;

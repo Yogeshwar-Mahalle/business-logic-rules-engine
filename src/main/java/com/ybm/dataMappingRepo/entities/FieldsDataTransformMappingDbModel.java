@@ -31,6 +31,10 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
     @Column(name = "TRANSFORM_MAPPER_NAME", length = 50, nullable=false)
     private String transformMapperName;
 
+    @Id
+    @Column(name = "TRANSFORM_MAPPER_VERSION", length = 10, nullable=false)
+    private String transformMapperVersion;
+
     @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 5120)
     private String mappingExpressionScript;
 
@@ -44,6 +48,7 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
     static class IdClass implements Serializable {
         private String transformMappingId;
         private String transformMapperName;
+        private String transformMapperVersion;
     }
 
 }

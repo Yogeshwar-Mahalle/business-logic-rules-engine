@@ -19,7 +19,7 @@ public class Payload implements Serializable {
     protected ContentType contentType;
     protected Map<String, Object> dataMap = new HashMap<>(); ;
 
-    public Payload(String  strMessage, ContentType contentType, Map<String, Object> dataMap) {
+    public Payload(String strMessage, ContentType contentType, Map<String, Object> dataMap) {
         this.strMessage = strMessage;
         this.contentType = contentType;
         this.dataMap = dataMap;
@@ -28,11 +28,13 @@ public class Payload implements Serializable {
     public Payload(Payload payload) {
         this.strMessage = String.valueOf(payload.strMessage);
         this.contentType = payload.contentType;
-        this.dataMap.putAll(payload.dataMap);
+
+        if(payload.dataMap != null)
+            this.dataMap.putAll(payload.dataMap);
     }
 
-    public void setStrMessage(String strOrgMessage) {
-        this.strMessage = strOrgMessage;
+    public void setStrMessage(String strMessage) {
+        this.strMessage = strMessage;
     }
 
     public void setContentType(ContentType contentType) {
@@ -46,7 +48,7 @@ public class Payload implements Serializable {
     @Override
     public String toString() {
         return "Payload{" +
-                "strOrgMessage='" + strMessage + '\'' +
+                "strMessage='" + strMessage + '\'' +
                 ", contentType=" + contentType +
                 ", dataMap=" + dataMap +
                 '}';
@@ -56,7 +58,9 @@ public class Payload implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Payload payload)) return false;
-        return Objects.equals(strMessage, payload.strMessage) && contentType == payload.contentType && Objects.equals(dataMap, payload.dataMap);
+        return Objects.equals(strMessage, payload.strMessage) &&
+                contentType == payload.contentType &&
+                Objects.equals(dataMap, payload.dataMap);
     }
 
     @Override

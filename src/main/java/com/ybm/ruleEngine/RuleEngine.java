@@ -6,6 +6,7 @@ package com.ybm.ruleEngine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ybm.exchangeDataRepo.ContentType;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleFunctionTemplateService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
@@ -85,14 +86,18 @@ public class RuleEngine {
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> dataMap = dataExchangeObject.getOutDataObject().getPayload().getDataMap();
-        String strPayload = dataMap.toString();
-        try {
-            strPayload = objectMapper.writeValueAsString(dataMap);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        if(!dataMap.isEmpty()) {
+            String strPayload = dataMap.toString();
+            try {
+                strPayload = objectMapper.writeValueAsString(dataMap);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
 
-        dataExchangeObject.getOutDataObject().getPayload().setStrMessage(strPayload);
+            dataExchangeObject.getOutDataObject().getPayload().setContentType(ContentType.JSON);
+            dataExchangeObject.getOutDataObject().getPayload().setStrMessage(strPayload);
+            //dataExchangeObject.getOutDataObject().getHeaders().put("content-type", ContentType.JSON.label);
+        }
 
         return dataExchangeObject;
     }
@@ -319,6 +324,7 @@ public class RuleEngine {
      */
     public DataExchangeObject executeRule(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
+        System.out.println("Selected and applied rule : " + businessLogicRule.getRuleId());
         DataExchangeObject outputResult = inputData.copy();
 
         Map<String, Object> dataMap = new HashMap<>();

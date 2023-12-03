@@ -23,19 +23,29 @@ public class DataMapProcessing implements ProcessingInterface {
     @Autowired
     private FieldsDataTransformMappingService fieldsDataTransformMappingService;
 
-    private String m_TransformMapperName;
+    private String m_TransformMapperId;
 
-    public DataMapProcessing getInstance(String transformMapperName) {
-        this.m_TransformMapperName = transformMapperName;
+    private static Map<String, FieldsDataTransformMapping> transformationMappingScriptMap = new HashMap<>();
+
+    public DataMapProcessing getInstance(String transformMapperId) {
+        this.m_TransformMapperId = transformMapperId;
         return this;
     }
 
     @Override
     public void process(PayloadMessageInterface payloadMessageInterface) {
-        FieldsDataTransformMapping fieldsDataTransformMapping =
-                fieldsDataTransformMappingService.getFieldsDataTransformMappingByName(this.m_TransformMapperName);
+
+        FieldsDataTransformMapping fieldsDataTransformMapping;// = transformationMappingScriptMap.get(this.m_TransformMapperId);
+        /*if ( fieldsDataTransformMapping == null )
+        {*/
+            fieldsDataTransformMapping =
+                    fieldsDataTransformMappingService.getFieldsDataTransformMappingById(this.m_TransformMapperId);
+            /*if( fieldsDataTransformMapping != null )
+                transformationMappingScriptMap.put(this.m_TransformMapperId, fieldsDataTransformMapping);
+        }*/
 
         if( fieldsDataTransformMapping != null ) {
+
             Map<String, Object> outdataMap = new HashMap<>();
             Map<String, Object> interfaceDetails = getInterfaceDataMap();
 

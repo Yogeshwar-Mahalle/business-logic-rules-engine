@@ -36,16 +36,17 @@ public class FieldsDataTransformMappingService {
         if( transformMappingId == null )
             return null;
 
-        Optional<FieldsDataTransformMappingDbModel> fieldsDataMappingDbModel = fieldsDataTransformMappingRepository.findById(transformMappingId);
+        Optional<FieldsDataTransformMappingDbModel> fieldsDataMappingDbModel = fieldsDataTransformMappingRepository.findByTransformMappingId(transformMappingId);
 
         return fieldsDataMappingDbModel.map(this::mapFieldsDataTransformMappingFromDbModel).orElse(null);
     }
 
-    public FieldsDataTransformMapping getFieldsDataTransformMappingByName(String transformMapperName) {
+    public FieldsDataTransformMapping getFieldsDataTransformMappingByNameAndVersion(String transformMapperName, String transformMapperVersion) {
         if( transformMapperName == null )
             return null;
 
-        Optional<FieldsDataTransformMappingDbModel> fieldsDataMappingDbModel = fieldsDataTransformMappingRepository.findByTransformMapperName(transformMapperName);
+        Optional<FieldsDataTransformMappingDbModel> fieldsDataMappingDbModel =
+                fieldsDataTransformMappingRepository.findByTransformMapperNameAndTransformMapperVersion(transformMapperName, transformMapperVersion);
 
         return fieldsDataMappingDbModel.map(this::mapFieldsDataTransformMappingFromDbModel).orElse(null);
     }
@@ -98,6 +99,7 @@ public class FieldsDataTransformMappingService {
         return FieldsDataTransformMapping.builder()
                 .transformMappingId(fieldsDataTransformMappingDbModel.getTransformMappingId())
                 .transformMapperName(fieldsDataTransformMappingDbModel.getTransformMapperName())
+                .transformMapperVersion(fieldsDataTransformMappingDbModel.getTransformMapperVersion())
                 .mappingExpressionScript(fieldsDataTransformMappingDbModel.getMappingExpressionScript())
                 .createTimeStamp(fieldsDataTransformMappingDbModel.getCreateTimeStamp())
                 .updateTimeStamp(fieldsDataTransformMappingDbModel.getUpdateTimeStamp())
@@ -109,9 +111,10 @@ public class FieldsDataTransformMappingService {
 
         return FieldsDataTransformMappingDbModel.builder()
                 .transformMappingId( fieldsDataTransformMapping.getTransformMappingId() == null ?
-                        fieldsDataTransformMapping.getTransformMapperName() + "~" + new Date().getTime() :
+                        fieldsDataTransformMapping.getTransformMapperName() + "." + fieldsDataTransformMapping.getTransformMapperVersion() :
                         fieldsDataTransformMapping.getTransformMappingId() )
                 .transformMapperName(fieldsDataTransformMapping.getTransformMapperName())
+                .transformMapperVersion(fieldsDataTransformMapping.getTransformMapperVersion())
                 .mappingExpressionScript(fieldsDataTransformMapping.getMappingExpressionScript())
                 .createTimeStamp(fieldsDataTransformMapping.getCreateTimeStamp() == null ? new Date() : fieldsDataTransformMapping.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

@@ -152,7 +152,7 @@ public class BusinessRulesService {
         if( ruleId == null )
             return null;
 
-        Optional<BLRuleDbModel> ruleDbModel = blRulesRepository.findById(ruleId);
+        Optional<BLRuleDbModel> ruleDbModel = blRulesRepository.findByRuleId(ruleId);
         BusinessLogicRule businessLogicRule =
                 ruleDbModel.map(this::mapRuleFromDbModel).orElse(null);
 

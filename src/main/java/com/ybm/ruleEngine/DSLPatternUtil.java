@@ -18,7 +18,12 @@ import java.util.regex.Pattern;
 @Service
 public class DSLPatternUtil {
     //${dsr.keyword(parameter1, ...)} or ${dsr.keyword[index]} or ${dsr.keyword} or ${dsr}
-    private static final String expr = "\\$\\{((\\w+\\.\\w+\\(([.,_a-zA-Z0-9\\s\\[\\]]+)\\)([0-9\\s\\[\\]]*))|(\\w+\\.\\w+\\[([0-9\\s]+)\\])|(\\w+\\.\\w+)|(\\w+))\\}";
+    private static final String expr = "\\$\\{(" +
+            "(\\w+\\.\\w+([-_a-zA-Z0-9]+)\\(([\"-.,_a-zA-Z0-9\\s\\[\\]]+)\\)([0-9\\s\\[\\]]*))|" +
+            "(\\w+\\.\\w+([-_a-zA-Z0-9]+)\\[([0-9\\s]+)\\])|" +
+            "(\\w+\\.\\w+([-_a-zA-Z0-9]+))|" +
+            "(\\w+)" +
+            ")\\}";
     private static final Pattern DSL_PATTERN = Pattern.compile(expr);
     private static final String DOT = ".";
     private static final String COMMA = ",";

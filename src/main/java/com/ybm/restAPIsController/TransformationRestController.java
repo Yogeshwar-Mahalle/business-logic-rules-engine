@@ -41,10 +41,11 @@ public class TransformationRestController {
         return ResponseEntity.ok(fieldsDataTransformMapping);
     }
 
-    @GetMapping(value = "/get-transform-mapper/{transformMapperName}")
-    public ResponseEntity<?> getTransformMapperByName(@PathVariable("transformMapperName") String transformMapperName) {
+    @GetMapping(value = "/get-transform-mapper/{transformMapperName}/{transformMapperVersion}")
+    public ResponseEntity<?> getTransformMapperByName(@PathVariable("transformMapperName") String transformMapperName,
+                                                      @PathVariable("transformMapperVersion") String transformMapperVersion) {
         FieldsDataTransformMapping fieldsDataTransformMapping =
-                fieldsDataTransformMappingService.getFieldsDataTransformMappingByName(transformMapperName);
+                fieldsDataTransformMappingService.getFieldsDataTransformMappingByNameAndVersion(transformMapperName, transformMapperVersion);
         return ResponseEntity.ok(fieldsDataTransformMapping);
     }
 

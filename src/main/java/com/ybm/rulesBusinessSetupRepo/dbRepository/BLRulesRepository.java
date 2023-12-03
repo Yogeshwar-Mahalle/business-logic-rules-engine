@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BLRulesRepository extends JpaRepository<BLRuleDbModel, String> {
@@ -16,4 +17,5 @@ public interface BLRulesRepository extends JpaRepository<BLRuleDbModel, String> 
     List<BLRuleDbModel> findByLinkedEntityAndRuleType(String linkedEntity, String ruleType);
     List<BLRuleDbModel> findByLinkedEntity(String linkedEntity);
 
+    Optional<BLRuleDbModel> findByRuleId(String ruleId);
 }

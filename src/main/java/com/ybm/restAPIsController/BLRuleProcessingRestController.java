@@ -73,20 +73,21 @@ public class BLRuleProcessingRestController {
     }
 
     @PostMapping(value = "/wrkflow")
-    public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
+    public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody String strPayload) {
+        String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         UUID uuid = UUID.randomUUID();
         Map<String, Object> properties = new HashMap<>();
         Map<String, Object> extData = new HashMap<>();
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        /*ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
         try {
             strPayload = objectMapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
-        Payload payload = new Payload(strPayload, ContentType.JSON, map );
+        Payload payload = new Payload(strPayload, ContentType.setLabel(strOrgContentType), null );
         DataObject dataObject = new DataObject( headers, payload);
         DataExchangeObject dataExchangeObject = new DataExchangeObject(
                 uuid.toString(),
