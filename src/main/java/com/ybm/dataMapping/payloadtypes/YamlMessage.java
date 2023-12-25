@@ -11,17 +11,17 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class YamlMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public YamlMessage(String dataName, String yamlMessage) throws JsonProcessingException {
         this.m_OrgMessage = yamlMessage;
         YAMLMapper m_YamlMapper = new YAMLMapper();
-        this.m_DataMap = m_YamlMapper.readValue(yamlMessage, new TypeReference<Map<String, Object>>(){});
+        this.m_DataMap = m_YamlMapper.readValue(yamlMessage, new TypeReference<LinkedHashMap<String, Object>>(){});
         this.m_RootNodeName = dataName;
     }
 
@@ -49,7 +49,7 @@ public class YamlMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

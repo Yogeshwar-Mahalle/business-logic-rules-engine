@@ -8,16 +8,16 @@ import com.ybm.exchangeDataRepo.ContentType;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
 
 @Getter
 public class Payload implements Serializable {
     protected String strMessage;
     protected ContentType contentType;
-    protected Map<String, Object> dataMap = new HashMap<>(); ;
+    protected Map<String, Object> dataMap = new LinkedHashMap<>(); ;
 
     public Payload(String strMessage, ContentType contentType, Map<String, Object> dataMap) {
         this.strMessage = strMessage;
@@ -41,7 +41,7 @@ public class Payload implements Serializable {
         this.contentType = contentType;
     }
 
-    public void setDataMap(Map<String, Object> mapPayload) {
+    public void setDataMap(LinkedHashMap<String, Object> mapPayload) {
         this.dataMap = mapPayload;
     }
 

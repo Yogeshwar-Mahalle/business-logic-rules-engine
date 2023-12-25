@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -135,7 +135,7 @@ public class APIDSLResolver implements DSLResolver {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         String urlQuery;
         String fullContextPath = "/" + contextPath;
         if ( parameters.length > 1 && parameters[1].contains("?"))
@@ -155,7 +155,7 @@ public class APIDSLResolver implements DSLResolver {
                 {
                     ObjectMapper jsonMapper = new ObjectMapper();
                     try {
-                        headers = jsonMapper.readValue(parameter, new TypeReference<Map<String, String>>() {});
+                        headers = jsonMapper.readValue(parameter, new TypeReference<LinkedHashMap<String, String>>() {});
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }

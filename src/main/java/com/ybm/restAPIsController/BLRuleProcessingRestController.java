@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,10 +37,10 @@ public class BLRuleProcessingRestController {
     private ExchangeDataService exchangeDataService;
 
     @PostMapping(value = "/edo")
-    public ResponseEntity<?> postPaymentDetails(@RequestHeader Map<String, String> headers, @RequestBody Map map) {
+    public ResponseEntity<?> postPaymentDetails(@RequestHeader LinkedHashMap<String, String> headers, @RequestBody LinkedHashMap map) {
         UUID uuid = UUID.randomUUID();
-        Map<String, Object> properties = new HashMap<>();
-        Map<String, Object> extData = new HashMap<>();
+        LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> extData = new LinkedHashMap<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
@@ -76,8 +76,8 @@ public class BLRuleProcessingRestController {
     public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody String strPayload) {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         UUID uuid = UUID.randomUUID();
-        Map<String, Object> properties = new HashMap<>();
-        Map<String, Object> extData = new HashMap<>();
+        LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> extData = new LinkedHashMap<>();
 
         /*ObjectMapper objectMapper = new ObjectMapper();
         String strPayload = map.toString();
@@ -128,11 +128,14 @@ public class BLRuleProcessingRestController {
         sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
         String entity = headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY");
         entity = entity == null ? "BLRuleEngine" : entity;
+        String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");
+        messageId = dataExchangeObject.getProperties().get("messageId") != null ? (String) dataExchangeObject.getProperties().get("messageId") : messageId;
 
         ExchangeData exchangeData = new ExchangeData();
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
         exchangeData.setLinkedEntity(entity);
         exchangeData.setSource(sourceSys);
+        exchangeData.setMessageId(messageId);
         exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@-@@@@@@@@@@-@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
         exchangeData.setOriginalContentType(ContentType.setLabel(strOrgContentType));
         exchangeData.setOriginalData(dataExchangeObject.getInDataObject().getPayload().getStrMessage());

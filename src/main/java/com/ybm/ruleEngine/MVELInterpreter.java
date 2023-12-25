@@ -16,21 +16,21 @@ import org.mvel2.templates.TemplateRuntime;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class MVELInterpreter {
 
-    static private Map<String, CompiledTemplate> preCompiledTemplateMap = new HashMap<>();
+    static private Map<String, CompiledTemplate> preCompiledTemplateMap = new LinkedHashMap<>();
 
     public boolean isPreCompiledFuncTemplateExist( String templateID )
     {
         return preCompiledTemplateMap.containsKey( templateID );
     }
 
-    public String evaluateMvelTemplate( String template, Map<String, Object> inputMap ){
+    public String evaluateMvelTemplate( String template, LinkedHashMap<String, Object> inputMap ){
         if ( template == null)
             return null;
 
@@ -56,7 +56,7 @@ public class MVELInterpreter {
         }
     }
 
-    public String execPreCompiledMvelTemplate( String templateId, Map<String, Object> inputMap ){
+    public String execPreCompiledMvelTemplate( String templateId, LinkedHashMap<String, Object> inputMap ){
         if ( templateId == null )
             return null;
 
@@ -71,13 +71,16 @@ public class MVELInterpreter {
         return null;
     }
 
-    public boolean evaluateMvelExpression( String expression, Map<String, Object> inputMap ){
+    public boolean evaluateMvelExpression( String expression, LinkedHashMap<String, Object> inputMap ){
         if ( expression == null )
             return false;
 
         try {
-            compileMvelInterceptor( expression );
+            //TODO:: Need to cache it before uncommenting
+            //compileMvelInterceptor( expression );
+
             evaluateMvelTemplate( expression, inputMap );
+
             return MVEL.evalToBoolean(expression,inputMap);
         }catch (Exception e){
             log.error("Can not parse Mvel Expression : {} Error: {}", expression, e.getMessage());
@@ -85,13 +88,16 @@ public class MVELInterpreter {
         return false;
     }
 
-    public void applyMvelExpressionAction( String expression, Map<String, Object> inputMap ){
+    public void applyMvelExpressionAction( String expression, LinkedHashMap<String, Object> inputMap ){
         if ( expression == null )
             return;
 
         try {
-            compileMvelInterceptor( expression );
+            //TODO:: Need to cache it before uncommenting
+            //compileMvelInterceptor( expression );
+
             evaluateMvelTemplate( expression, inputMap );
+
             MVEL.eval(expression, inputMap);
         }catch (Exception e){
             log.error("Can not parse Mvel Expression : {} Error: {}", expression, e.getMessage());
@@ -107,7 +113,7 @@ public class MVELInterpreter {
             ParserContext context = new ParserContext();
             //context.setStrictTypeEnforcement(true);
 
-            Map<String, Interceptor> interceptors = new HashMap<String, Interceptor>();
+            Map<String, Interceptor> interceptors = new LinkedHashMap<String, Interceptor>();
 
             // Create a simple interceptor.
             Interceptor defaultInterceptor = new Interceptor() {

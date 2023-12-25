@@ -19,23 +19,22 @@ import lombok.Value;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class XMLMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public XMLMessage(String dataName, String xmlMessage) throws IOException, ParserConfigurationException, SAXException {
         this.m_OrgMessage = xmlMessage;
         XmlMapper m_xmlMapper = new XmlMapper();
-        this.m_DataMap = new HashMap<>();
+        this.m_DataMap = new LinkedHashMap<>();
 
         this.m_RootNodeName = m_xmlMapper.readValue(
                 xmlMessage, XmlWrapper.class
         ).getXmlRootName();
-        this.m_DataMap.put(this.m_RootNodeName, m_xmlMapper.readValue(xmlMessage, new TypeReference<Map<String, Object>>(){}));
+        this.m_DataMap.put(this.m_RootNodeName, m_xmlMapper.readValue(xmlMessage, new TypeReference<LinkedHashMap<String, Object>>(){ }));
     }
 
     @Value
@@ -75,7 +74,7 @@ public class XMLMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

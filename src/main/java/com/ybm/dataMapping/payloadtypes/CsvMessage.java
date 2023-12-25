@@ -12,25 +12,24 @@ import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CsvMessage implements PayloadMessageInterface {
 
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public CsvMessage(String dataName, String csvMessage) throws IOException {
         this.m_OrgMessage = csvMessage;
-        this.m_DataMap = new HashMap<>();
+        this.m_DataMap = new LinkedHashMap<>();
         CsvSchema csvSchema = CsvSchema.emptySchema().withHeader();
         CsvMapper m_CsvMapper = new CsvMapper();
-        MappingIterator<Map<String, Object>> mappingIterator =
-                m_CsvMapper.readerFor(Map.class).with(csvSchema).readValues(csvMessage);
+        MappingIterator<LinkedHashMap<String, Object>> mappingIterator =
+                m_CsvMapper.readerFor(LinkedHashMap.class).with(csvSchema).readValues(csvMessage);
 
-        List<Map<String, Object>> listOfMap = mappingIterator.readAll();
+        List<LinkedHashMap<String, Object>> listOfMap = mappingIterator.readAll();
         listOfMap.forEach(
                 map -> {
                     map.forEach((key, value) -> {
@@ -71,7 +70,7 @@ public class CsvMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

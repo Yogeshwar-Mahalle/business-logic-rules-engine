@@ -10,8 +10,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ToCsvTransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
@@ -25,12 +25,15 @@ public class ToCsvTransformerVisitor implements VisitorInterface {
     public String getResult() {
         try {
 
-            List<Map<String, Object>> list = (List<Map<String, Object>>) m_PayloadMessageInterface.getDataMap()
+            /*List<LinkedHashMap<String, Object>> list = (List<LinkedHashMap<String, Object>>) m_PayloadMessageInterface.getDataMap()
+                    .get( m_PayloadMessageInterface.getRootNode() );*/
+            LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) m_PayloadMessageInterface.getDataMap()
                     .get( m_PayloadMessageInterface.getRootNode() );
 
             CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
 
-            list.get(0).keySet().forEach(csvSchemaBuilder::addColumn);
+            //list.get(0).keySet().forEach(csvSchemaBuilder::addColumn);
+            map.keySet().forEach(csvSchemaBuilder::addColumn);
             CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
 
             /*if (map != null && !map.isEmpty()) {
@@ -40,9 +43,12 @@ public class ToCsvTransformerVisitor implements VisitorInterface {
                 csvSchema = csvSchemaBuilder.build().withLineSeparator(System.lineSeparator()).withHeader();
             }*/
 
-            return m_CsvMapper.writerFor(List.class)
+            /*return m_CsvMapper.writerFor(List.class)
                     .with(csvSchema)
-                    .writeValueAsString(list);
+                    .writeValueAsString(list);*/
+            return m_CsvMapper.writerFor(LinkedHashMap.class)
+                    .with(csvSchema)
+                    .writeValueAsString(map);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

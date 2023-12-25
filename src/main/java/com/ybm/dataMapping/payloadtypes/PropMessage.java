@@ -11,17 +11,17 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class PropMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public PropMessage(String dataName, String csvMessage) throws JsonProcessingException {
         this.m_OrgMessage = csvMessage;
         JavaPropsMapper m_PropMapper = new JavaPropsMapper();
-        this.m_DataMap = m_PropMapper.readValue(csvMessage, new TypeReference<Map<String, Object>>(){});
+        this.m_DataMap = m_PropMapper.readValue(csvMessage, new TypeReference<LinkedHashMap<String, Object>>(){});
         this.m_RootNodeName = dataName;
     }
 
@@ -49,7 +49,7 @@ public class PropMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

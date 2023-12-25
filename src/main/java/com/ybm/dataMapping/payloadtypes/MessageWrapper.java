@@ -9,20 +9,19 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class MessageWrapper implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private String m_RootNodeName;
 
     public MessageWrapper(String dataName, String payloadMessage) throws JsonProcessingException {
         this.m_OrgMessage = payloadMessage;
-        this.m_DataMap = new HashMap<>();
+        this.m_DataMap = new LinkedHashMap<>();
         this.m_RootNodeName = dataName;
         //ObjectMapper m_JsonMapper = new ObjectMapper();
-        //m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<Map<String, Object>>() {});
+        //m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<LinkedHashMap<String, Object>>() {});
         this.m_DataMap.put(dataName, payloadMessage);
     }
 
@@ -50,7 +49,7 @@ public class MessageWrapper implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

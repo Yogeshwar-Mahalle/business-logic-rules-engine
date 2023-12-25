@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
@@ -36,9 +36,9 @@ public class DataEnrichmentProcessing implements ProcessingInterface {
     @Override
     public void process(PayloadMessageInterface payloadMessageInterface) {
 
-        Map<String, Object> dataMap = payloadMessageInterface.getDataMap();
-        Map<String, Object> interfaceDetails =
-                dataMap != null ? (Map<String, Object>) dataMap.get(StandardFields.INTERFACE.label) : null;
+        LinkedHashMap<String, Object> dataMap = payloadMessageInterface.getDataMap();
+        LinkedHashMap<String, Object> interfaceDetails =
+                dataMap != null ? (LinkedHashMap<String, Object>) dataMap.get(StandardFields.INTERFACE.label) : null;
 
         if( interfaceDetails != null ) {
             String httpMethod = (String) interfaceDetails.get(StandardFields.INTERFACE_HTTP_METHOD.label);

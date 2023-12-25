@@ -8,11 +8,11 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class TextMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private String m_RootNodeName;
 
     public TextMessage(String dataName, String textMessage) {
@@ -45,7 +45,7 @@ public class TextMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

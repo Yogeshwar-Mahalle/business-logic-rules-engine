@@ -11,18 +11,17 @@ import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class JsonMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
-    private Map<String, Object> m_DataMap = null;
+    private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;
 
     public JsonMessage(String dataName, String jsonMessage) throws JsonProcessingException {
         this.m_OrgMessage = jsonMessage;
         ObjectMapper m_JsonMapper = new ObjectMapper();
-        this.m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<Map<String, Object>>() {});
+        this.m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<LinkedHashMap<String, Object>>() {});
         this.m_RootNodeName = dataName;
     }
 
@@ -51,7 +50,7 @@ public class JsonMessage implements PayloadMessageInterface {
     }
 
     @Override
-    public Map<String, Object> getDataMap() {
+    public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
     }
 

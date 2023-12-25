@@ -158,7 +158,7 @@ public class RuleEngine {
      * @param templateId
      * @param dataMap
      */
-    public String evaluateTemplateFunction(String templateId, Map<String, Object> dataMap) {
+    public String evaluateTemplateFunction(String templateId, LinkedHashMap<String, Object> dataMap) {
 
         BusinessLogicRuleFunctionTemplate businessLogicRuleFunctionTemplate = businessRuleFunctionTemplateService.getRuleFunction(templateId);
         if( businessLogicRuleFunctionTemplate != null ) {
@@ -191,7 +191,7 @@ public class RuleEngine {
      * @param templateName
      * @param inputData
      */
-    public String execPreCompiledTemplateFunction(String templateId, Map<String, Object> dataMap) {
+    public String execPreCompiledTemplateFunction(String templateId, LinkedHashMap<String, Object> dataMap) {
         if ( templateId == null )
             return null;
 
@@ -276,7 +276,7 @@ public class RuleEngine {
      */
     public boolean evaluateCondition(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
-        Map<String, Object> dataMap = new HashMap<>();
+        LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());
@@ -327,7 +327,7 @@ public class RuleEngine {
         System.out.println("Selected and applied rule : " + businessLogicRule.getRuleId());
         DataExchangeObject outputResult = inputData.copy();
 
-        Map<String, Object> dataMap = new HashMap<>();
+        LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());

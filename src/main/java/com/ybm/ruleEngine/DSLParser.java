@@ -24,20 +24,20 @@ public class DSLParser {
     @Autowired
     private DSLPatternUtil dslPatternUtil;
 
-    public String resolveDomainSpecificKeywords(String expression, Map<String, Object> inputObjects){
+    public String resolveDomainSpecificKeywords(String expression, LinkedHashMap<String, Object> inputObjects){
         if( expression == null || inputObjects == null)
             return expression;
 
-        Map<String, Object> dslKeywordToResolverValueMap = executeDSLResolver(expression, inputObjects);
+        LinkedHashMap<String, Object> dslKeywordToResolverValueMap = executeDSLResolver(expression, inputObjects);
         return replaceKeywordsWithValue(expression, dslKeywordToResolverValueMap);
     }
 
-    private Map<String, Object> executeDSLResolver(String expression, Map<String, Object> inputObjects) {
+    private LinkedHashMap<String, Object> executeDSLResolver(String expression, LinkedHashMap<String, Object> inputObjects) {
         if( expression == null )
             return null;
 
         List<String> listOfDslKeyword = dslPatternUtil.getListOfDslKeywords(expression);
-        Map<String, Object> dslKeywordToResolverValueMap = new HashMap<>();
+        LinkedHashMap<String, Object> dslKeywordToResolverValueMap = new LinkedHashMap<>();
         listOfDslKeyword
                 .forEach(
                         dslKeyword -> {
@@ -158,7 +158,7 @@ public class DSLParser {
         return dslKeywordToResolverValueMap;
     }
 
-    private String replaceKeywordsWithValue(String expression, Map<String, Object> dslKeywordToResolverValueMap){
+    private String replaceKeywordsWithValue(String expression, LinkedHashMap<String, Object> dslKeywordToResolverValueMap){
         if( expression == null || dslKeywordToResolverValueMap == null)
             return expression;
 

@@ -35,7 +35,7 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
     @Column(name = "TRANSFORM_MAPPER_VERSION", length = 10, nullable=false)
     private String transformMapperVersion;
 
-    @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 5120)
+    @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 20480)
     private String mappingExpressionScript;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)

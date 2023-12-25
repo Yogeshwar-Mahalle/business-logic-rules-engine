@@ -14,8 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -74,7 +74,7 @@ public class TransformationRestController {
     public ResponseEntity<?> messageSubmit(@PathVariable(value = "dataName", required = true) String dataName,
                                            @PathVariable(value = "fromFormat", required = true) String fromFormat,
                                            @PathVariable(value = "toFormat", required = true) String toFormat,
-                                           @RequestHeader Map<String, String> headers,
+                                           @RequestHeader LinkedHashMap<String, String> headers,
                                            @RequestBody String messageString) {
 
         DataMappingProcessor.MessageFormat fromMessageFormat = Enums.getIfPresent(DataMappingProcessor.MessageFormat.class, fromFormat.toUpperCase())

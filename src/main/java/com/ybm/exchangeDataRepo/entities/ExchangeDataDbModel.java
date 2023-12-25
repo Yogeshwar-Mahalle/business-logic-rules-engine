@@ -35,6 +35,9 @@ public class ExchangeDataDbModel implements Serializable {
     @Column(name = "TARGET", length = 25)
     private String target;
 
+    @Column(name = "MESSAGE_ID", length = 128)
+    private String messageId;
+
     @Column(name = "WORKFLOW_MONITOR", length = 512, nullable=false)
     private String workflowMonitor;
 

@@ -22,6 +22,7 @@ public class ExchangeData implements Serializable {
     String linkedEntity;
     String source;
     String target;
+    String messageId;
     String workflowMonitor;
     ContentType originalContentType;
     String originalData;

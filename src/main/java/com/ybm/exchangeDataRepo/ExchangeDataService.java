@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ExchangeDataService {
@@ -25,7 +27,22 @@ public class ExchangeDataService {
         Optional<ExchangeDataDbModel> exchangeDataDbModel = exchangeDataRepository.findById(uniqueExchangeID);
 
         return exchangeDataDbModel.map(this::mapExchangeDataFromDbModel).orElse(null);
+    }
 
+    public List<ExchangeData> getExchangeDataByMessageId(String entity, String source, String messageId) {
+        List<ExchangeData> exchangeDataDbModel;
+
+        exchangeDataDbModel = exchangeDataRepository.findByLinkedEntityAndSourceAndMessageId(entity, source, messageId).stream()
+                .map(
+                        this::mapExchangeDataFromDbModel
+                )
+                .collect(Collectors.toList());
+
+        return exchangeDataDbModel;
+    }
+
+    public int getExchangeDataCountByMessageId(String entity, String source, String messageId) {
+        return exchangeDataRepository.countByLinkedEntityAndSourceAndMessageId(entity, source, messageId);
     }
 
     @Transactional
@@ -49,6 +66,7 @@ public class ExchangeDataService {
                 .linkedEntity(exchangeDataDbModel.getLinkedEntity())
                 .source(exchangeDataDbModel.getSource())
                 .target(exchangeDataDbModel.getTarget())
+                .messageId(exchangeDataDbModel.getMessageId())
                 .workflowMonitor(exchangeDataDbModel.getWorkflowMonitor())
                 .originalContentType(originalContentType)
                 .originalData(exchangeDataDbModel.getOriginalData())
@@ -71,6 +89,7 @@ public class ExchangeDataService {
                 .linkedEntity(exchangeData.getLinkedEntity())
                 .source(exchangeData.getSource())
                 .target(exchangeData.getTarget())
+                .messageId(exchangeData.getMessageId())
                 .workflowMonitor(exchangeData.getWorkflowMonitor())
                 .originalContentType(exchangeData.getOriginalContentType().name())
                 .originalData(exchangeData.getOriginalData())

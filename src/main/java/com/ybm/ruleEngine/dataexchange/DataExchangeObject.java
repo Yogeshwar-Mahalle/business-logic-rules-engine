@@ -19,7 +19,11 @@ public class DataExchangeObject implements Serializable {
     private Map<String, Object> properties;
     private Map<String, Object> extData;
 
-    public DataExchangeObject(String uniqueExchangeId, Map<String, Object> properties, DataObject inDataObject, DataObject outDataObject, Map<String, Object> extData ) {
+    public DataExchangeObject(String uniqueExchangeId,
+                              Map<String, Object> properties,
+                              DataObject inDataObject,
+                              DataObject outDataObject,
+                              Map<String, Object> extData ) {
         this.uniqueExchangeId = uniqueExchangeId;
         this.properties = properties;
         this.inDataObject = inDataObject.copy();

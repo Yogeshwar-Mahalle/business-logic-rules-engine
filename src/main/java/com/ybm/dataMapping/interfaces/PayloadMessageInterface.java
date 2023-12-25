@@ -4,7 +4,7 @@
 
 package com.ybm.dataMapping.interfaces;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public interface PayloadMessageInterface {
     public String accept(VisitorInterface visitorInterface);
@@ -13,5 +13,5 @@ public interface PayloadMessageInterface {
     public boolean validate();
 
     public String getRootNode();
-    public Map<String, Object> getDataMap();
+    public LinkedHashMap<String, Object> getDataMap();
 }
