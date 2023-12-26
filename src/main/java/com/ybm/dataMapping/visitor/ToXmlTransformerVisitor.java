@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import com.ybm.dataMapping.MapValueNode;
+import com.ybm.dataMapping.MapXMLSerializer;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 
@@ -36,7 +36,7 @@ public class ToXmlTransformerVisitor implements VisitorInterface {
         try {
 
             SimpleModule module = new SimpleModule();
-            module.addSerializer(new MapValueNode());
+            module.addSerializer(new MapXMLSerializer());
             m_XmlMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             m_XmlMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
             m_XmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);

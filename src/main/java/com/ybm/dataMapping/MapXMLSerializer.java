@@ -18,15 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Getter
-public class MapValueNode extends JsonSerializer<LinkedHashMap<String, Object>> {
+public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Object>> {
     private final String NAMESPACE_KEYWORD = "#{xmlns:";
     private final String ATTRIBUTE_STARTWITH = "#{";
     private final String ATTRIBUTE_ENDWITH = "}";
 
-    /*public MapValueNode() {
+    /*public MapXMLSerializer() {
         this(null);
     }
-    public MapValueNode(Class t) {
+    public MapXMLSerializer(Class t) {
         super(t);
     }*/
 
@@ -147,6 +147,7 @@ public class MapValueNode extends JsonSerializer<LinkedHashMap<String, Object>> 
                     }
                     QName qName = new QName(namespaceURL, item.getKey(), namespacePrefix);
                     xmlGenerator.setNextName(qName);
+                    //xmlGenerator.writeFieldName(qName.getLocalPart());
 
                     //Clear Namespace Prefix & URL
                     namespacePrefix = null;
