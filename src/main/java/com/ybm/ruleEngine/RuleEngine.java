@@ -44,14 +44,14 @@ public class RuleEngine {
      * @param dataExchangeObject
      * @return
      */
-    public DataExchangeObject run(String ruleType, DataExchangeObject dataExchangeObject) {
+    public DataExchangeObject run(String entity, String ruleType, DataExchangeObject dataExchangeObject) {
         //TODO: Here for each call, we are fetching all rules from dbRepository. It should be cache.
-        BusinessLogicRuleType businessLogicRuleTypes = businessRuleTypesService.getRuleType(ruleType);
+        BusinessLogicRuleType businessLogicRuleTypes = businessRuleTypesService.getRuleTypeByEntityAndRuleType(entity, ruleType);
         if (businessLogicRuleTypes == null){
             return dataExchangeObject;
         }
 
-        List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByType(ruleType);
+        List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByEntityAndType(entity, ruleType);
         if (null == listOfBusinessLogicRules || listOfBusinessLogicRules.isEmpty()){
             return dataExchangeObject;
         }

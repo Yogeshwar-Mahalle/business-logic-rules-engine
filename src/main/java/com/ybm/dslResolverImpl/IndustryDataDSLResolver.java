@@ -15,9 +15,11 @@ public class IndustryDataDSLResolver implements DSLResolver {
     private static final String DSL_RESOLVER_KEYWORD = "industry";
     private static final String NCC_TYPE = "ncctype";
     private static final String NCC_BIC = "nccbic";
+    private static final String BIC_NCC = "bicncc";
 
     private static final String NCC_TYPE_VALUE = "ncctypevalue";
     private static final String NCC_BIC_VALUE = "nccbicvalue";
+    private static final String BIC_NCC_VALUE = "bicnccvalue";
 
     @Autowired
     private IndustryDataRepository industryDataRepository;
@@ -57,6 +59,12 @@ public class IndustryDataDSLResolver implements DSLResolver {
         }
 
         //By using this keyword external interfaces APIs or DB service can be called
+        if (keyword.equalsIgnoreCase(BIC_NCC)){
+            industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "BIC_NCC", parameters[0]);
+            result = industryDataDbModel;
+        }
+
+        //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(NCC_BIC)){
             industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_BIC", parameters[0]);
             result = industryDataDbModel;
@@ -65,6 +73,12 @@ public class IndustryDataDSLResolver implements DSLResolver {
         //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(NCC_TYPE_VALUE)){
             industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "NCC_TYPE", parameters[0]);
+            result = industryDataDbModel != null ? industryDataDbModel.getValueField() : "null";
+        }
+
+        //By using this keyword external interfaces APIs or DB service can be called
+        if (keyword.equalsIgnoreCase(BIC_NCC_VALUE)){
+            industryDataDbModel = industryDataRepository.findByDataTypeAndKeyField( "BIC_NCC", parameters[0]);
             result = industryDataDbModel != null ? industryDataDbModel.getValueField() : "null";
         }
 

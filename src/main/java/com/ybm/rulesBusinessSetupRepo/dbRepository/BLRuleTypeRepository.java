@@ -13,8 +13,13 @@ import java.util.Optional;
 
 @Repository
 public interface BLRuleTypeRepository extends JpaRepository<BLRuleTypeDbModel, String> {
-    Optional<BLRuleTypeDbModel> findByRuleType(String ruleType);
+    List<BLRuleTypeDbModel> findByRuleType(String ruleType);
+
+    Optional<BLRuleTypeDbModel> findByLinkedEntityAndRuleType(String entity, String ruleType);
 
     List<BLRuleTypeDbModel>  findByWorkflowRuleFlag(boolean flag);
 
+    void deleteByLinkedEntityAndRuleType(String entity, String ruleType);
+
+    List<BLRuleTypeDbModel> findByLinkedEntityAndWorkflowRuleFlag(String entity, boolean b);
 }

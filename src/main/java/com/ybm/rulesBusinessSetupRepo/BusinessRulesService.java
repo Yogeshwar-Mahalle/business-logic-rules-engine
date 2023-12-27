@@ -68,7 +68,14 @@ public class BusinessRulesService {
         {
             for( BusinessLogicRule updatedBusinessLogicRule : updatedBusinessLogicRules )
             {
-                if( businessLogicRule.getRuleId().equals(updatedBusinessLogicRule.getRuleId()) )
+                String ruleId = businessLogicRule.getRuleType() + "~"
+                        + businessLogicRule.getLinkedEntity() + "~"
+                        + businessLogicRule.getRuleName() ;
+
+                if( ruleId.equals(updatedBusinessLogicRule.getRuleId()) )
+                /*if( businessLogicRule.getRuleType().equals(updatedBusinessLogicRule.getRuleType()) &&
+                        businessLogicRule.getLinkedEntity().equals(updatedBusinessLogicRule.getLinkedEntity()) &&
+                        businessLogicRule.getRuleName().equals(updatedBusinessLogicRule.getRuleName()) )*/
                 {
                     List<BusinessLogicRuleCondition> conditionList =
                             businessRuleConditionService.saveRuleConditions(updatedBusinessLogicRule.getRuleId(), businessLogicRule.getConditionList());
@@ -194,7 +201,7 @@ public class BusinessRulesService {
         return ruleList;
     }
 
-    public List<BusinessLogicRule> getAllEntityRules(String entity){
+    public List<BusinessLogicRule> getAllRulesByEntity(String entity){
         if( entity == null )
             return null;
 
@@ -220,7 +227,7 @@ public class BusinessRulesService {
     }
 
 
-    public List<BusinessLogicRule> getAllEntityRulesByType(String entity, String ruleType){
+    public List<BusinessLogicRule> getAllRulesByEntityAndType(String entity, String ruleType){
         if( entity == null || ruleType == null)
             return null;
 

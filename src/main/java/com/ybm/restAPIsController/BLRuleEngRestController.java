@@ -44,7 +44,14 @@ public class BLRuleEngRestController {
 
     @GetMapping(value = "/get-rule-type/{ruleTypeId}")
     public ResponseEntity<?> getRuleTypeByTypeId(@PathVariable("ruleTypeId") String ruleTypeId) {
-        BusinessLogicRuleType businessLogicRuleType = businessRuleTypesService.getRuleType(ruleTypeId);
+        List<BusinessLogicRuleType> businessLogicRuleTypeList = businessRuleTypesService.getAllByRuleType(ruleTypeId);
+        return ResponseEntity.ok(businessLogicRuleTypeList);
+    }
+
+    @GetMapping(value = "/get-rule-type/{entity}/{ruleTypeId}")
+    public ResponseEntity<?> getRuleTypeByTypeId(@PathVariable("entity") String entity,
+                                                 @PathVariable("ruleTypeId") String ruleTypeId) {
+        BusinessLogicRuleType businessLogicRuleType = businessRuleTypesService.getRuleTypeByEntityAndRuleType(entity, ruleTypeId);
         return ResponseEntity.ok(businessLogicRuleType);
     }
 
@@ -62,9 +69,10 @@ public class BLRuleEngRestController {
         return ResponseEntity.ok(rulesUpdated);
     }
 
-    @DeleteMapping(value = "/remove-rule-type/{ruleTypeId}")
-    public ResponseEntity<?> removeRuleTypeByTypeId(@PathVariable("ruleTypeId") String ruleTypeId) {
-        List<BusinessLogicRuleType> allRemainingBusinessLogicRuleTypes = businessRuleTypesService.removeRuleTypesById(ruleTypeId);
+    @DeleteMapping(value = "/remove-rule-type/{entity}/{ruleTypeId}")
+    public ResponseEntity<?> removeRuleTypeByTypeId(@PathVariable("entity") String entity,
+                                                    @PathVariable("ruleTypeId") String ruleTypeId) {
+        List<BusinessLogicRuleType> allRemainingBusinessLogicRuleTypes = businessRuleTypesService.removeRuleTypesByEntityAndTypeId(entity, ruleTypeId);
         return ResponseEntity.ok(allRemainingBusinessLogicRuleTypes);
     }
 
@@ -72,6 +80,19 @@ public class BLRuleEngRestController {
     public ResponseEntity<?> getRuleById(@PathVariable("ruleId") String ruleId) {
         BusinessLogicRule businessLogicRule = businessRulesService.getRuleById(ruleId);
         return ResponseEntity.ok(businessLogicRule);
+    }
+
+    @GetMapping(value = "/get-all-rules/{entity}/{ruleType}")
+    public ResponseEntity<?> getAllRulesByEntityAndType(@PathVariable("entity") String entity,
+                                                        @PathVariable("ruleType") String ruleType) {
+        List<BusinessLogicRule> allBusinessLogicRules = businessRulesService.getAllRulesByEntityAndType(entity, ruleType);
+        return ResponseEntity.ok(allBusinessLogicRules);
+    }
+
+    @GetMapping(value = "/get-all-rules/{entity}")
+    public ResponseEntity<?> getAllEntityRules(@PathVariable("entity") String entity) {
+        List<BusinessLogicRule> allBusinessLogicRules = businessRulesService.getAllRulesByEntity(entity);
+        return ResponseEntity.ok(allBusinessLogicRules);
     }
 
     @GetMapping(value = "/get-all-rules/{ruleType}")
@@ -83,18 +104,6 @@ public class BLRuleEngRestController {
     @GetMapping(value = "/get-all-rules")
     public ResponseEntity<?> getAllRules() {
         List<BusinessLogicRule> allBusinessLogicRules = businessRulesService.getAllRules();
-        return ResponseEntity.ok(allBusinessLogicRules);
-    }
-
-    @GetMapping(value = "/get-entities-rules/{entities}/{ruleType}")
-    public ResponseEntity<?> getAllEntityRuleByType(@PathVariable("entities") String entity, @PathVariable("ruleType") String ruleType) {
-        List<BusinessLogicRule> allBusinessLogicRules = businessRulesService.getAllEntityRulesByType(entity, ruleType);
-        return ResponseEntity.ok(allBusinessLogicRules);
-    }
-
-    @GetMapping(value = "/get-entities-rules/{entities}")
-    public ResponseEntity<?> getAllEntityRules(@PathVariable("entities") String entity) {
-        List<BusinessLogicRule> allBusinessLogicRules = businessRulesService.getAllEntityRules(entity);
         return ResponseEntity.ok(allBusinessLogicRules);
     }
 

@@ -166,17 +166,20 @@ public class APIDSLResolver implements DSLResolver {
             }
         }
 
-
+        MediaType acceptedMediaType = MediaType.APPLICATION_JSON;
+        if(parameters.length >= 3)
+            acceptedMediaType = parameters[3].equalsIgnoreCase("xml") ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 
         if( parameters[0].equalsIgnoreCase("GET") || parameters[0].equalsIgnoreCase("\"GET\"") )
         {
             String finalFullContextPath = fullContextPath;
+
             response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path(finalFullContextPath)
                             //.query(urlQuery)
                             .build())
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(acceptedMediaType)
                     .retrieve()
                     .bodyToMono(String.class)
                     .onErrorResume(e -> Mono.empty())
@@ -191,7 +194,7 @@ public class APIDSLResolver implements DSLResolver {
                     .uri(uriBuilder -> uriBuilder
                             .path(finalFullContextPath1)
                             .build())
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(acceptedMediaType)
                     .headers( reqHeaders -> {
 
                         finalHeaders.forEach((key, value) -> {
@@ -206,6 +209,9 @@ public class APIDSLResolver implements DSLResolver {
                     .bodyToMono(String.class)
                     .onErrorResume(e -> Mono.empty())
                     .block();
+
+            if(acceptedMediaType == MediaType.APPLICATION_XML)
+                response = response.replace("\"", "\\\"");
         }
 
         return response;

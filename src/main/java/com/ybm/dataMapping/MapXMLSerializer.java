@@ -91,11 +91,6 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                 continue;
             }
 
-            /*if(!bNested)
-            {
-                namespacePrefix = null;
-            }*/
-
             //Add attributes
             if (attributeKeyValue != null && !attributeKeyValue.isEmpty()) {
                 //xmlGenerator.writeStartObject();

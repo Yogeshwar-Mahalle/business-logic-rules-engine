@@ -17,10 +17,7 @@ import com.ybm.workflow.WorkflowManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,8 +33,10 @@ public class BLRuleProcessingRestController {
     @Autowired
     private ExchangeDataService exchangeDataService;
 
-    @PostMapping(value = "/edo")
-    public ResponseEntity<?> postPaymentDetails(@RequestHeader LinkedHashMap<String, String> headers, @RequestBody LinkedHashMap map) {
+    @PostMapping(value = "/edo/{entity}")
+    public ResponseEntity<?> postPaymentDetails(@PathVariable("entity") String entity,
+                                                @RequestHeader LinkedHashMap<String, String> headers,
+                                                @RequestBody LinkedHashMap map) {
         UUID uuid = UUID.randomUUID();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         LinkedHashMap<String, Object> extData = new LinkedHashMap<>();
@@ -64,7 +63,7 @@ public class BLRuleProcessingRestController {
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
-        DataExchangeObject result = ruleEngine.run(ruleType, dataExchangeObject);
+        DataExchangeObject result = ruleEngine.run(entity, ruleType, dataExchangeObject);
 
         exchangeData = mapExchangeData(result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
@@ -72,8 +71,10 @@ public class BLRuleProcessingRestController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping(value = "/wrkflow")
-    public ResponseEntity<?> postToWorkFlow(@RequestHeader Map<String, String> headers, @RequestBody String strPayload) {
+    @PostMapping(value = "/wrkflow/{entity}")
+    public ResponseEntity<?> postToWorkFlow(@PathVariable("entity") String entity,
+                                            @RequestHeader Map<String, String> headers,
+                                            @RequestBody String strPayload) {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         UUID uuid = UUID.randomUUID();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
@@ -100,7 +101,7 @@ public class BLRuleProcessingRestController {
         ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
-        DataExchangeObject result = workflowManager.run( dataExchangeObject );
+        DataExchangeObject result = workflowManager.run(entity, dataExchangeObject );
 
         exchangeData = mapExchangeData(result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);

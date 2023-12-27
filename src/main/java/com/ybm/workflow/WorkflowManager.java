@@ -27,18 +27,20 @@ public class WorkflowManager {
     private RuleEngine ruleEngine;
 
 
-    public DataExchangeObject run(DataExchangeObject dataExchangeObject) {
+    public DataExchangeObject run(String entity, DataExchangeObject dataExchangeObject) {
 
         DataExchangeObject wrkflwDataExchangeObject = dataExchangeObject.copy();
+        wrkflwDataExchangeObject.getProperties().putIfAbsent("RulesLog", "");
 
-        List<BusinessLogicRuleType> listBusinessLogicRuleTypes = businessRuleTypesService.getAllRuleTypeByWrkFlowFlag();
+        List<BusinessLogicRuleType> listBusinessLogicRuleTypes = businessRuleTypesService.getAllRuleTypeByEntityWrkFlowFlag(entity);
         if (null == listBusinessLogicRuleTypes || listBusinessLogicRuleTypes.isEmpty()){
             return dataExchangeObject;
         }
 
         for ( BusinessLogicRuleType businessLogicRuleType : listBusinessLogicRuleTypes ) {
 
-            DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run(businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject);
+            DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run(businessLogicRuleType.getLinkedEntity(), businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject);
+            wrkflwDataExchangeObject.setProperties(wrkFlowRulesXchangeObj.getProperties());
 
             String strRuleTypeList = (String) wrkFlowRulesXchangeObj.getOutDataObject().getPayload().getDataMap().get(WORKFLOW_RULE_TYPE_LIST);
             if( strRuleTypeList != null )
@@ -48,7 +50,7 @@ public class WorkflowManager {
                         .toList();
                 for ( String ruleType : ruleTypeList ) {
 
-                    wrkflwDataExchangeObject = ruleEngine.run(ruleType, wrkflwDataExchangeObject);
+                    wrkflwDataExchangeObject = ruleEngine.run(businessLogicRuleType.getLinkedEntity(), ruleType, wrkflwDataExchangeObject);
 
                     //Set output payload of previous rule to input payload of next rule in the workflow
                     wrkflwDataExchangeObject = new DataExchangeObject(

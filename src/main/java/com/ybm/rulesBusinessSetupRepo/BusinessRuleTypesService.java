@@ -30,9 +30,25 @@ public class BusinessRuleTypesService {
                 .collect(Collectors.toList());
     }
 
-    public BusinessLogicRuleType getRuleType(String ruleType) {
-        Optional<BLRuleTypeDbModel> blRuleTypesDbModel = blRuleTypeRepository.findByRuleType(ruleType);
+    public List<BusinessLogicRuleType> getAllByRuleType(String ruleType) {
+        return blRuleTypeRepository.findByRuleType(ruleType).stream()
+                .map(
+                        this::mapRuleTypesFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    public BusinessLogicRuleType getRuleTypeByEntityAndRuleType(String entity, String ruleType) {
+        Optional<BLRuleTypeDbModel> blRuleTypesDbModel = blRuleTypeRepository.findByLinkedEntityAndRuleType(entity, ruleType);
         return blRuleTypesDbModel.map(this::mapRuleTypesFromDbModel).orElse(null);
+    }
+
+    public List<BusinessLogicRuleType> getAllRuleTypeByEntityWrkFlowFlag(String entity) {
+        return blRuleTypeRepository.findByLinkedEntityAndWorkflowRuleFlag(entity, true).stream()
+                .map(
+                        this::mapRuleTypesFromDbModel
+                )
+                .collect(Collectors.toList());
     }
 
     public List<BusinessLogicRuleType> getAllRuleTypeByWrkFlowFlag() {
@@ -67,9 +83,9 @@ public class BusinessRuleTypesService {
 
     }
 
-    public List<BusinessLogicRuleType> removeRuleTypesById(String ruleType) {
+    public List<BusinessLogicRuleType> removeRuleTypesByEntityAndTypeId(String entity, String ruleType) {
 
-        blRuleTypeRepository.deleteById(ruleType);
+        blRuleTypeRepository.deleteByLinkedEntityAndRuleType(entity, ruleType);
 
         return blRuleTypeRepository.findAll().stream()
                 .map(
