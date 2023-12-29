@@ -31,6 +31,7 @@ public class ExchangeData implements Serializable {
     String processedData;
     String processedHeaders;
     String properties;
+    String dataExtension;
     String status;
     Date createTimeStamp;
     Date updateTimeStamp;

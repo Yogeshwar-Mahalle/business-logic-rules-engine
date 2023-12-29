@@ -15,6 +15,6 @@ import java.util.List;
 @Repository
 public interface RuleLogsRepository extends JpaRepository<RuleLogsDbModel, String> {
 
-    //@Query("SELECT RuleLogsDbModel FROM RULE_LOGS RuleLogsDbModel WHERE RuleLogsDbModel.UNIQUE_EXCHANGE_ID = :uniqueExchangeId ORDER BY RuleLogsDbModel.CREATE_TIME_STAMP")
+    //@Query("SELECT ruleLogsDbModel FROM RuleLogsDbModel ruleLogsDbModel WHERE ruleLogsDbModel.UNIQUE_EXCHANGE_ID = :uniqueExchangeId ORDER BY ruleLogsDbModel.CREATE_TIME_STAMP")
     List<RuleLogsDbModel> findByUniqueExchangeIdOrderByCreateTimeStamp(@Param("uniqueExchangeId") String uniqueExchangeId);
 }

@@ -52,8 +52,13 @@ public class ExchangeDataDSLResolver implements DSLResolver {
 
         //By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(DUPLICATE_CHECK)){
-            int count = exchangeDataService.getExchangeDataCountByMessageId( parameters[0], parameters[1], parameters[2] );
-            Map<String, Boolean> map = new LinkedHashMap<>();
+            int count =
+                    exchangeDataService.getExchangeDataCountByMessageIdAndNotExchId(
+                            parameters[0],
+                            parameters[1],
+                            parameters[2],
+                            parameters[3]
+                    );
 
             result = count > 0;
         }

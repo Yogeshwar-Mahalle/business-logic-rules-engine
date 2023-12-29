@@ -277,12 +277,13 @@ public class RuleEngine {
     public boolean evaluateCondition(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
+        dataMap.put(ExchangeObjectType.INPUT_EXCHANGE_ID.getLabel(), inputData.getUniqueExchangeId());
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());
         dataMap.put(ExchangeObjectType.INPUT_PROPERTIES.getLabel(), inputData.getProperties());
         dataMap.put(ExchangeObjectType.PROCESSING_PAYLOAD.getLabel(), inputData.getOutDataObject().getPayload().getDataMap());
-        dataMap.put(ExchangeObjectType.INPUT_EXTENSION_DATA.getLabel(), inputData.getExtData());
+        dataMap.put(ExchangeObjectType.INPUT_DATA_EXTENSION.getLabel(), inputData.getDataExtension());
 
         //Step 1. Resolve domain specific keywords first: ${domainName.keyword} or ${domainName.keyword(parameter)}
         String mvelConditionExpression = getConditionExpressionWithFunction(businessLogicRule);
@@ -328,16 +329,17 @@ public class RuleEngine {
         DataExchangeObject outputResult = inputData.copy();
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
+        dataMap.put(ExchangeObjectType.INPUT_EXCHANGE_ID.getLabel(), inputData.getUniqueExchangeId());
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());
         dataMap.put(ExchangeObjectType.INPUT_PROPERTIES.getLabel(), inputData.getProperties());
-        dataMap.put(ExchangeObjectType.INPUT_EXTENSION_DATA.getLabel(), inputData.getExtData());
+        dataMap.put(ExchangeObjectType.INPUT_DATA_EXTENSION.getLabel(), inputData.getDataExtension());
         dataMap.put(ExchangeObjectType.PROCESSING_PAYLOAD.getLabel(), outputResult.getOutDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.OUTPUT_PAYLOAD.getLabel(), outputResult.getOutDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.OUTPUT_HEADERS.getLabel(), outputResult.getOutDataObject().getHeaders());
         dataMap.put(ExchangeObjectType.OUTPUT_PROPERTIES.getLabel(), outputResult.getProperties());
-        dataMap.put(ExchangeObjectType.OUTPUT_EXTENSION_DATA.getLabel(), outputResult.getExtData());
+        dataMap.put(ExchangeObjectType.OUTPUT_DATA_EXTENSION.getLabel(), outputResult.getDataExtension());
 
         //Step 1. Resolve domain specific keywords: ${domainName.keyword} or ${domainName.keyword(parameter)}
         String mvelActionExpression = getActionExpressionWithFunction(businessLogicRule);
@@ -368,7 +370,7 @@ public class RuleEngine {
 
         //Step 6. Add result of final template result in to extension data block.
         if( finalExtensionData != null )
-            outputResult.getExtData().put(ExchangeObjectType.CUSTOM_FIELDS.getLabel(), finalExtensionData);
+            outputResult.getDataExtension().put(businessLogicRule.getActionFinalTemplate(), finalExtensionData);
 
         return outputResult;
     }

@@ -59,13 +59,13 @@ public class BLRuleProcessingRestController {
                 extData
         );
 
-        ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
+        ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
         DataExchangeObject result = ruleEngine.run(entity, ruleType, dataExchangeObject);
 
-        exchangeData = mapExchangeData(result);
+        exchangeData = mapExchangeData(entity, result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         return ResponseEntity.ok(result);
@@ -98,28 +98,30 @@ public class BLRuleProcessingRestController {
                 extData
         );
 
-        ExchangeData exchangeData = mapExchangeData(dataExchangeObject);
+        ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         DataExchangeObject result = workflowManager.run(entity, dataExchangeObject );
 
-        exchangeData = mapExchangeData(result);
+        exchangeData = mapExchangeData(entity, result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         return ResponseEntity.ok(result);
     }
 
-    private static ExchangeData mapExchangeData(DataExchangeObject dataExchangeObject) {
+    private static ExchangeData mapExchangeData(String entity, DataExchangeObject dataExchangeObject) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> headers = dataExchangeObject.getInDataObject().getHeaders();
         String strProperties = dataExchangeObject.getProperties().toString();
         String strOrgHeaders = dataExchangeObject.getInDataObject().getHeaders().toString();
         String strProcessedHeaders = dataExchangeObject.getOutDataObject().getHeaders().toString();
+        String strDataExtension = dataExchangeObject.getDataExtension().toString();
 
         try {
             strProperties = objectMapper.writeValueAsString(dataExchangeObject.getProperties());
             strOrgHeaders = objectMapper.writeValueAsString(dataExchangeObject.getInDataObject().getHeaders());
             strProcessedHeaders = objectMapper.writeValueAsString(dataExchangeObject.getOutDataObject().getHeaders());
+            strDataExtension = objectMapper.writeValueAsString(dataExchangeObject.getDataExtension());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -127,7 +129,7 @@ public class BLRuleProcessingRestController {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
         sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
-        String entity = headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY");
+        entity = entity != null ? entity : (headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY") );
         entity = entity == null ? "BLRuleEngine" : entity;
         String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");
         messageId = dataExchangeObject.getProperties().get("messageId") != null ? (String) dataExchangeObject.getProperties().get("messageId") : messageId;
@@ -145,7 +147,11 @@ public class BLRuleProcessingRestController {
         exchangeData.setProcessedData(dataExchangeObject.getOutDataObject().getPayload().getStrMessage());
         exchangeData.setProcessedHeaders(strProcessedHeaders);
         exchangeData.setProperties(strProperties);
-        exchangeData.setStatus("AC");
+        exchangeData.setDataExtension(strDataExtension);
+
+        if( exchangeData.getStatus() == null )
+            exchangeData.setStatus( "RECEIVED" ) ;
+
         return exchangeData;
     }
 }

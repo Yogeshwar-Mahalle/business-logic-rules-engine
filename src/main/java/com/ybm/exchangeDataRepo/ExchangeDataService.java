@@ -42,7 +42,21 @@ public class ExchangeDataService {
     }
 
     public int getExchangeDataCountByMessageId(String entity, String source, String messageId) {
-        return exchangeDataRepository.countByLinkedEntityAndSourceAndMessageId(entity, source, messageId);
+        return exchangeDataRepository
+                .countByLinkedEntityAndSourceAndMessageId(entity, source, messageId);
+    }
+
+    public int getExchangeDataCountByMessageIdAndNotExchId(String entity,
+                                                           String source,
+                                                           String messageId,
+                                                           String exchangeId) {
+        return exchangeDataRepository
+            .countByLinkedEntityAndSourceAndMessageIdAndNotUniqueExchangeId(
+                entity,
+                source,
+                messageId,
+                exchangeId
+            );
     }
 
     @Transactional
@@ -75,6 +89,7 @@ public class ExchangeDataService {
                 .processedData(exchangeDataDbModel.getProcessedData())
                 .processedHeaders(exchangeDataDbModel.getProcessedHeaders())
                 .properties(exchangeDataDbModel.getProperties())
+                .dataExtension(exchangeDataDbModel.getDataExtension())
                 .status(exchangeDataDbModel.getStatus())
                 .createTimeStamp(exchangeDataDbModel.getCreateTimeStamp())
                 .updateTimeStamp(exchangeDataDbModel.getUpdateTimeStamp())
@@ -98,6 +113,7 @@ public class ExchangeDataService {
                 .processedData(exchangeData.getProcessedData())
                 .processedHeaders(exchangeData.getProcessedHeaders())
                 .properties(exchangeData.getProperties())
+                .dataExtension(exchangeData.getDataExtension())
                 .status(exchangeData.getStatus())
                 .createTimeStamp(exchangeData.getCreateTimeStamp() == null ? new Date() : exchangeData.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

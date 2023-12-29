@@ -5,6 +5,7 @@
 package com.ybm.rulesBusinessSetupRepo;
 
 public enum ExchangeObjectType {
+    INPUT_EXCHANGE_ID("uniqueExchangeId"),
     INPUT_MESSAGE("inMessage"),
     INPUT_PAYLOAD("inPayload"),
     INPUT_HEADERS("inHeaders"),
@@ -13,9 +14,8 @@ public enum ExchangeObjectType {
     OUTPUT_PAYLOAD("outPayload"),
     OUTPUT_HEADERS("outHeaders"),
     OUTPUT_PROPERTIES("outProperties"),
-    INPUT_EXTENSION_DATA("inExtData"),
-    OUTPUT_EXTENSION_DATA("outExtData"),
-    CUSTOM_FIELDS("customFields");
+    INPUT_DATA_EXTENSION("inDataExtension"),
+    OUTPUT_DATA_EXTENSION("outDataExtension");
 
     private final String label;
     ExchangeObjectType(String label) {
