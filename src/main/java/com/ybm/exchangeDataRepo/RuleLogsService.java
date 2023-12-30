@@ -32,7 +32,7 @@ public class RuleLogsService {
     }
 
     @Transactional
-    public RuleLogs saveExchangeData(RuleLogs ruleLogs) {
+    public RuleLogs saveRuleLogs(RuleLogs ruleLogs) {
         RuleLogsDbModel ruleLogsDbModel = mapRuleLogsToDbModel(ruleLogs);
         ruleLogsDbModel = ruleLogsRepository.save(ruleLogsDbModel);
 
