@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IndustryDataDSLResolver implements DSLResolver {
-    private static final String DSL_RESOLVER_KEYWORD = "industry";
-    private static final String NCC_TYPE = "ncctype";
-    private static final String NCC_BIC = "nccbic";
-    private static final String BIC_NCC = "bicncc";
+    private static final String DSL_RESOLVER_KEYWORD = "INDUSTRY";
+    private static final String NCC_TYPE = "NCCTYPE";
+    private static final String NCC_BIC = "NCCBIC";
+    private static final String BIC_NCC = "BICNCC";
 
-    private static final String NCC_TYPE_VALUE = "ncctypevalue";
-    private static final String NCC_BIC_VALUE = "nccbicvalue";
-    private static final String BIC_NCC_VALUE = "bicnccvalue";
+    private static final String NCC_TYPE_VALUE = "NCCTYPEVALUE";
+    private static final String NCC_BIC_VALUE = "NCCBICVALUE";
+    private static final String BIC_NCC_VALUE = "BICNCCVALUE";
 
     @Autowired
     private IndustryDataRepository industryDataRepository;
