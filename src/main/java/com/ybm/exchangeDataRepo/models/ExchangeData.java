@@ -4,7 +4,6 @@
 
 package com.ybm.exchangeDataRepo.models;
 
-import com.ybm.exchangeDataRepo.ContentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

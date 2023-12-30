@@ -5,7 +5,6 @@
 package com.ybm.dataMappingRepo.entities;
 
 
-import com.ybm.dataMappingRepo.DataTrimType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

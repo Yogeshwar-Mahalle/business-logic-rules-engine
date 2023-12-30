@@ -7,6 +7,7 @@ package com.ybm.dataMappingRepo;
 import com.google.common.base.Enums;
 import com.ybm.dataMappingRepo.dbRepository.FieldsDataMappingRepository;
 import com.ybm.dataMappingRepo.entities.FieldsDataMappingDbModel;
+import com.ybm.dataMappingRepo.models.DataTrimType;
 import com.ybm.dataMappingRepo.models.FieldsDataMapping;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

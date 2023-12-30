@@ -19,8 +19,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @Table(name = "INTERFACE_PROPERTIES")
-@IdClass(InterfacePropertiesDbModel.IdClass.class)
-public class InterfacePropertiesDbModel implements Serializable {
+@IdClass(InterfacePropertyDbModel.IdClass.class)
+public class InterfacePropertyDbModel implements Serializable {
     @Id
     @Column(name = "INTERFACE_ID", length = 128, nullable=false)
     String interfaceId;
@@ -29,7 +29,7 @@ public class InterfacePropertiesDbModel implements Serializable {
     @Column(name = "PROPERTY_NAME", length = 30, nullable=false)
     String propertyName;
 
-    @Column(name = "PROPERTY_VALUE", length = 30, nullable=false)
+    @Column(name = "PROPERTY_VALUE", length = 512, nullable=false)
     String propertyValue;
 
     @Column(name = "STATUS", length = 10, nullable=false)

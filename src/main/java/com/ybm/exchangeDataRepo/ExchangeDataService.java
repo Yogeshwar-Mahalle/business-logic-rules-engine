@@ -7,6 +7,7 @@ package com.ybm.exchangeDataRepo;
 import com.google.common.base.Enums;
 import com.ybm.exchangeDataRepo.dbRepository.ExchangeDataRepository;
 import com.ybm.exchangeDataRepo.entities.ExchangeDataDbModel;
+import com.ybm.exchangeDataRepo.models.ContentType;
 import com.ybm.exchangeDataRepo.models.ExchangeData;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

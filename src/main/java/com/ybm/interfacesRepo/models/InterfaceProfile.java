@@ -4,7 +4,6 @@
 
 package com.ybm.interfacesRepo.models;
 
-import com.ybm.interfacesRepo.ComProtocolType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +21,9 @@ public class InterfaceProfile implements Serializable {
     String linkedEntity;
     String interfaceName;
     @Builder.Default
-    ComProtocolType communicationProtocol = ComProtocolType.NONE;
-    char direction;
+    ComProtocolType communicationProtocol = ComProtocolType.FILE;
+    @Builder.Default
+    DirectionType direction = DirectionType.OUTGOING;
     String status;
     Date createTimeStamp;
     Date updateTimeStamp;

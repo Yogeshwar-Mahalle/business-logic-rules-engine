@@ -4,7 +4,7 @@
 
 package com.ybm.ruleEngine.dataexchange;
 
-import com.ybm.exchangeDataRepo.ContentType;
+import com.ybm.exchangeDataRepo.models.ContentType;
 import lombok.Getter;
 
 import java.io.Serializable;

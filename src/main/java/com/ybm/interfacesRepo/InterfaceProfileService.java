@@ -6,6 +6,8 @@ package com.ybm.interfacesRepo;
 
 import com.ybm.interfacesRepo.dbRepository.InterfaceProfileRepository;
 import com.ybm.interfacesRepo.entities.InterfaceProfileDbModel;
+import com.ybm.interfacesRepo.models.ComProtocolType;
+import com.ybm.interfacesRepo.models.DirectionType;
 import com.ybm.interfacesRepo.models.InterfaceProfile;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,14 @@ public class InterfaceProfileService {
 
     @Autowired
     private InterfaceProfileRepository interfaceProfileRepository;
+
+    public List<InterfaceProfile> getAllInterfaceProfile() {
+        return interfaceProfileRepository.findAll().stream()
+                .map(
+                        this::mapInterfaceProfileFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
 
     public InterfaceProfile getInterfaceProfileByInterfaceId(String interfaceId) {
 
@@ -66,6 +76,34 @@ public class InterfaceProfileService {
         return mapInterfaceProfileFromDbModel(interfaceProfileDbModel);
     }
 
+    @Transactional
+    public List<InterfaceProfile> saveInterfaceProfileList(List<InterfaceProfile> interfaceProfileList) {
+
+        List<InterfaceProfileDbModel> listInterfaceProfileDbDBModel = interfaceProfileList.stream()
+                .map(
+                        this::mapInterfaceProfileToDbModel
+                )
+                .collect(Collectors.toList());
+
+        return interfaceProfileRepository.saveAll(listInterfaceProfileDbDBModel).stream()
+                        .map(
+                                this::mapInterfaceProfileFromDbModel
+                        )
+                        .collect(Collectors.toList());
+    }
+
+    public List<InterfaceProfile> removeInterfaceProfileById(String interfaceId){
+        if( interfaceId == null )
+            return null;
+
+        interfaceProfileRepository.deleteById(interfaceId);
+
+        return interfaceProfileRepository.findAll().stream()
+                .map(
+                        this::mapInterfaceProfileFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
 
     private InterfaceProfile mapInterfaceProfileFromDbModel(InterfaceProfileDbModel interfaceProfileDbModel){
 
@@ -74,7 +112,7 @@ public class InterfaceProfileService {
                 .linkedEntity(interfaceProfileDbModel.getLinkedEntity())
                 .interfaceName(interfaceProfileDbModel.getInterfaceName())
                 .communicationProtocol(ComProtocolType.valueOf(interfaceProfileDbModel.getCommunicationProtocol()))
-                .direction(interfaceProfileDbModel.getDirection())
+                .direction(DirectionType.setLabel(String.valueOf(interfaceProfileDbModel.getDirection())))
                 .status(interfaceProfileDbModel.getStatus())
                 .createTimeStamp(interfaceProfileDbModel.getCreateTimeStamp())
                 .updateTimeStamp(interfaceProfileDbModel.getUpdateTimeStamp())
@@ -91,7 +129,7 @@ public class InterfaceProfileService {
                 .linkedEntity(interfaceProfile.getLinkedEntity())
                 .interfaceName(interfaceProfile.getInterfaceName())
                 .communicationProtocol(String.valueOf(interfaceProfile.getCommunicationProtocol()))
-                .direction(interfaceProfile.getDirection())
+                .direction(interfaceProfile.getDirection().label.charAt(0))
                 .status(interfaceProfile.getStatus())
                 .createTimeStamp(interfaceProfile.getCreateTimeStamp())
                 .createTimeStamp(interfaceProfile.getCreateTimeStamp() == null ? new Date() : interfaceProfile.getCreateTimeStamp())

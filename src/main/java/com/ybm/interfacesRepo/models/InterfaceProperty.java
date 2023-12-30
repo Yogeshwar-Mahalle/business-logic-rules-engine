@@ -16,9 +16,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class InterfaceProperties implements Serializable {
+public class InterfaceProperty implements Serializable {
     String interfaceId;
-    String propertyName;
+    @Builder.Default
+    PropertyType propertyName = PropertyType.FILE_PATH;
     String propertyValue;
     String status;
     Date createTimeStamp;

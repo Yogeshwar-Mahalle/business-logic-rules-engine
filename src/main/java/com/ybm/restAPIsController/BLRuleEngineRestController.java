@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-public class BLRuleEngRestController {
+public class BLRuleEngineRestController {
 
     @Autowired
     private RuleEngine ruleEngine;

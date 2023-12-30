@@ -6,7 +6,7 @@ package com.ybm.ruleEngine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ybm.exchangeDataRepo.ContentType;
+import com.ybm.exchangeDataRepo.models.ContentType;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleFunctionTemplateService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;

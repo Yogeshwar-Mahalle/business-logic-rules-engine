@@ -6,7 +6,7 @@ package com.ybm.restAPIsController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ybm.exchangeDataRepo.ContentType;
+import com.ybm.exchangeDataRepo.models.ContentType;
 import com.ybm.exchangeDataRepo.ExchangeDataService;
 import com.ybm.exchangeDataRepo.models.ExchangeData;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-public class BLRuleProcessingRestController {
+public class MessageProcessingRestController {
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired

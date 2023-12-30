@@ -4,7 +4,6 @@
 
 package com.ybm.dataMappingRepo.models;
 
-import com.ybm.dataMappingRepo.DataTrimType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
