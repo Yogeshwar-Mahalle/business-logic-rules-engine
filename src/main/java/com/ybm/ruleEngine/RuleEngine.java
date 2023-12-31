@@ -6,7 +6,9 @@ package com.ybm.ruleEngine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ybm.exchangeDataRepo.RuleLogsService;
 import com.ybm.exchangeDataRepo.models.ContentType;
+import com.ybm.exchangeDataRepo.models.RuleLogs;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleFunctionTemplateService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
@@ -37,6 +39,9 @@ public class RuleEngine {
     private BusinessRulesService businessRulesService;
     @Autowired
     private BusinessRuleFunctionTemplateService businessRuleFunctionTemplateService;
+
+    @Autowired
+    private RuleLogsService ruleLogsService;
 
     /**
      * Run BusinessLogicRule engine on set of rules for given data.
@@ -71,6 +76,20 @@ public class RuleEngine {
 
             //STEP 4 (EXECUTE) : Run the action of the selected rule on given data and return the output.
             dataExchangeObject = executeRule(resolvedBusinessLogicRule, dataExchangeObject);
+
+            //Step 5 (Rule Log) : Save the action and data change in the rule log
+            RuleLogs RuleLogs = new RuleLogs(
+                    dataExchangeObject.getUniqueExchangeId(),
+                    resolvedBusinessLogicRule.getRuleId(),
+                    dataExchangeObject.getInDataObject().getPayload().toString(),
+                    dataExchangeObject.getOutDataObject().getPayload().toString(),
+                    dataExchangeObject.getInDataObject().getHeaders().toString(),
+                    dataExchangeObject.getOutDataObject().getHeaders().toString(),
+                    dataExchangeObject.getProperties().toString(),
+                    dataExchangeObject.getDataExtension().toString(),
+                    new Date()
+            );
+            dataExchangeObject.getRuleLogsList().add( ruleLogsService.saveRuleLogs(RuleLogs) );
         }
         else {
 
@@ -80,6 +99,19 @@ public class RuleEngine {
                 //STEP 4 (EXECUTE) : Run the action of the selected businessLogicRule on given data and return the output.
                 dataExchangeObject = executeRule(businessLogicRule, dataExchangeObject);
 
+                //Step 5 (Rule Log) : Save the action and data change in the rule log
+                RuleLogs RuleLogs = new RuleLogs(
+                        dataExchangeObject.getUniqueExchangeId(),
+                        businessLogicRule.getRuleId(),
+                        dataExchangeObject.getInDataObject().getPayload().toString(),
+                        dataExchangeObject.getOutDataObject().getPayload().toString(),
+                        dataExchangeObject.getInDataObject().getHeaders().toString(),
+                        dataExchangeObject.getOutDataObject().getHeaders().toString(),
+                        dataExchangeObject.getProperties().toString(),
+                        dataExchangeObject.getDataExtension().toString(),
+                        new Date()
+                );
+                dataExchangeObject.getRuleLogsList().add( ruleLogsService.saveRuleLogs(RuleLogs) );
             }
 
         }

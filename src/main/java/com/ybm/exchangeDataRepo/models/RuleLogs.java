@@ -23,7 +23,7 @@ public class RuleLogs implements Serializable {
     String actionedData;
     String previousHeaders;
     String actionedHeaders;
-    String previousProperties;
-    String actionedProperties;
+    String properties;
+    String extensionData;
     Date createTimeStamp;
 }

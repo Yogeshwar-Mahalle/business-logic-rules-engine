@@ -4,10 +4,12 @@
 
 package com.ybm.ruleEngine.dataexchange;
 
+import com.ybm.exchangeDataRepo.models.RuleLogs;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,17 +22,20 @@ public class DataExchangeObject implements Serializable {
     private DataObject outDataObject;
     private Map<String, Object> properties;
     private Map<String, Object> dataExtension;
+    private LinkedList<RuleLogs> ruleLogsList;
 
     public DataExchangeObject(String uniqueExchangeId,
                               Map<String, Object> properties,
                               DataObject inDataObject,
                               DataObject outDataObject,
-                              Map<String, Object> dataExtension ) {
+                              Map<String, Object> dataExtension,
+                              LinkedList<RuleLogs> ruleLogsList ) {
         this.uniqueExchangeId = uniqueExchangeId;
         this.properties = properties;
         this.inDataObject = inDataObject.copy();
         this.outDataObject = outDataObject;
         this.dataExtension = dataExtension;
+        this.ruleLogsList = ruleLogsList;
     }
 
     public DataExchangeObject(DataExchangeObject dataExchangeObject) {
@@ -41,6 +46,7 @@ public class DataExchangeObject implements Serializable {
         this.outDataObject = dataExchangeObject.outDataObject.copy();
         this.dataExtension = dataExchangeObject.dataExtension.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.ruleLogsList = new LinkedList<>(dataExchangeObject.ruleLogsList);
     }
 
     @Override

@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,7 +57,8 @@ public class MessageProcessingRestController {
                 properties,
                 dataObject,
                 dataObject,
-                extData
+                extData,
+                new LinkedList<>()
         );
 
         ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);
@@ -95,7 +97,8 @@ public class MessageProcessingRestController {
                 properties,
                 dataObject,
                 dataObject,
-                extData
+                extData,
+                new LinkedList<>()
         );
 
         ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);

@@ -47,17 +47,17 @@ public class RuleLogsDbModel implements Serializable {
     @Column(name = "ACTIONED_HEADERS", length = 524288)
     private String actionedHeaders;
 
-    @Column(name = "PREVIOUS_PROPERTIES", length = 524288)
-    private String previousProperties;
+    @Column(name = "PROPERTIES", length = 524288)
+    private String properties;
 
-    @Column(name = "ACTIONED_PROPERTIES", length = 524288)
-    private String actionedProperties;
+    @Column(name = "EXTENSION_DATA", length = 524288)
+    private String extensionData;
 
 
     @Data
     static class IdClass implements Serializable {
         private String uniqueExchangeId;
-        private String createTimeStamp;
+        private Date createTimeStamp;
         private String ruleId;
     }
 

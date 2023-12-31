@@ -41,6 +41,7 @@ public class WorkflowManager {
 
             DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run(businessLogicRuleType.getLinkedEntity(), businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject);
             wrkflwDataExchangeObject.setProperties(wrkFlowRulesXchangeObj.getProperties());
+            wrkflwDataExchangeObject.setRuleLogsList(wrkFlowRulesXchangeObj.getRuleLogsList());
 
             String strRuleTypeList = (String) wrkFlowRulesXchangeObj.getOutDataObject().getPayload().getDataMap().get(WORKFLOW_RULE_TYPE_LIST);
             if( strRuleTypeList != null )
@@ -58,7 +59,8 @@ public class WorkflowManager {
                             wrkflwDataExchangeObject.getProperties(),
                             wrkflwDataExchangeObject.getOutDataObject(),
                             wrkflwDataExchangeObject.getOutDataObject(),
-                            wrkflwDataExchangeObject.getDataExtension()
+                            wrkflwDataExchangeObject.getDataExtension(),
+                            wrkflwDataExchangeObject.getRuleLogsList()
                     );
                 }
             }
@@ -68,6 +70,7 @@ public class WorkflowManager {
         dataExchangeObject.setOutDataObject(wrkflwDataExchangeObject.getOutDataObject());
         dataExchangeObject.setProperties(wrkflwDataExchangeObject.getProperties());
         dataExchangeObject.setDataExtension(wrkflwDataExchangeObject.getDataExtension());
+        dataExchangeObject.setRuleLogsList(wrkflwDataExchangeObject.getRuleLogsList());
 
         return dataExchangeObject;
     }

@@ -49,8 +49,8 @@ public class RuleLogsService {
                 .actionedData(ruleLogsDbModel.getActionedData())
                 .previousHeaders(ruleLogsDbModel.getPreviousHeaders())
                 .actionedHeaders(ruleLogsDbModel.getActionedHeaders())
-                .previousProperties(ruleLogsDbModel.getPreviousProperties())
-                .actionedProperties(ruleLogsDbModel.getActionedProperties())
+                .properties(ruleLogsDbModel.getProperties())
+                .extensionData(ruleLogsDbModel.getExtensionData())
                 .createTimeStamp(ruleLogsDbModel.getCreateTimeStamp())
                 .build();
 
@@ -65,8 +65,8 @@ public class RuleLogsService {
                 .actionedData(ruleLogs.getActionedData())
                 .previousHeaders(ruleLogs.getPreviousHeaders())
                 .actionedHeaders(ruleLogs.getActionedHeaders())
-                .previousProperties(ruleLogs.getPreviousProperties())
-                .actionedProperties(ruleLogs.getActionedProperties())
+                .properties(ruleLogs.getProperties())
+                .extensionData(ruleLogs.getExtensionData())
                 .createTimeStamp(ruleLogs.getCreateTimeStamp() == null ? new Date() : ruleLogs.getCreateTimeStamp())
                 .build();
 
