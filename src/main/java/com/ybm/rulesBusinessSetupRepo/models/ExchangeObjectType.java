@@ -2,7 +2,7 @@
  * Copyright (c) 2023. The code is intellectual property of Yogeshwar Mahalle.
  */
 
-package com.ybm.rulesBusinessSetupRepo;
+package com.ybm.rulesBusinessSetupRepo.models;
 
 public enum ExchangeObjectType {
     INPUT_EXCHANGE_ID("uniqueExchangeId"),

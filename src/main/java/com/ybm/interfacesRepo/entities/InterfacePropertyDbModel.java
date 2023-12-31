@@ -32,7 +32,7 @@ public class InterfacePropertyDbModel implements Serializable {
     @Column(name = "PROPERTY_VALUE", length = 512, nullable=false)
     String propertyValue;
 
-    @Column(name = "STATUS", length = 10, nullable=false)
+    @Column(name = "STATUS", length = 2, nullable=false)
     String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)

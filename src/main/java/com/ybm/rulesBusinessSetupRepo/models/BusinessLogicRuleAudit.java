@@ -17,11 +17,11 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class BusinessLogicRuleAudit implements Serializable {
-    String ruleAuditId;
-    String changedByUserId;
-    String blRuleId;
-    Date changeDateTime;
-    String changeRemark;
-    String approvedByUserId;
-    Date approvedDateTime;
+    private String ruleAuditId;
+    private String changedByUserId;
+    private String blRuleId;
+    private Date changeDateTime;
+    private String changeRemark;
+    private String approvedByUserId;
+    private Date approvedDateTime;
 }

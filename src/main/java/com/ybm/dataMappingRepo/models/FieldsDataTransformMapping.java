@@ -17,10 +17,12 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class FieldsDataTransformMapping implements Serializable {
-    String transformMappingId;
-    String transformMapperName;
-    String transformMapperVersion;
-    String mappingExpressionScript;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private String linkedEntity;
+    private String transformMappingId;
+    private String transformMapperName;
+    private String transformMapperVersion;
+    private String mappingExpressionScript;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

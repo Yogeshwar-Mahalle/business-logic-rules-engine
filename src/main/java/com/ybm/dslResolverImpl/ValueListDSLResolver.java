@@ -2,7 +2,7 @@
  * Copyright (c) 2023. The code is intellectual property of Yogeshwar Mahalle.
  */
 
-package com.ybm.rulesBusinessSetupRepo;
+package com.ybm.dslResolverImpl;
 
 import com.ybm.dslResolverImpl.dbRepository.IndustryDataRepository;
 import com.ybm.dslResolverImpl.entities.IndustryDataDbModel;
@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BusinessLogicRuleDSLResolver implements DSLResolver {
-    private static final String DSL_RESOLVER_KEYWORD = "blvaluelist";
-    private static final String WORKFLOW = "workflow";
+public class ValueListDSLResolver implements DSLResolver {
+    private static final String DSL_RESOLVER_KEYWORD = "VALUELIST";
+    private static final String WORKFLOW = "WORKFLOW";
 
     @Autowired
     private IndustryDataRepository industryDataRepository;

@@ -19,23 +19,23 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class BusinessLogicRule implements Serializable {
-    String ruleId;
-    String ruleType;
-    String linkedEntity;
-    String ruleName;
-    String condInclFuncNameList;
-    String condInitTemplate;
-    String condition;
-    String actionInclFuncNameList;
-    String actionInitTemplate;
-    String action;
-    String actionFinalTemplate;
-    Integer priority;
-    String description;
-    String status;
-    Date createTimeStamp;
-    Date effectiveFromDate;
-    Date updateTimeStamp;
+    private String linkedEntity;
+    private String ruleId;
+    private String ruleType;
+    private String ruleName;
+    private String condInclFuncNameList;
+    private String condInitTemplate;
+    private String condition;
+    private String actionInclFuncNameList;
+    private String actionInitTemplate;
+    private String action;
+    private String actionFinalTemplate;
+    private Integer priority;
+    private String description;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date effectiveFromDate;
+    private Date updateTimeStamp;
 
     List<BusinessLogicRuleCondition> conditionList;
     List<BusinessLogicRuleAction> actionList;

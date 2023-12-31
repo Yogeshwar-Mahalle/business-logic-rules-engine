@@ -7,6 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleFunctionTemplateRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleFunctionTemplateDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleFunctionTemplate;
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class BusinessRuleFunctionTemplateService {
                 .functionParameters(blRuleFunctionTemplateDbModel.getFunctionParameters())
                 .includeFunctionsNameList(blRuleFunctionTemplateDbModel.getIncludeFunctionsNameList())
                 .functionLogic(blRuleFunctionTemplateDbModel.getFunctionLogic())
-                .status(blRuleFunctionTemplateDbModel.getStatus())
+                .status(StatusType.valueOf(blRuleFunctionTemplateDbModel.getStatus()))
                 .createTimeStamp(blRuleFunctionTemplateDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleFunctionTemplateDbModel.getUpdateTimeStamp())
                 .build();
@@ -79,6 +80,7 @@ public class BusinessRuleFunctionTemplateService {
 
         return BLRuleFunctionTemplateDbModel.builder()
                 .functionId( businessLogicRuleFunctionTemplate.getFunctionId() == null ?
+                        businessLogicRuleFunctionTemplate.getLinkedEntity() + "~" +
                                 businessLogicRuleFunctionTemplate.getLinkedEntity() + "~" +
                                 businessLogicRuleFunctionTemplate.getFunctionName() :
                         businessLogicRuleFunctionTemplate.getFunctionId() )
@@ -88,7 +90,7 @@ public class BusinessRuleFunctionTemplateService {
                 .functionParameters(businessLogicRuleFunctionTemplate.getFunctionParameters())
                 .includeFunctionsNameList(businessLogicRuleFunctionTemplate.getIncludeFunctionsNameList())
                 .functionLogic(businessLogicRuleFunctionTemplate.getFunctionLogic())
-                .status(businessLogicRuleFunctionTemplate.getStatus())
+                .status(String.valueOf(businessLogicRuleFunctionTemplate.getStatus()))
                 .createTimeStamp(businessLogicRuleFunctionTemplate.getCreateTimeStamp() == null ? new Date() : businessLogicRuleFunctionTemplate.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

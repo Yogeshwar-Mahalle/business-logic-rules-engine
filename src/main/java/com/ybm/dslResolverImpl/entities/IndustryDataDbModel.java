@@ -24,6 +24,10 @@ import java.util.Date;
 public class IndustryDataDbModel implements Serializable {
 
     @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
+    @Id
     @Column(name = "DATA_TYPE", length = 25, nullable=false)
     private String dataType;
 
@@ -37,6 +41,9 @@ public class IndustryDataDbModel implements Serializable {
     @Column(name = "SEQUENCE_NUMBER", nullable=false)
     private Integer sequenceNumber;
 
+    @Column(name = "STATUS", length = 2, nullable=false)
+    private String status;
+
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 
@@ -45,6 +52,7 @@ public class IndustryDataDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
+        private String linkedEntity;
         private String dataType;
         private String keyField;
     }

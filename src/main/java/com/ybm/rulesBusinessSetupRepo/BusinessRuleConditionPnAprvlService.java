@@ -7,7 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.google.common.base.Enums;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleConditionPnAprvlRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleConditionPnAprvlDbModel;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleCondition;
+import com.ybm.rulesBusinessSetupRepo.models.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

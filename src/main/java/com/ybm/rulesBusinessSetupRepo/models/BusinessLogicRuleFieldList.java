@@ -25,7 +25,7 @@ public class BusinessLogicRuleFieldList implements Serializable {
     private String dataType;
     private String dataFormat;
     private String defaultValue;
-    private String status;
+    private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;
 }

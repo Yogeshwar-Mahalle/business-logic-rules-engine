@@ -24,6 +24,10 @@ import java.util.Date;
 public class FieldsDataMappingDbModel implements Serializable {
 
     @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
+    @Id
     @Column(name = "FIELD_DATA_MAPPING_ID", length = 128, nullable=false)
     private String fieldDataMappingId;
 
@@ -66,6 +70,9 @@ public class FieldsDataMappingDbModel implements Serializable {
     @Column(name = "END_DELIMITER")
     private String endDelimiter;
 
+    @Column(name = "STATUS", length = 2, nullable=false)
+    private String status;
+
     @Column(name = "DATA_TRIM_TYPE", nullable=false)
     private String dataTrimType;
 
@@ -78,6 +85,7 @@ public class FieldsDataMappingDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
+        private String linkedEntity;
         private String fieldDataMappingId;
     }
 

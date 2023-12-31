@@ -50,7 +50,7 @@ public class BLRuleFieldListDbModel implements Serializable {
     @Column(name = "DEFAULT_VALUE", length = 128)
     private String defaultValue;
 
-    @Column(name = "STATUS", length = 25, nullable=false)
+    @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)

@@ -7,9 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRulesRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleDbModel;
 //import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRulesRepositoryDummy;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRule;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleAction;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleCondition;
+import com.ybm.rulesBusinessSetupRepo.models.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -268,7 +266,7 @@ public class BusinessRulesService {
                 .actionFinalTemplate(blRuleDbModel.getActionFinalTemplate())
                 .description(blRuleDbModel.getDescription())
                 .priority(blRuleDbModel.getPriority())
-                .status(blRuleDbModel.getStatus())
+                .status(StatusType.valueOf(blRuleDbModel.getStatus()))
                 .createTimeStamp(blRuleDbModel.getCreateTimeStamp())
                 .effectiveFromDate(blRuleDbModel.getEffectiveFromDate())
                 .updateTimeStamp(blRuleDbModel.getUpdateTimeStamp())
@@ -568,7 +566,7 @@ public class BusinessRulesService {
                 .actionFinalTemplate(businessLogicRule.getActionFinalTemplate())
                 .description(businessLogicRule.getDescription())
                 .priority(businessLogicRule.getPriority())
-                .status(businessLogicRule.getStatus())
+                .status(String.valueOf(businessLogicRule.getStatus()))
                 .createTimeStamp(businessLogicRule.getCreateTimeStamp() == null ? new Date() : businessLogicRule.getCreateTimeStamp())
                 .effectiveFromDate(businessLogicRule.getEffectiveFromDate())
                 .updateTimeStamp(new Date())

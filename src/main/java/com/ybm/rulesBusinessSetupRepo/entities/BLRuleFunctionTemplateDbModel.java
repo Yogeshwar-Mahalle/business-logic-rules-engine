@@ -24,12 +24,12 @@ import java.util.Date;
 public class BLRuleFunctionTemplateDbModel implements Serializable {
 
     @Id
-    @Column(name = "FUNCTION_ID", length = 128, nullable=false)
-    private String functionId;
-
-    @Id
     @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
     private String linkedEntity;
+
+    @Id
+    @Column(name = "FUNCTION_ID", length = 128, nullable=false)
+    private String functionId;
 
     @Id
     @Column(name = "FUNCTION_NAME", length = 64, nullable=false)
@@ -47,7 +47,7 @@ public class BLRuleFunctionTemplateDbModel implements Serializable {
     @Column(name = "FUNCTION_LOGIC", length = 2097152)
     private String functionLogic;
 
-    @Column(name = "STATUS", length = 25, nullable=false)
+    @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
@@ -58,8 +58,8 @@ public class BLRuleFunctionTemplateDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
-        private String functionId;
         private String linkedEntity;
+        private String functionId;
         private String functionName;
     }
 

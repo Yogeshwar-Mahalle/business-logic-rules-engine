@@ -7,6 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleValueListPnAprvlRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleValueListPnAprvlDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleValueList;
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,7 +87,7 @@ public class BusinessRuleValueListPnAprvlService {
                 .keyField(blRuleValueListPnAprvlDbModel.getKeyField())
                 .valueField(blRuleValueListPnAprvlDbModel.getValueField())
                 .sequenceNumber(blRuleValueListPnAprvlDbModel.getSequenceNumber())
-                .status(blRuleValueListPnAprvlDbModel.getStatus())
+                .status(StatusType.valueOf(blRuleValueListPnAprvlDbModel.getStatus()))
                 .createTimeStamp(blRuleValueListPnAprvlDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleValueListPnAprvlDbModel.getUpdateTimeStamp())
                 .build();
@@ -101,7 +102,7 @@ public class BusinessRuleValueListPnAprvlService {
                 .keyField(businessLogicRuleValueList.getKeyField())
                 .valueField(businessLogicRuleValueList.getValueField())
                 .sequenceNumber(businessLogicRuleValueList.getSequenceNumber())
-                .status(businessLogicRuleValueList.getStatus())
+                .status(String.valueOf(businessLogicRuleValueList.getStatus()))
                 .createTimeStamp(businessLogicRuleValueList.getCreateTimeStamp() == null ? new Date() : businessLogicRuleValueList.getCreateTimeStamp())
                 .updateTimeStamp(businessLogicRuleValueList.getUpdateTimeStamp())
                 .build();

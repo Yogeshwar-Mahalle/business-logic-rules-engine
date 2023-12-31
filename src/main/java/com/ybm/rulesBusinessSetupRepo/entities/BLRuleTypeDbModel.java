@@ -24,12 +24,12 @@ import java.util.Date;
 public class BLRuleTypeDbModel implements Serializable {
 
     @Id
-    @Column(name = "RULE_TYPE", length = 25, nullable=false)
-    private String ruleType;
-
-    @Id
     @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
     private String linkedEntity;
+
+    @Id
+    @Column(name = "RULE_TYPE", length = 25, nullable=false)
+    private String ruleType;
 
     @Column(name = "DESCRIPTION", length = 256)
     private String description;
@@ -46,7 +46,7 @@ public class BLRuleTypeDbModel implements Serializable {
     @Column(name = "APPLY_ALL_FLAG", nullable=false)
     private boolean applyAllFlag;
 
-    @Column(name = "STATUS", length = 25, nullable=false)
+    @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
@@ -57,8 +57,8 @@ public class BLRuleTypeDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
-        private String ruleType;
         private String linkedEntity;
+        private String ruleType;
     }
 
 }

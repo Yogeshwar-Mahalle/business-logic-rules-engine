@@ -17,21 +17,21 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class ExchangeData implements Serializable {
-    String uniqueExchangeId;
-    String linkedEntity;
-    String source;
-    String target;
-    String messageId;
-    String workflowMonitor;
-    ContentType originalContentType;
-    String originalData;
-    String originalHeaders;
-    ContentType contentType;
-    String processedData;
-    String processedHeaders;
-    String properties;
-    String dataExtension;
-    String status;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private String uniqueExchangeId;
+    private String linkedEntity;
+    private String source;
+    private String target;
+    private String messageId;
+    private String workflowMonitor;
+    private ContentType originalContentType;
+    private String originalData;
+    private String originalHeaders;
+    private ContentType contentType;
+    private String processedData;
+    private String processedHeaders;
+    private String properties;
+    private String dataExtension;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

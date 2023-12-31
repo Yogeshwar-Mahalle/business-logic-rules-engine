@@ -4,6 +4,7 @@
 
 package com.ybm.interfacesRepo.models;
 
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,14 +18,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class InterfaceProfile implements Serializable {
-    String interfaceId;
-    String linkedEntity;
-    String interfaceName;
+    private String linkedEntity;
+    private String interfaceId;
+    private String interfaceName;
     @Builder.Default
-    ComProtocolType communicationProtocol = ComProtocolType.FILE;
+    private ComProtocolType communicationProtocol = ComProtocolType.FILE;
     @Builder.Default
-    DirectionType direction = DirectionType.OUTGOING;
-    String status;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private DirectionType direction = DirectionType.OUTGOING;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

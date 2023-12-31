@@ -7,6 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleTypeRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleTypeDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -104,7 +105,7 @@ public class BusinessRuleTypesService {
                 .workflowRuleFlag(blRuleTypeDbModel.isWorkflowRuleFlag())
                 .systemRuleFlag(blRuleTypeDbModel.isSystemRuleFlag())
                 .applyAllFlag(blRuleTypeDbModel.isApplyAllFlag())
-                .status(blRuleTypeDbModel.getStatus())
+                .status(StatusType.valueOf(blRuleTypeDbModel.getStatus()))
                 .createTimeStamp(blRuleTypeDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleTypeDbModel.getUpdateTimeStamp())
                 .build();
@@ -121,7 +122,7 @@ public class BusinessRuleTypesService {
                 .workflowRuleFlag(businessLogicRuleType.isWorkflowRuleFlag())
                 .systemRuleFlag(businessLogicRuleType.isSystemRuleFlag())
                 .applyAllFlag(businessLogicRuleType.isApplyAllFlag())
-                .status(businessLogicRuleType.getStatus())
+                .status(String.valueOf(businessLogicRuleType.getStatus()))
                 .createTimeStamp(businessLogicRuleType.getCreateTimeStamp() == null ? new Date() : businessLogicRuleType.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

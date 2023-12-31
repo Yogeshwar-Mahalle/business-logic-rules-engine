@@ -13,7 +13,7 @@ import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleFunctionTemplateService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRulesService;
-import com.ybm.rulesBusinessSetupRepo.ExchangeObjectType;
+import com.ybm.rulesBusinessSetupRepo.models.ExchangeObjectType;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRule;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleFunctionTemplate;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;

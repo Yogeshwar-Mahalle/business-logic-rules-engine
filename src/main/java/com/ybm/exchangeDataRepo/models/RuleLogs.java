@@ -17,13 +17,13 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class RuleLogs implements Serializable {
-    String uniqueExchangeId;
-    String ruleId;
-    String previousData;
-    String actionedData;
-    String previousHeaders;
-    String actionedHeaders;
-    String properties;
-    String extensionData;
-    Date createTimeStamp;
+    private String uniqueExchangeId;
+    private String ruleId;
+    private String previousData;
+    private String actionedData;
+    private String previousHeaders;
+    private String actionedHeaders;
+    private String properties;
+    private String extensionData;
+    private Date createTimeStamp;
 }

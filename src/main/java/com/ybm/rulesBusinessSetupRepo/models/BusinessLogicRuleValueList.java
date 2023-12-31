@@ -22,7 +22,7 @@ public class BusinessLogicRuleValueList implements Serializable {
     private String keyField;
     private String valueField;
     private Integer sequenceNumber;
-    private String status;
+    private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;
 }

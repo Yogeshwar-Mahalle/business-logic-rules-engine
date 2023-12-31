@@ -9,6 +9,7 @@ import com.ybm.exchangeDataRepo.dbRepository.ExchangeDataRepository;
 import com.ybm.exchangeDataRepo.entities.ExchangeDataDbModel;
 import com.ybm.exchangeDataRepo.models.ContentType;
 import com.ybm.exchangeDataRepo.models.ExchangeData;
+import com.ybm.exchangeDataRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,7 +92,7 @@ public class ExchangeDataService {
                 .processedHeaders(exchangeDataDbModel.getProcessedHeaders())
                 .properties(exchangeDataDbModel.getProperties())
                 .dataExtension(exchangeDataDbModel.getDataExtension())
-                .status(exchangeDataDbModel.getStatus())
+                .status(StatusType.valueOf(exchangeDataDbModel.getStatus()))
                 .createTimeStamp(exchangeDataDbModel.getCreateTimeStamp())
                 .updateTimeStamp(exchangeDataDbModel.getUpdateTimeStamp())
                 .build();
@@ -115,7 +116,7 @@ public class ExchangeDataService {
                 .processedHeaders(exchangeData.getProcessedHeaders())
                 .properties(exchangeData.getProperties())
                 .dataExtension(exchangeData.getDataExtension())
-                .status(exchangeData.getStatus())
+                .status(String.valueOf(exchangeData.getStatus()))
                 .createTimeStamp(exchangeData.getCreateTimeStamp() == null ? new Date() : exchangeData.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

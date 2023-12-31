@@ -4,6 +4,7 @@
 
 package com.ybm.interfacesRepo.models;
 
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,11 +18,11 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class InterfaceProperty implements Serializable {
-    String interfaceId;
+    private String interfaceId;
     @Builder.Default
-    PropertyType propertyName = PropertyType.FILE_PATH;
-    String propertyValue;
-    String status;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private PropertyType propertyName = PropertyType.FILE_PATH;
+    private String propertyValue;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

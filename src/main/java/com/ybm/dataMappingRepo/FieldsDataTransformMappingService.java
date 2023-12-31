@@ -7,6 +7,7 @@ package com.ybm.dataMappingRepo;
 import com.ybm.dataMappingRepo.dbRepository.FieldsDataTransformMappingRepository;
 import com.ybm.dataMappingRepo.entities.FieldsDataTransformMappingDbModel;
 import com.ybm.dataMappingRepo.models.FieldsDataTransformMapping;
+import com.ybm.dataMappingRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,10 +98,12 @@ public class FieldsDataTransformMappingService {
     private FieldsDataTransformMapping mapFieldsDataTransformMappingFromDbModel(FieldsDataTransformMappingDbModel fieldsDataTransformMappingDbModel){
 
         return FieldsDataTransformMapping.builder()
+                .linkedEntity(fieldsDataTransformMappingDbModel.getLinkedEntity())
                 .transformMappingId(fieldsDataTransformMappingDbModel.getTransformMappingId())
                 .transformMapperName(fieldsDataTransformMappingDbModel.getTransformMapperName())
                 .transformMapperVersion(fieldsDataTransformMappingDbModel.getTransformMapperVersion())
                 .mappingExpressionScript(fieldsDataTransformMappingDbModel.getMappingExpressionScript())
+                .status(StatusType.valueOf(fieldsDataTransformMappingDbModel.getStatus()))
                 .createTimeStamp(fieldsDataTransformMappingDbModel.getCreateTimeStamp())
                 .updateTimeStamp(fieldsDataTransformMappingDbModel.getUpdateTimeStamp())
                 .build();
@@ -110,12 +113,14 @@ public class FieldsDataTransformMappingService {
     private FieldsDataTransformMappingDbModel mapFieldsDataTransformMappingToDbModel(FieldsDataTransformMapping fieldsDataTransformMapping){
 
         return FieldsDataTransformMappingDbModel.builder()
+                .linkedEntity(fieldsDataTransformMapping.getLinkedEntity())
                 .transformMappingId( fieldsDataTransformMapping.getTransformMappingId() == null ?
-                        fieldsDataTransformMapping.getTransformMapperName() + "." + fieldsDataTransformMapping.getTransformMapperVersion() :
+                        fieldsDataTransformMapping.getLinkedEntity() + "~" + fieldsDataTransformMapping.getTransformMapperName() + "." + fieldsDataTransformMapping.getTransformMapperVersion() :
                         fieldsDataTransformMapping.getTransformMappingId() )
                 .transformMapperName(fieldsDataTransformMapping.getTransformMapperName())
                 .transformMapperVersion(fieldsDataTransformMapping.getTransformMapperVersion())
                 .mappingExpressionScript(fieldsDataTransformMapping.getMappingExpressionScript())
+                .status(String.valueOf(fieldsDataTransformMapping.getStatus()))
                 .createTimeStamp(fieldsDataTransformMapping.getCreateTimeStamp() == null ? new Date() : fieldsDataTransformMapping.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

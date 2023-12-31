@@ -17,14 +17,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class BusinessLogicRuleFunctionTemplate implements Serializable {
-    String functionId;
-    String linkedEntity;
-    String functionName;
-    String description;
-    String functionParameters;
-    String includeFunctionsNameList;
-    String functionLogic;
-    String status;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private String linkedEntity;
+    private String functionId;
+    private String functionName;
+    private String description;
+    private String functionParameters;
+    private String includeFunctionsNameList;
+    private String functionLogic;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

@@ -4,6 +4,7 @@
 
 package com.ybm.dslResolverImpl.models;
 
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,10 +18,12 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class IndustryData implements Serializable {
+    private String linkedEntity;
     private String dataType;
     private String keyField;
     private String valueField;
     private Integer sequenceNumber;
+    private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;
 }

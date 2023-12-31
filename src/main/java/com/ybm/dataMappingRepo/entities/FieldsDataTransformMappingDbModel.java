@@ -24,6 +24,10 @@ import java.util.Date;
 public class FieldsDataTransformMappingDbModel implements Serializable {
 
     @Id
+    @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
+    private String linkedEntity;
+
+    @Id
     @Column(name = "TRANSFORM_MAPPING_ID", length = 128, nullable=false)
     private String transformMappingId;
 
@@ -38,6 +42,9 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
     @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 20480)
     private String mappingExpressionScript;
 
+    @Column(name = "STATUS", length = 2, nullable=false)
+    private String status;
+
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;
 
@@ -46,6 +53,7 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
+        private String linkedEntity;
         private String transformMappingId;
         private String transformMapperName;
         private String transformMapperVersion;

@@ -8,6 +8,7 @@ import com.ybm.interfacesRepo.dbRepository.InterfacePropertyRepository;
 import com.ybm.interfacesRepo.entities.InterfacePropertyDbModel;
 import com.ybm.interfacesRepo.models.InterfaceProperty;
 import com.ybm.interfacesRepo.models.PropertyType;
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,7 +114,7 @@ public class InterfacePropertyService {
                 .interfaceId(interfacePropertyDbModel.getInterfaceId())
                 .propertyName(PropertyType.valueOf(interfacePropertyDbModel.getPropertyName()))
                 .propertyValue(interfacePropertyDbModel.getPropertyValue())
-                .status(interfacePropertyDbModel.getStatus())
+                .status(StatusType.valueOf(interfacePropertyDbModel.getStatus()))
                 .createTimeStamp(interfacePropertyDbModel.getCreateTimeStamp())
                 .updateTimeStamp(interfacePropertyDbModel.getUpdateTimeStamp())
                 .build();
@@ -126,7 +127,7 @@ public class InterfacePropertyService {
                 .interfaceId(interfaceProperty.getInterfaceId())
                 .propertyName(String.valueOf(interfaceProperty.getPropertyName()))
                 .propertyValue(interfaceProperty.getPropertyValue())
-                .status(interfaceProperty.getStatus())
+                .status(String.valueOf(interfaceProperty.getStatus()))
                 .createTimeStamp(interfaceProperty.getCreateTimeStamp())
                 .createTimeStamp(interfaceProperty.getCreateTimeStamp() == null ? new Date() : interfaceProperty.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

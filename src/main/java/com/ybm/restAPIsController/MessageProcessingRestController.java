@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.exchangeDataRepo.models.ContentType;
 import com.ybm.exchangeDataRepo.ExchangeDataService;
 import com.ybm.exchangeDataRepo.models.ExchangeData;
+import com.ybm.exchangeDataRepo.models.StatusType;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.ruleEngine.dataexchange.DataObject;
 import com.ybm.ruleEngine.dataexchange.Payload;
@@ -136,13 +137,22 @@ public class MessageProcessingRestController {
         entity = entity == null ? "BLRuleEngine" : entity;
         String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");
         messageId = dataExchangeObject.getProperties().get("messageId") != null ? (String) dataExchangeObject.getProperties().get("messageId") : messageId;
+        String messageType = headers.get("messagetype") != null ? headers.get("messagetype") : headers.get("MESSAGETYPE");
+        messageType = dataExchangeObject.getProperties().get("messageType") != null ? (String) dataExchangeObject.getProperties().get("messageType") : messageType;
+
+        dataExchangeObject.getProperties().putIfAbsent("entity", entity);
+        dataExchangeObject.getProperties().putIfAbsent("source", sourceSys);
+        dataExchangeObject.getProperties().putIfAbsent("formatType", ContentType.setLabel(strOrgContentType).name());
+        dataExchangeObject.getProperties().putIfAbsent("messageType", messageType);
+        dataExchangeObject.getProperties().putIfAbsent("messageId", messageId);
+
 
         ExchangeData exchangeData = new ExchangeData();
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
         exchangeData.setLinkedEntity(entity);
         exchangeData.setSource(sourceSys);
         exchangeData.setMessageId(messageId);
-        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@-@@@@@@@@@@-@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
+        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
         exchangeData.setOriginalContentType(ContentType.setLabel(strOrgContentType));
         exchangeData.setOriginalData(dataExchangeObject.getInDataObject().getPayload().getStrMessage());
         exchangeData.setOriginalHeaders(strOrgHeaders);
@@ -153,7 +163,7 @@ public class MessageProcessingRestController {
         exchangeData.setDataExtension(strDataExtension);
 
         if( exchangeData.getStatus() == null )
-            exchangeData.setStatus( "RECEIVED" ) ;
+            exchangeData.setStatus( StatusType.RECEIVED ) ;
 
         return exchangeData;
     }

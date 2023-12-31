@@ -17,22 +17,24 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class FieldsDataMapping implements Serializable {
-    String fieldDataMappingId;
-    String sourceDataType;
-    Integer fieldSequenceNumber;
-    String fieldDataMappingParentId;
-    String uniqueFieldName;
-    String fieldDisplayName;
-    String outputJsonPath;
-    String sourceDataFormat;
-    String sourcePath;
-    Integer startPosition;
-    Integer length;
-    String separator;
-    String startDelimiter;
-    String endDelimiter;
+    private String linkedEntity;
+    private String fieldDataMappingId;
+    private String sourceDataType;
+    private Integer fieldSequenceNumber;
+    private String fieldDataMappingParentId;
+    private String uniqueFieldName;
+    private String fieldDisplayName;
+    private String outputJsonPath;
+    private String sourceDataFormat;
+    private String sourcePath;
+    private Integer startPosition;
+    private Integer length;
+    private String separator;
+    private String startDelimiter;
+    private String endDelimiter;
     @Builder.Default
-    DataTrimType dataTrimType = DataTrimType.NONE;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private DataTrimType dataTrimType = DataTrimType.NONE;
+    private StatusType status;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

@@ -4,10 +4,6 @@
 
 package com.ybm.rulesBusinessSetupRepo.models;
 
-import com.ybm.rulesBusinessSetupRepo.ExchangeObjectType;
-import com.ybm.rulesBusinessSetupRepo.LogicalOperator;
-import com.ybm.rulesBusinessSetupRepo.OperandType;
-import com.ybm.rulesBusinessSetupRepo.Operator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,23 +17,23 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 public class BusinessLogicRuleCondition implements Serializable {
-    String ruleConditionId;
-    String parentRuleConditionId;
-    String ruleId;
-    Integer sequenceNumber;
+    private String ruleConditionId;
+    private String parentRuleConditionId;
+    private String ruleId;
+    private Integer sequenceNumber;
     @Builder.Default
-    Boolean isNotIndicator = false;
-    String openConditionScope;
-    ExchangeObjectType leftDataObject;
-    String leftOperand;
-    OperandType leftOperandType;
-    Operator operator;
-    ExchangeObjectType rightDataObject;
-    String rightOperand;
-    OperandType rightOperandType;
-    String closeConditionScope;
-    LogicalOperator logicalOperator;
-    String includeFuncNameList;
-    Date createTimeStamp;
-    Date updateTimeStamp;
+    private Boolean isNotIndicator = false;
+    private String openConditionScope;
+    private ExchangeObjectType leftDataObject;
+    private String leftOperand;
+    private OperandType leftOperandType;
+    private Operator operator;
+    private ExchangeObjectType rightDataObject;
+    private String rightOperand;
+    private OperandType rightOperandType;
+    private String closeConditionScope;
+    private LogicalOperator logicalOperator;
+    private String includeFuncNameList;
+    private Date createTimeStamp;
+    private Date updateTimeStamp;
 }

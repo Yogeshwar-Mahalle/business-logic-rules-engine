@@ -30,7 +30,6 @@ public class WorkflowManager {
     public DataExchangeObject run(String entity, DataExchangeObject dataExchangeObject) {
 
         DataExchangeObject wrkflwDataExchangeObject = dataExchangeObject.copy();
-        wrkflwDataExchangeObject.getProperties().putIfAbsent("RulesLog", "");
 
         List<BusinessLogicRuleType> listBusinessLogicRuleTypes = businessRuleTypesService.getAllRuleTypeByEntityWrkFlowFlag(entity);
         if (null == listBusinessLogicRuleTypes || listBusinessLogicRuleTypes.isEmpty()){

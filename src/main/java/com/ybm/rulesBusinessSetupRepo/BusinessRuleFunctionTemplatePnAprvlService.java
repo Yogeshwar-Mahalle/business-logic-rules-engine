@@ -7,6 +7,7 @@ package com.ybm.rulesBusinessSetupRepo;
 import com.ybm.rulesBusinessSetupRepo.dbRepository.BLRuleFunctionPnAprvlRepository;
 import com.ybm.rulesBusinessSetupRepo.entities.BLRuleFunctionTemplatePnAprvlDbModel;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleFunctionTemplate;
+import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class BusinessRuleFunctionTemplatePnAprvlService {
                 .functionParameters(blRuleFunctionTemplatePnAprvlDbModel.getFunctionParameters())
                 .includeFunctionsNameList(blRuleFunctionTemplatePnAprvlDbModel.getIncludeFunctionsNameList())
                 .functionLogic(blRuleFunctionTemplatePnAprvlDbModel.getFunctionLogic())
-                .status(blRuleFunctionTemplatePnAprvlDbModel.getStatus())
+                .status(StatusType.valueOf(blRuleFunctionTemplatePnAprvlDbModel.getStatus()))
                 .createTimeStamp(blRuleFunctionTemplatePnAprvlDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleFunctionTemplatePnAprvlDbModel.getUpdateTimeStamp())
                 .build();
@@ -79,7 +80,9 @@ public class BusinessRuleFunctionTemplatePnAprvlService {
 
         return BLRuleFunctionTemplatePnAprvlDbModel.builder()
                 .functionId( businessLogicRuleFunctionTemplate.getFunctionId() == null ?
-                        businessLogicRuleFunctionTemplate.getFunctionName() + "~" + businessLogicRuleFunctionTemplate.getFunctionParameters().hashCode() :
+                        businessLogicRuleFunctionTemplate.getLinkedEntity() + "~" +
+                                businessLogicRuleFunctionTemplate.getFunctionName() + "~" +
+                                businessLogicRuleFunctionTemplate.getFunctionParameters().hashCode() :
                         businessLogicRuleFunctionTemplate.getFunctionId() )
                 .linkedEntity(businessLogicRuleFunctionTemplate.getLinkedEntity())
                 .functionName(businessLogicRuleFunctionTemplate.getFunctionName())
@@ -87,7 +90,7 @@ public class BusinessRuleFunctionTemplatePnAprvlService {
                 .functionParameters(businessLogicRuleFunctionTemplate.getFunctionParameters())
                 .includeFunctionsNameList(businessLogicRuleFunctionTemplate.getIncludeFunctionsNameList())
                 .functionLogic(businessLogicRuleFunctionTemplate.getFunctionLogic())
-                .status(businessLogicRuleFunctionTemplate.getStatus())
+                .status(String.valueOf(businessLogicRuleFunctionTemplate.getStatus()))
                 .createTimeStamp(businessLogicRuleFunctionTemplate.getCreateTimeStamp() == null ? new Date() : businessLogicRuleFunctionTemplate.getCreateTimeStamp())
                 .updateTimeStamp(new Date())
                 .build();

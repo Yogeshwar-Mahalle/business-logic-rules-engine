@@ -21,13 +21,14 @@ import java.util.Date;
 @Table(name = "INTERFACE_PROFILE")
 @IdClass(InterfaceProfileDbModel.IdClass.class)
 public class InterfaceProfileDbModel implements Serializable {
-    @Id
-    @Column(name = "INTERFACE_ID", length = 128, nullable=false)
-    private String interfaceId;
 
     @Id
     @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
     private String linkedEntity;
+
+    @Id
+    @Column(name = "INTERFACE_ID", length = 128, nullable=false)
+    private String interfaceId;
 
     @Id
     @Column(name = "INTERFACE_NAME", length = 30, nullable=false)
@@ -39,7 +40,7 @@ public class InterfaceProfileDbModel implements Serializable {
     @Column(name = "DIRECTION", length = 1, nullable=false)
     private char direction;
 
-    @Column(name = "STATUS", length = 10, nullable=false)
+    @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
@@ -50,8 +51,8 @@ public class InterfaceProfileDbModel implements Serializable {
 
     @Data
     static class IdClass implements Serializable {
-        private String interfaceId;
         private String linkedEntity;
+        private String interfaceId;
         private String interfaceName;
     }
 }

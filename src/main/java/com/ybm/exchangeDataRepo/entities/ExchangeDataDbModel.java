@@ -65,7 +65,7 @@ public class ExchangeDataDbModel implements Serializable {
     @Column(name = "DATA_EXTENSION", length = 2097152)
     private String dataExtension;
 
-    @Column(name = "STATUS", length = 10, nullable=false)
+    @Column(name = "STATUS", length = 15, nullable=false)
     private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
