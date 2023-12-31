@@ -359,7 +359,10 @@ public class RuleEngine {
      */
     public DataExchangeObject executeRule(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
-        System.out.println("Selected and applied rule : " + businessLogicRule.getRuleId());
+        LOG.info("Selected and applied RuleId : " + businessLogicRule.getRuleId());
+        LOG.info("Selected and applied rule condition : " + businessLogicRule.getCondition());
+        LOG.info("Selected and applied rule action : " + businessLogicRule.getAction());
+
         DataExchangeObject outputResult = inputData.copy();
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();

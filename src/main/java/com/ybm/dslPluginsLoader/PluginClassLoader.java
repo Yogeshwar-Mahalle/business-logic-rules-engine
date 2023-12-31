@@ -44,7 +44,7 @@ public class PluginClassLoader implements ImportBeanDefinitionRegistrar {
             method.invoke(classLoader, pluginDir.toURI().toURL());
             return classLoader;
         } catch (Exception e) {
-            System.out.println("ClassLoader-error : " + e);
+            LOG.error("ClassLoader-error : " + e);
             return null;
         }
     }
