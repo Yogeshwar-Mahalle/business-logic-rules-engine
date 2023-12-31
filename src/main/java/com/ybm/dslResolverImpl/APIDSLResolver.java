@@ -24,7 +24,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 
 @Component
 public class APIDSLResolver implements DSLResolver {
-    private static final String DSL_RESOLVER_KEYWORD = "api";
+    private static final String DSL_RESOLVER_KEYWORD = "API";
 
     @Value( "${dsl.external.interface.url}" )
     private String externInterfaceUrl;
