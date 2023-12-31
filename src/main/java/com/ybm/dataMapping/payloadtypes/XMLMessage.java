@@ -16,12 +16,15 @@ import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 import lombok.Value;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
 public class XMLMessage implements PayloadMessageInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(XMLMessage.class);
     private final String m_OrgMessage;
     private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;

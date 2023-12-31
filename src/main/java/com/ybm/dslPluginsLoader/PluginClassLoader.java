@@ -5,6 +5,8 @@
 package com.ybm.dslPluginsLoader;
 
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -18,7 +20,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 public class PluginClassLoader implements ImportBeanDefinitionRegistrar {
-
+    private static final Logger LOG = LoggerFactory.getLogger(PluginClassLoader.class);
     @Value( "${dsl.plugins.path:/Users/yogeshwar_mahalle/RuleEngine/DSLPlugins/}" )
     private final String pluginJarsUrl; // = "file:///Users/yogeshwar_mahalle/RuleEngine/DSLPlugins/interface-plugin-impl-0.0.1-SNAPSHOT.jar";
     @Value( "${dsl.plugins.package.name:com.ybm.dslResolverImpl}"  )

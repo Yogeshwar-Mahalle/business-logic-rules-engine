@@ -5,13 +5,16 @@
 package com.ybm.dslResolverImpl;
 
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BankDSLResolver implements DSLResolver {
-    private static final String DSL_RESOLVER_KEYWORD = "bank";
-    private static final String INTEREST_RATE = "interestRate";
-    private static final String ELIGIBLE_AMOUNT = "eligibleAmount";
+    private static final Logger LOG = LoggerFactory.getLogger(BankDSLResolver.class);
+    private static final String DSL_RESOLVER_KEYWORD = "BANK";
+    private static final String INTEREST_RATE = "INTERESTRATE";
+    private static final String ELIGIBLE_AMOUNT = "ELIGIBLEAMOUNT";
 
     @Override
     public String getResolverKeyword() {

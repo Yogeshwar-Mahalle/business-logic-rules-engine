@@ -8,8 +8,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ToYamlTransformerVisitor implements VisitorInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(ToYamlTransformerVisitor.class);
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final YAMLMapper m_YamlMapper = new YAMLMapper();
     @Override

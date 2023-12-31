@@ -13,9 +13,12 @@ import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.ybm.dataMapping.MapXMLSerializer;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ToXmlTransformerVisitor implements VisitorInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(ToXmlTransformerVisitor.class);
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private XmlMapper m_XmlMapper = new XmlMapper();
 

@@ -7,11 +7,14 @@ package com.ybm.dslResolverImpl;
 import com.ybm.dslResolverImpl.dbRepository.IndustryDataRepository;
 import com.ybm.dslResolverImpl.entities.IndustryDataDbModel;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IndustryDataDSLResolver implements DSLResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(IndustryDataDSLResolver.class);
     private static final String DSL_RESOLVER_KEYWORD = "INDUSTRY";
     private static final String NCC_TYPE = "NCCTYPE";
     private static final String NCC_BIC = "NCCBIC";

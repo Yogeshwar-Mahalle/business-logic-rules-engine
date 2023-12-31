@@ -4,6 +4,8 @@
 
 package com.ybm.dslPluginsLoader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SpringBeansContextAware implements ApplicationContextAware {
+    private static final Logger LOG = LoggerFactory.getLogger(SpringBeansContextAware.class);
     private DefaultListableBeanFactory defaultListableBeanFactory;
     private ApplicationContext applicationContext;
 

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -19,6 +21,7 @@ import java.util.Map;
 
 @Getter
 public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Object>> {
+    private static final Logger LOG = LoggerFactory.getLogger(MapXMLSerializer.class);
     private final String NAMESPACE_KEYWORD = "#{xmlns:";
     private final String ATTRIBUTE_STARTWITH = "#{";
     private final String ATTRIBUTE_ENDWITH = "}";

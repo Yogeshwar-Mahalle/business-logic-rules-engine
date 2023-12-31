@@ -6,6 +6,8 @@ package com.ybm.dslResolverImpl;
 
 import com.ybm.exchangeDataRepo.ExchangeDataService;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +16,10 @@ import java.util.Map;
 
 @Component
 public class ExchangeDataDSLResolver implements DSLResolver {
-    private static final String DSL_RESOLVER_KEYWORD = "exchangedata";
-    private static final String DUPLICATE_CHECK = "duplicatecheck";
-    private static final String GET_EXCHANGE_DATA = "getdata";
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeDataDSLResolver.class);
+    private static final String DSL_RESOLVER_KEYWORD = "EXCHANGEDATA";
+    private static final String DUPLICATE_CHECK = "DUPLICATECHECK";
+    private static final String GET_EXCHANGE_DATA = "GETDATA";
 
 
     @Autowired

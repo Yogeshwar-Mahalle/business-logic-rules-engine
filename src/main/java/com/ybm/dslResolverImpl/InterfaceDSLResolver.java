@@ -8,6 +8,8 @@ import com.ybm.interfacesRepo.models.*;
 import com.ybm.interfacesRepo.InterfaceProfileService;
 import com.ybm.interfacesRepo.InterfacePropertyService;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class InterfaceDSLResolver implements DSLResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(InterfaceDSLResolver.class);
     private static final String DSL_RESOLVER_KEYWORD = "INTERFACE";
     private static final String SYNCHRONOUS = "SYNCHRONOUS";
     private static final String ASYNCHRONOUS = "ASYNCHRONOUS";

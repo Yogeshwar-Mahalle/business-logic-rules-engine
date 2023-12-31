@@ -7,6 +7,8 @@ package com.ybm.ruleEngine;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class DSLPatternUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(DSLPatternUtil.class);
     //${dsr.keyword(parameter1, ...)} or ${dsr.keyword[index]} or ${dsr.keyword} or ${dsr}
     private static final String expr = "\\$\\{(" +
             "(\\w+\\.\\w+([-_a-zA-Z0-9]+)\\(([\"-.,_a-zA-Z0-9\\s\\[\\]]+)\\)([0-9\\s\\[\\]]*))|" +

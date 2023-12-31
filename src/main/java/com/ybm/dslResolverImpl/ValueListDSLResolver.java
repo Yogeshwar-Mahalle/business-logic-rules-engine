@@ -7,11 +7,14 @@ package com.ybm.dslResolverImpl;
 import com.ybm.dslResolverImpl.dbRepository.IndustryDataRepository;
 import com.ybm.dslResolverImpl.entities.IndustryDataDbModel;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ValueListDSLResolver implements DSLResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(ValueListDSLResolver.class);
     private static final String DSL_RESOLVER_KEYWORD = "VALUELIST";
     private static final String WORKFLOW = "WORKFLOW";
 

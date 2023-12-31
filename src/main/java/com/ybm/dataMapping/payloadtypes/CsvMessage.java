@@ -10,13 +10,15 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class CsvMessage implements PayloadMessageInterface {
-
+    private static final Logger LOG = LoggerFactory.getLogger(CsvMessage.class);
     private final String m_OrgMessage;
     private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;

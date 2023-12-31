@@ -10,10 +10,13 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 
 public class PropMessage implements PayloadMessageInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(PropMessage.class);
     private final String m_OrgMessage;
     private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;

@@ -10,6 +10,8 @@ import com.ybm.dataMapping.payloadtypes.*;
 import com.ybm.dataMapping.processor.DataEnrichmentProcessing;
 import com.ybm.dataMapping.processor.DataMapProcessing;
 import com.ybm.dataMapping.visitor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -19,6 +21,7 @@ import java.io.IOException;
 
 @Component
 public class DataMappingProcessor {
+    private static final Logger LOG = LoggerFactory.getLogger(DataMappingProcessor.class);
     @Autowired
     DataEnrichmentProcessing dataEnrichmentProcessing;
 

@@ -16,6 +16,8 @@ import com.ybm.ruleEngine.dataexchange.Payload;
 import com.ybm.ruleEngine.RuleEngine;
 import com.ybm.workflow.WorkflowManager;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 public class MessageProcessingRestController {
+    private static final Logger LOG = LoggerFactory.getLogger(MessageProcessingRestController.class);
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired

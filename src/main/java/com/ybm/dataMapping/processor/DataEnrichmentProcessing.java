@@ -4,9 +4,11 @@
 
 package com.ybm.dataMapping.processor;
 
-import com.ybm.dataMapping.StandardFields;
+import com.ybm.dataMapping.models.StandardFields;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,6 +22,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 
 @Component
 public class DataEnrichmentProcessing implements ProcessingInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(DataEnrichmentProcessing.class);
 
     @Value( "${transformer.external.interface.url}" )
     private String externInterfaceUrl;

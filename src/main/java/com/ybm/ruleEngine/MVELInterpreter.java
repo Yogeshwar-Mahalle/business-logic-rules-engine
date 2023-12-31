@@ -13,6 +13,8 @@ import org.mvel2.integration.VariableResolverFactory;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -22,7 +24,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class MVELInterpreter {
-
+    private static final Logger LOG = LoggerFactory.getLogger(MVELInterpreter.class);
     static private Map<String, CompiledTemplate> preCompiledTemplateMap = new LinkedHashMap<>();
 
     public boolean isPreCompiledFuncTemplateExist( String templateID )

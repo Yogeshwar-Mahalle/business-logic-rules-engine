@@ -4,12 +4,14 @@
 
 package com.ybm.dataMapping.processor;
 
-import com.ybm.dataMapping.StandardFields;
+import com.ybm.dataMapping.models.StandardFields;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMappingRepo.FieldsDataTransformMappingService;
 import com.ybm.dataMappingRepo.models.FieldsDataTransformMapping;
 import com.ybm.ruleEngine.MVELInterpreter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import java.util.LinkedHashMap;
 
 @Component
 public class DataMapProcessing implements ProcessingInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(DataMapProcessing.class);
     @Autowired
     protected MVELInterpreter mvelInterpreter;
     @Autowired

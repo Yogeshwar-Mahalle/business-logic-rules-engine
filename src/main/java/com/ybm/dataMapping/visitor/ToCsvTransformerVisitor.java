@@ -9,11 +9,13 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 public class ToCsvTransformerVisitor implements VisitorInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(ToCsvTransformerVisitor.class);
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final CsvMapper m_CsvMapper = new CsvMapper();
     @Override

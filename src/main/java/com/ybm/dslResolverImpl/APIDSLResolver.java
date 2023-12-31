@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,6 +26,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 
 @Component
 public class APIDSLResolver implements DSLResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(APIDSLResolver.class);
     private static final String DSL_RESOLVER_KEYWORD = "API";
 
     @Value( "${dsl.external.interface.url}" )

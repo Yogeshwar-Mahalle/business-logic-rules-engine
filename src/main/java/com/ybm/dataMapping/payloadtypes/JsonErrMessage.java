@@ -10,10 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.ProcessingInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 
 public class JsonErrMessage implements PayloadMessageInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(JsonErrMessage.class);
     private final String m_OrgMessage;
     private LinkedHashMap<String, Object> m_DataMap = null;
     private final String m_RootNodeName;

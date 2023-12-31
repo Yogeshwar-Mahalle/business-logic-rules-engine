@@ -8,8 +8,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ToJsonTransformerVisitor implements VisitorInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(ToJsonTransformerVisitor.class);
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final ObjectMapper m_JsonMapper = new ObjectMapper();
 

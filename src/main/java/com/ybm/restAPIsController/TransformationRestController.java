@@ -9,6 +9,8 @@ import com.ybm.dataMapping.DataMappingProcessor;
 import com.ybm.dataMappingRepo.FieldsDataTransformMappingService;
 import com.ybm.dataMappingRepo.models.FieldsDataTransformMapping;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 public class TransformationRestController {
-
+    private static final Logger LOG = LoggerFactory.getLogger(TransformationRestController.class);
     @Autowired
     private FieldsDataTransformMappingService fieldsDataTransformMappingService;
 
