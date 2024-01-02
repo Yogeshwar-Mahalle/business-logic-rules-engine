@@ -24,6 +24,8 @@ public class BLRuleEngineRestController {
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired
+    private BusinessRuleEntityService businessRuleEntityService;
+    @Autowired
     private BusinessRuleTypesService businessRuleTypesService;
     @Autowired
     private BusinessRulesService businessRulesService;
@@ -37,6 +39,39 @@ public class BLRuleEngineRestController {
     private BusinessRuleFieldListService businessRuleFieldListService;
     @Autowired
     private BusinessRuleValueListService businessRuleValueListService;
+
+    @GetMapping(value = "/get-all-rule-entity")
+    public ResponseEntity<?> getAllRuleEntities() {
+        List<BusinessLogicRuleEntity> allBusinessLogicRuleEntity = businessRuleEntityService.getAllEntities();
+        return ResponseEntity.ok(allBusinessLogicRuleEntity);
+    }
+
+    @GetMapping(value = "/get-rule-entity/{entity}")
+    public ResponseEntity<?> getRuleEntityByEntityName(@PathVariable("entity") String entityName) {
+        BusinessLogicRuleEntity businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName(entityName);
+        return ResponseEntity.ok(businessLogicRuleEntity);
+    }
+
+    @PostMapping(value = "/update-rule-entity")
+    public ResponseEntity<?> updateRuleEntity(@RequestBody BusinessLogicRuleEntity businessLogicRuleEntity) {
+
+        BusinessLogicRuleEntity businessLogicRuleEntityUpdated = businessRuleEntityService.saveRuleEntity(businessLogicRuleEntity);
+        return ResponseEntity.ok(businessLogicRuleEntityUpdated);
+    }
+
+    @PostMapping(value = "/update-all-rule-entity")
+    public ResponseEntity<?> updateRuleEntities(@RequestBody List<BusinessLogicRuleEntity> businessLogicRuleEntities) {
+
+        List<BusinessLogicRuleEntity> ruleEntitiesUpdated = businessRuleEntityService.saveRuleEntities(businessLogicRuleEntities);
+        return ResponseEntity.ok(ruleEntitiesUpdated);
+    }
+
+    @DeleteMapping(value = "/remove-rule-entity/{entity}")
+    public ResponseEntity<?> removeRuleEntityByEntityName(@PathVariable("entity") String entityName) {
+        List<BusinessLogicRuleEntity> allRemainingBusinessLogicRuleEntities =
+                businessRuleEntityService.removeRuleEntityByEntityName(entityName);
+        return ResponseEntity.ok(allRemainingBusinessLogicRuleEntities);
+    }
 
     @GetMapping(value = "/get-all-rule-type")
     public ResponseEntity<?> getAllRuleType() {
