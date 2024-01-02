@@ -7,9 +7,9 @@ package com.ybm;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -23,6 +23,14 @@ import java.util.concurrent.Executor;
 public class BLRuleEngineApplication {
     private static final Logger LOG = LoggerFactory.getLogger(BLRuleEngineApplication.class);
 
+    @Value( "${threadpooltaskexecutor.corePoolSize:5}" )
+    private Integer corePoolSize;
+    @Value( "${threadpooltaskexecutor.maxPoolSize:100}" )
+    private Integer maxPoolSize;
+    @Value( "${threadpooltaskexecutor.queueCapacity:500}" )
+    private Integer queueCapacity;
+
+
     public static void main(String[] args) {
         LOG.info("******************************* BLRuleEngine Loading *******************************");
         SpringApplication.run(BLRuleEngineApplication.class, args);
@@ -33,9 +41,9 @@ public class BLRuleEngineApplication {
     @Bean
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(100);
-        executor.setQueueCapacity(500);
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("BLRuleEngine-");
         executor.initialize();
         return executor;

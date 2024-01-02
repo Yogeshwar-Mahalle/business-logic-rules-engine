@@ -93,6 +93,7 @@ public class InterfaceProfileService {
                         .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<InterfaceProfile> removeInterfaceProfileById(String interfaceId){
         if( interfaceId == null )
             return null;

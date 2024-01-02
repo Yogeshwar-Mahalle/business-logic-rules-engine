@@ -46,6 +46,7 @@ public class BusinessRuleFunctionTemplatePnAprvlService {
         return mapRuleFunctionTemplatePnAprvlFromDbModel(blRuleFunctionTemplatePnAprvlDbModel);
     }
 
+    @Transactional
     public List<BusinessLogicRuleFunctionTemplate> removeRuleFunctionById(String functionId) {
         if( functionId == null )
             return null;

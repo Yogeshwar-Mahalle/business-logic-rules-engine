@@ -60,6 +60,7 @@ public class BusinessRuleEntityService {
 
     }
 
+    @Transactional
     public List<BusinessLogicRuleEntity> removeRuleEntityByEntityName(String entityName) {
 
         blRuleEntityRepository.deleteByEntityName(entityName);
@@ -76,6 +77,11 @@ public class BusinessRuleEntityService {
         return BusinessLogicRuleEntity.builder()
                 .entityName(blRuleEntityDbModel.getEntityName())
                 .description(blRuleEntityDbModel.getDescription())
+                .countryCode(blRuleEntityDbModel.getCountryCode())
+                .currencyCode(blRuleEntityDbModel.getCurrencyCode())
+                .businessDate(blRuleEntityDbModel.getBusinessDate())
+                .timeZone(blRuleEntityDbModel.getTimeZone())
+                .dataStorageFlag(blRuleEntityDbModel.getDataStorageFlag())
                 .status(StatusType.valueOf(blRuleEntityDbModel.getStatus()))
                 .createTimeStamp(blRuleEntityDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleEntityDbModel.getUpdateTimeStamp())
@@ -88,6 +94,11 @@ public class BusinessRuleEntityService {
         return BLRuleEntityDbModel.builder()
                 .entityName(businessLogicRuleEntity.getEntityName())
                 .description(businessLogicRuleEntity.getDescription())
+                .countryCode(businessLogicRuleEntity.getCountryCode())
+                .currencyCode(businessLogicRuleEntity.getCurrencyCode())
+                .businessDate(businessLogicRuleEntity.getBusinessDate() == null ? new Date() : businessLogicRuleEntity.getBusinessDate())
+                .timeZone(businessLogicRuleEntity.getTimeZone())
+                .dataStorageFlag(businessLogicRuleEntity.getDataStorageFlag())
                 .status(String.valueOf(businessLogicRuleEntity.getStatus()))
                 .createTimeStamp(businessLogicRuleEntity.getCreateTimeStamp() == null ? new Date() : businessLogicRuleEntity.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

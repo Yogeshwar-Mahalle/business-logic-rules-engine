@@ -24,18 +24,18 @@ public class FieldsDataMappingService {
     private FieldsDataMappingRepository fieldsDataMappingRepository;
 
     public FieldsDataMapping getFieldsDataMappingById(String uniqueExchangeID) {
-        Optional<FieldsDataMappingDbModel> FieldsDataMappingDbModel = fieldsDataMappingRepository.findById(uniqueExchangeID);
+        Optional<FieldsDataMappingDbModel> fieldsDataMappingDbModel = fieldsDataMappingRepository.findById(uniqueExchangeID);
 
-        return FieldsDataMappingDbModel.map(this::mapFieldsDataMappingFromDbModel).orElse(null);
+        return fieldsDataMappingDbModel.map(this::mapFieldsDataMappingFromDbModel).orElse(null);
 
     }
 
     @Transactional
     public FieldsDataMapping saveFieldsDataMapping(FieldsDataMapping FieldsDataMapping) {
-        FieldsDataMappingDbModel FieldsDataMappingDbModel = mapFieldsDataMappingToDbModel(FieldsDataMapping);
-        FieldsDataMappingDbModel = fieldsDataMappingRepository.save(FieldsDataMappingDbModel);
+        FieldsDataMappingDbModel fieldsDataMappingDbModel = mapFieldsDataMappingToDbModel(FieldsDataMapping);
+        fieldsDataMappingDbModel = fieldsDataMappingRepository.save(fieldsDataMappingDbModel);
 
-        return mapFieldsDataMappingFromDbModel(FieldsDataMappingDbModel);
+        return mapFieldsDataMappingFromDbModel(fieldsDataMappingDbModel);
     }
 
 

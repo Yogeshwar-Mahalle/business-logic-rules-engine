@@ -67,6 +67,7 @@ public class InterfacePropertyService {
         return mapInterfacePropertiesFromDbModel(interfacePropertyDbModel);
     }
 
+    @Transactional
     public List<InterfaceProperty> saveInterfacePropertyList(List<InterfaceProperty> interfacePropertyList) {
         List<InterfacePropertyDbModel> listInterfacePropertyDbDBModel = interfacePropertyList.stream()
                 .map(
@@ -81,6 +82,7 @@ public class InterfacePropertyService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<InterfaceProperty> removeInterfacePropertiesById(String interfaceId) {
         if( interfaceId == null )
             return null;
@@ -94,6 +96,7 @@ public class InterfacePropertyService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<InterfaceProperty> removeInterfacePropertiesByIdAndName(String interfaceId,
                                                                         String propertyName) {
         if( interfaceId == null )

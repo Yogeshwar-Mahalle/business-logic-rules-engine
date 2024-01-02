@@ -68,6 +68,7 @@ public class BusinessRuleValueListPnAprvlService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<BusinessLogicRuleValueList> removeRuleValueByFieldId(String dataType, String keyField) {
         blRuleValueListPnAprvlRepository.deleteByDataTypeAndKeyField(dataType, keyField);
 

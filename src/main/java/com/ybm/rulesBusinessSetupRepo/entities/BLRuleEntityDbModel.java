@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Data
 @Builder
@@ -29,6 +30,21 @@ public class BLRuleEntityDbModel implements Serializable {
 
     @Column(name = "DESCRIPTION", length = 256)
     private String description;
+
+    @Column(name = "COUNTRY_CODE", length = 2, nullable=false)
+    private String countryCode;
+
+    @Column(name = "CURRENCY_CODE", length = 3, nullable=false)
+    private String currencyCode;
+
+    @Column(name = "BUSINESS_DATE", nullable=false)
+    private Date businessDate;
+
+    @Column(name = "TIME_ZONE", nullable=false)
+    private TimeZone timeZone;
+
+    @Column(name = "DATA_STORAGE_FLAG", nullable=false)
+    private Boolean dataStorageFlag;
 
     @Column(name = "STATUS", length = 2, nullable=false)
     private String status;

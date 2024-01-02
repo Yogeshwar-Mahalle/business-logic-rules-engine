@@ -20,10 +20,10 @@ public class BusinessLogicRuleType implements Serializable {
     private String linkedEntity;
     private String ruleType;
     private String description;
-    private boolean complexRuleFlag;
-    private boolean workflowRuleFlag;
-    private boolean applyAllFlag;
-    private boolean systemRuleFlag;
+    private Boolean complexRuleFlag;
+    private Boolean workflowRuleFlag;
+    private Boolean applyAllFlag;
+    private Boolean systemRuleFlag;
     private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;

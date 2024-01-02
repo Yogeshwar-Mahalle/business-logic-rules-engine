@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Builder
 @NoArgsConstructor
@@ -19,6 +20,11 @@ import java.util.Date;
 public class BusinessLogicRuleEntity implements Serializable {
     private String entityName;
     private String description;
+    private String countryCode;
+    private String currencyCode;
+    private Date businessDate;
+    private TimeZone timeZone;
+    private Boolean dataStorageFlag;
     private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;

@@ -35,16 +35,16 @@ public class BLRuleTypeDbModel implements Serializable {
     private String description;
 
     @Column(name = "COMPLEX_RULE_FLAG", nullable=false)
-    private boolean complexRuleFlag;
+    private Boolean complexRuleFlag;
 
     @Column(name = "WORKFLOW_RULE_FLAG", nullable=false)
-    private boolean workflowRuleFlag;
+    private Boolean workflowRuleFlag;
 
     @Column(name = "SYSTEM_RULE_FLAG", nullable=false)
-    private boolean systemRuleFlag;
+    private Boolean systemRuleFlag;
 
     @Column(name = "APPLY_ALL_FLAG", nullable=false)
-    private boolean applyAllFlag;
+    private Boolean applyAllFlag;
 
     @Column(name = "STATUS", length = 2, nullable=false)
     private String status;

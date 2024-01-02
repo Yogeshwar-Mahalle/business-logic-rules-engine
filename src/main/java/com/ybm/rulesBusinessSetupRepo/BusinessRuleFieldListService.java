@@ -68,6 +68,7 @@ public class BusinessRuleFieldListService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<BusinessLogicRuleFieldList> removeRuleFieldByFieldId(String ruleType, String keyField) {
         blRuleFieldListRepository.deleteByRuleTypeAndFieldName(ruleType, keyField);
 

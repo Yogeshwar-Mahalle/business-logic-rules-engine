@@ -70,11 +70,11 @@ public class FieldsDataMappingDbModel implements Serializable {
     @Column(name = "END_DELIMITER")
     private String endDelimiter;
 
-    @Column(name = "STATUS", length = 2, nullable=false)
-    private String status;
-
     @Column(name = "DATA_TRIM_TYPE", nullable=false)
     private String dataTrimType;
+
+    @Column(name = "STATUS", length = 2, nullable=false)
+    private String status;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;

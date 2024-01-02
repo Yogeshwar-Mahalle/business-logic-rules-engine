@@ -84,6 +84,7 @@ public class BusinessRuleTypesService {
 
     }
 
+    @Transactional
     public List<BusinessLogicRuleType> removeRuleTypesByEntityAndTypeId(String entity, String ruleType) {
 
         blRuleTypeRepository.deleteByLinkedEntityAndRuleType(entity, ruleType);
@@ -101,10 +102,10 @@ public class BusinessRuleTypesService {
                 .ruleType(blRuleTypeDbModel.getRuleType())
                 .linkedEntity(blRuleTypeDbModel.getLinkedEntity())
                 .description(blRuleTypeDbModel.getDescription())
-                .complexRuleFlag(blRuleTypeDbModel.isComplexRuleFlag())
-                .workflowRuleFlag(blRuleTypeDbModel.isWorkflowRuleFlag())
-                .systemRuleFlag(blRuleTypeDbModel.isSystemRuleFlag())
-                .applyAllFlag(blRuleTypeDbModel.isApplyAllFlag())
+                .complexRuleFlag(blRuleTypeDbModel.getComplexRuleFlag())
+                .workflowRuleFlag(blRuleTypeDbModel.getWorkflowRuleFlag())
+                .systemRuleFlag(blRuleTypeDbModel.getSystemRuleFlag())
+                .applyAllFlag(blRuleTypeDbModel.getApplyAllFlag())
                 .status(StatusType.valueOf(blRuleTypeDbModel.getStatus()))
                 .createTimeStamp(blRuleTypeDbModel.getCreateTimeStamp())
                 .updateTimeStamp(blRuleTypeDbModel.getUpdateTimeStamp())
@@ -118,10 +119,10 @@ public class BusinessRuleTypesService {
                 .ruleType(businessLogicRuleType.getRuleType())
                 .linkedEntity(businessLogicRuleType.getLinkedEntity())
                 .description(businessLogicRuleType.getDescription())
-                .complexRuleFlag(businessLogicRuleType.isComplexRuleFlag())
-                .workflowRuleFlag(businessLogicRuleType.isWorkflowRuleFlag())
-                .systemRuleFlag(businessLogicRuleType.isSystemRuleFlag())
-                .applyAllFlag(businessLogicRuleType.isApplyAllFlag())
+                .complexRuleFlag(businessLogicRuleType.getComplexRuleFlag())
+                .workflowRuleFlag(businessLogicRuleType.getWorkflowRuleFlag())
+                .systemRuleFlag(businessLogicRuleType.getSystemRuleFlag())
+                .applyAllFlag(businessLogicRuleType.getApplyAllFlag())
                 .status(String.valueOf(businessLogicRuleType.getStatus()))
                 .createTimeStamp(businessLogicRuleType.getCreateTimeStamp() == null ? new Date() : businessLogicRuleType.getCreateTimeStamp())
                 .updateTimeStamp(new Date())

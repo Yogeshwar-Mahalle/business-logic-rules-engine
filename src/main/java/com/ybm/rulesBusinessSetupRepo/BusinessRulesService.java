@@ -89,6 +89,7 @@ public class BusinessRulesService {
         return updatedBusinessLogicRules;
     }
 
+    @Transactional
     public List<BusinessLogicRule> removeRuleById(String ruleId){
         if( ruleId == null )
             return null;

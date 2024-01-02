@@ -70,7 +70,7 @@ public class RuleEngine {
         //STEP 2 (SORT) : Sort the matched rules based on priority
         List<BusinessLogicRule> matchedSortedRulesSet = sortMatchedRulesSet(matchedRulesSet);
 
-        if( !businessLogicRuleTypes.isApplyAllFlag() ) {
+        if( !businessLogicRuleTypes.getApplyAllFlag() ) {
             //STEP 3 (FIND FIRST) : Apply only first matched rule using priority from the selected rules.
             BusinessLogicRule resolvedBusinessLogicRule = resolve(matchedSortedRulesSet);
             if (null == resolvedBusinessLogicRule) {

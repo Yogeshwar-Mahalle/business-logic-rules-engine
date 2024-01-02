@@ -63,6 +63,7 @@ public class FieldsDataTransformMappingService {
         return mapFieldsDataTransformMappingFromDbModel(fieldsDataTransformMappingDbModel);
     }
 
+    @Transactional
     public List<FieldsDataTransformMapping> saveFieldsDataMappingList(List<FieldsDataTransformMapping> fieldsDataTransformMappingList) {
         if( fieldsDataTransformMappingList == null )
             return null;
@@ -82,6 +83,7 @@ public class FieldsDataTransformMappingService {
                 .toList();
     }
 
+    @Transactional
     public List<FieldsDataTransformMapping> removeFieldsDataTransformMappingById(String transformMapperId) {
         if( transformMapperId == null )
             return null;
