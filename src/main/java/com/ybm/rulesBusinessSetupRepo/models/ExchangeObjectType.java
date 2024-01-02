@@ -6,6 +6,7 @@ package com.ybm.rulesBusinessSetupRepo.models;
 
 public enum ExchangeObjectType {
     INPUT_EXCHANGE_ID("uniqueExchangeId"),
+    INPUT_ENTITY("entity"),
     INPUT_MESSAGE("inMessage"),
     INPUT_PAYLOAD("inPayload"),
     INPUT_HEADERS("inHeaders"),

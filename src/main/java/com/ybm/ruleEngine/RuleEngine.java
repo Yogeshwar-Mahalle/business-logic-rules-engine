@@ -13,10 +13,7 @@ import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleFunctionTemplateService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
 import com.ybm.rulesBusinessSetupRepo.BusinessRulesService;
-import com.ybm.rulesBusinessSetupRepo.models.ExchangeObjectType;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRule;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleFunctionTemplate;
-import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;
+import com.ybm.rulesBusinessSetupRepo.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,14 +48,18 @@ public class RuleEngine {
      * @param dataExchangeObject
      * @return
      */
-    public DataExchangeObject run(String entity, String ruleType, DataExchangeObject dataExchangeObject) {
+    public DataExchangeObject run(String ruleType, DataExchangeObject dataExchangeObject) {
+        BusinessLogicRuleEntity businessLogicRuleEntity = dataExchangeObject.getBusinessLogicRuleEntity();
+
         //TODO: Here for each call, we are fetching all rules from dbRepository. It should be cache.
-        BusinessLogicRuleType businessLogicRuleTypes = businessRuleTypesService.getRuleTypeByEntityAndRuleType(entity, ruleType);
+        BusinessLogicRuleType businessLogicRuleTypes =
+                businessRuleTypesService.getRuleTypeByEntityAndRuleType(businessLogicRuleEntity.getEntityName(), ruleType);
         if (businessLogicRuleTypes == null){
             return dataExchangeObject;
         }
 
-        List<BusinessLogicRule> listOfBusinessLogicRules = businessRulesService.getAllRulesByEntityAndType(entity, ruleType);
+        List<BusinessLogicRule> listOfBusinessLogicRules =
+                businessRulesService.getAllRulesByEntityAndType(businessLogicRuleEntity.getEntityName(), ruleType);
         if (null == listOfBusinessLogicRules || listOfBusinessLogicRules.isEmpty()){
             return dataExchangeObject;
         }
@@ -312,6 +313,7 @@ public class RuleEngine {
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         dataMap.put(ExchangeObjectType.INPUT_EXCHANGE_ID.getLabel(), inputData.getUniqueExchangeId());
+        dataMap.put(ExchangeObjectType.INPUT_ENTITY.getLabel(), inputData.getBusinessLogicRuleEntity());
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());
@@ -367,6 +369,7 @@ public class RuleEngine {
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         dataMap.put(ExchangeObjectType.INPUT_EXCHANGE_ID.getLabel(), inputData.getUniqueExchangeId());
+        dataMap.put(ExchangeObjectType.INPUT_ENTITY.getLabel(), inputData.getBusinessLogicRuleEntity());
         dataMap.put(ExchangeObjectType.INPUT_MESSAGE.getLabel(), inputData.getInDataObject().getPayload().getStrMessage());
         dataMap.put(ExchangeObjectType.INPUT_PAYLOAD.getLabel(), inputData.getInDataObject().getPayload().getDataMap());
         dataMap.put(ExchangeObjectType.INPUT_HEADERS.getLabel(), inputData.getOutDataObject().getHeaders());

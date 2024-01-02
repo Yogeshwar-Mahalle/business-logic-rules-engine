@@ -5,6 +5,7 @@
 package com.ybm.ruleEngine.dataexchange;
 
 import com.ybm.exchangeDataRepo.models.RuleLogs;
+import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @Setter
 public class DataExchangeObject implements Serializable {
     private final String uniqueExchangeId;
+    private final BusinessLogicRuleEntity businessLogicRuleEntity;
     private final DataObject inDataObject;
     private DataObject outDataObject;
     private Map<String, Object> properties;
@@ -25,12 +27,14 @@ public class DataExchangeObject implements Serializable {
     private LinkedList<RuleLogs> ruleLogsList;
 
     public DataExchangeObject(String uniqueExchangeId,
+                              BusinessLogicRuleEntity businessLogicRuleEntity,
                               Map<String, Object> properties,
                               DataObject inDataObject,
                               DataObject outDataObject,
                               Map<String, Object> dataExtension,
                               LinkedList<RuleLogs> ruleLogsList ) {
         this.uniqueExchangeId = uniqueExchangeId;
+        this.businessLogicRuleEntity = businessLogicRuleEntity;
         this.properties = properties;
         this.inDataObject = inDataObject.copy();
         this.outDataObject = outDataObject;
@@ -40,6 +44,7 @@ public class DataExchangeObject implements Serializable {
 
     public DataExchangeObject(DataExchangeObject dataExchangeObject) {
         this.uniqueExchangeId = dataExchangeObject.uniqueExchangeId;
+        this.businessLogicRuleEntity = dataExchangeObject.businessLogicRuleEntity;
         this.properties = dataExchangeObject.properties.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         this.inDataObject = dataExchangeObject.inDataObject.copy();
@@ -49,10 +54,12 @@ public class DataExchangeObject implements Serializable {
         this.ruleLogsList = new LinkedList<>(dataExchangeObject.ruleLogsList);
     }
 
+
     @Override
     public String toString() {
         return "DataExchangeObject{" +
                 "uniqueExchangeId='" + uniqueExchangeId + '\'' +
+                ", businessLogicRuleEntity=" + businessLogicRuleEntity +
                 ", properties=" + properties +
                 ", inDataObject=" + inDataObject +
                 ", outDataObject=" + outDataObject +
@@ -65,6 +72,7 @@ public class DataExchangeObject implements Serializable {
         if (this == o) return true;
         if (!(o instanceof DataExchangeObject that)) return false;
         return Objects.equals(uniqueExchangeId, that.uniqueExchangeId) &&
+                Objects.equals(businessLogicRuleEntity, that.businessLogicRuleEntity) &&
                 Objects.equals(properties, that.properties) &&
                 Objects.equals(inDataObject, that.inDataObject) &&
                 Objects.equals(outDataObject, that.outDataObject) &&
@@ -73,7 +81,7 @@ public class DataExchangeObject implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uniqueExchangeId, properties, inDataObject, outDataObject, dataExtension);
+        return Objects.hash(uniqueExchangeId, businessLogicRuleEntity, properties, inDataObject, outDataObject, dataExtension);
     }
 
     public DataExchangeObject copy() {

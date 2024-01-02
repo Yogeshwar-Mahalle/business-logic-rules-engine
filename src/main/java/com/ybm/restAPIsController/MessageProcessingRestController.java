@@ -14,6 +14,8 @@ import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.ruleEngine.dataexchange.DataObject;
 import com.ybm.ruleEngine.dataexchange.Payload;
 import com.ybm.ruleEngine.RuleEngine;
+import com.ybm.rulesBusinessSetupRepo.BusinessRuleEntityService;
+import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleEntity;
 import com.ybm.workflow.WorkflowManager;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -34,12 +36,14 @@ public class MessageProcessingRestController {
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired
+    private BusinessRuleEntityService businessRuleEntityService;
+    @Autowired
     private WorkflowManager workflowManager;
     @Autowired
     private ExchangeDataService exchangeDataService;
 
-    @PostMapping(value = "/edo/{entity}")
-    public ResponseEntity<?> postPaymentDetails(@PathVariable("entity") String entity,
+    @PostMapping(value = "/edo/{entityName}")
+    public ResponseEntity<?> postPaymentDetails(@PathVariable("entityName") String entityName,
                                                 @RequestHeader LinkedHashMap<String, String> headers,
                                                 @RequestBody LinkedHashMap map) {
         UUID uuid = UUID.randomUUID();
@@ -54,10 +58,13 @@ public class MessageProcessingRestController {
             throw new RuntimeException(e);
         }
 
+        BusinessLogicRuleEntity businessLogicRuleEntity =
+                businessRuleEntityService.getEntityByEntityName(entityName);
         Payload payload = new Payload(strPayload, ContentType.JSON, map );
         DataObject dataObject = new DataObject( headers, payload);
         DataExchangeObject dataExchangeObject = new DataExchangeObject(
                 uuid.toString(),
+                businessLogicRuleEntity,
                 properties,
                 dataObject,
                 dataObject,
@@ -65,20 +72,20 @@ public class MessageProcessingRestController {
                 new LinkedList<>()
         );
 
-        ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);
+        ExchangeData exchangeData = mapExchangeData(businessLogicRuleEntity, dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         String ruleType = headers.get("RULE_TYPE") != null ? headers.get("RULE_TYPE") : headers.get("rule_type");
-        DataExchangeObject result = ruleEngine.run(entity, ruleType, dataExchangeObject);
+        DataExchangeObject result = ruleEngine.run(ruleType, dataExchangeObject);
 
-        exchangeData = mapExchangeData(entity, result);
+        exchangeData = mapExchangeData(businessLogicRuleEntity, result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping(value = "/wrkflow/{entity}")
-    public ResponseEntity<?> postToWorkFlow(@PathVariable("entity") String entity,
+    @PostMapping(value = "/wrkflow/{entityName}")
+    public ResponseEntity<?> postToWorkFlow(@PathVariable("entityName") String entityName,
                                             @RequestHeader Map<String, String> headers,
                                             @RequestBody String strPayload) {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
@@ -94,10 +101,14 @@ public class MessageProcessingRestController {
             throw new RuntimeException(e);
         }*/
 
+        BusinessLogicRuleEntity businessLogicRuleEntity =
+                businessRuleEntityService.getEntityByEntityName(entityName);
+
         Payload payload = new Payload(strPayload, ContentType.setLabel(strOrgContentType), null );
         DataObject dataObject = new DataObject( headers, payload);
         DataExchangeObject dataExchangeObject = new DataExchangeObject(
                 uuid.toString(),
+                businessLogicRuleEntity,
                 properties,
                 dataObject,
                 dataObject,
@@ -105,18 +116,18 @@ public class MessageProcessingRestController {
                 new LinkedList<>()
         );
 
-        ExchangeData exchangeData = mapExchangeData(entity, dataExchangeObject);
+        ExchangeData exchangeData = mapExchangeData(businessLogicRuleEntity, dataExchangeObject);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
-        DataExchangeObject result = workflowManager.run(entity, dataExchangeObject );
+        DataExchangeObject result = workflowManager.run( dataExchangeObject );
 
-        exchangeData = mapExchangeData(entity, result);
+        exchangeData = mapExchangeData(businessLogicRuleEntity, result);
         exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
         return ResponseEntity.ok(result);
     }
 
-    private static ExchangeData mapExchangeData(String entity, DataExchangeObject dataExchangeObject) {
+    private ExchangeData mapExchangeData(BusinessLogicRuleEntity businessLogicRuleEntity, DataExchangeObject dataExchangeObject) {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> headers = dataExchangeObject.getInDataObject().getHeaders();
         String strProperties = dataExchangeObject.getProperties().toString();
@@ -136,14 +147,24 @@ public class MessageProcessingRestController {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
         sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
-        entity = entity != null ? entity : (headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY") );
-        entity = entity == null ? "BLRuleEngine" : entity;
+
+        if( businessLogicRuleEntity == null )
+        {
+            String entityName = (headers.get("entity") != null ? headers.get("entity") : headers.get("ENTITY") );
+            businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName(entityName);
+
+            if( businessLogicRuleEntity == null )
+            {
+                businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName( "BLRuleEngine" );
+            }
+        }
+
         String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");
         messageId = dataExchangeObject.getProperties().get("messageId") != null ? (String) dataExchangeObject.getProperties().get("messageId") : messageId;
         String messageType = headers.get("messagetype") != null ? headers.get("messagetype") : headers.get("MESSAGETYPE");
         messageType = dataExchangeObject.getProperties().get("messageType") != null ? (String) dataExchangeObject.getProperties().get("messageType") : messageType;
 
-        dataExchangeObject.getProperties().putIfAbsent("entity", entity);
+        dataExchangeObject.getProperties().putIfAbsent("entity", businessLogicRuleEntity.getEntityName());
         dataExchangeObject.getProperties().putIfAbsent("source", sourceSys);
         dataExchangeObject.getProperties().putIfAbsent("formatType", ContentType.setLabel(strOrgContentType).name());
         dataExchangeObject.getProperties().putIfAbsent("messageType", messageType);
@@ -152,7 +173,7 @@ public class MessageProcessingRestController {
 
         ExchangeData exchangeData = new ExchangeData();
         exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
-        exchangeData.setLinkedEntity(entity);
+        exchangeData.setLinkedEntity(businessLogicRuleEntity.getEntityName());
         exchangeData.setSource(sourceSys);
         exchangeData.setMessageId(messageId);
         exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI

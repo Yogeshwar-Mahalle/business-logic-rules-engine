@@ -7,6 +7,7 @@ package com.ybm.workflow;
 import com.ybm.ruleEngine.RuleEngine;
 import com.ybm.ruleEngine.dataexchange.DataExchangeObject;
 import com.ybm.rulesBusinessSetupRepo.BusinessRuleTypesService;
+import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleEntity;
 import com.ybm.rulesBusinessSetupRepo.models.BusinessLogicRuleType;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -31,18 +32,20 @@ public class WorkflowManager {
     private RuleEngine ruleEngine;
 
 
-    public DataExchangeObject run(String entity, DataExchangeObject dataExchangeObject) {
+    public DataExchangeObject run(DataExchangeObject dataExchangeObject) {
 
         DataExchangeObject wrkflwDataExchangeObject = dataExchangeObject.copy();
+        BusinessLogicRuleEntity businessLogicRuleEntity = dataExchangeObject.getBusinessLogicRuleEntity();
 
-        List<BusinessLogicRuleType> listBusinessLogicRuleTypes = businessRuleTypesService.getAllRuleTypeByEntityWrkFlowFlag(entity);
+        List<BusinessLogicRuleType> listBusinessLogicRuleTypes =
+                businessRuleTypesService.getAllRuleTypeByEntityWrkFlowFlag(businessLogicRuleEntity.getEntityName());
         if (null == listBusinessLogicRuleTypes || listBusinessLogicRuleTypes.isEmpty()){
             return dataExchangeObject;
         }
 
         for ( BusinessLogicRuleType businessLogicRuleType : listBusinessLogicRuleTypes ) {
 
-            DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run(businessLogicRuleType.getLinkedEntity(), businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject);
+            DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run( businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject );
             wrkflwDataExchangeObject.setProperties(wrkFlowRulesXchangeObj.getProperties());
             wrkflwDataExchangeObject.setRuleLogsList(wrkFlowRulesXchangeObj.getRuleLogsList());
 
@@ -54,11 +57,12 @@ public class WorkflowManager {
                         .toList();
                 for ( String ruleType : ruleTypeList ) {
 
-                    wrkflwDataExchangeObject = ruleEngine.run(businessLogicRuleType.getLinkedEntity(), ruleType, wrkflwDataExchangeObject);
+                    wrkflwDataExchangeObject = ruleEngine.run(ruleType, wrkflwDataExchangeObject);
 
                     //Set output payload of previous rule to input payload of next rule in the workflow
                     wrkflwDataExchangeObject = new DataExchangeObject(
                             dataExchangeObject.getUniqueExchangeId(),
+                            wrkflwDataExchangeObject.getBusinessLogicRuleEntity(),
                             wrkflwDataExchangeObject.getProperties(),
                             wrkflwDataExchangeObject.getOutDataObject(),
                             wrkflwDataExchangeObject.getOutDataObject(),
