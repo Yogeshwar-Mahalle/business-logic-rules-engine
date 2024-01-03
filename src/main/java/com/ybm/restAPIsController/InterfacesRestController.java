@@ -13,11 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Slf4j
+@EnableMethodSecurity
 @RestController
 public class InterfacesRestController {
     private static final Logger LOG = LoggerFactory.getLogger(InterfacesRestController.class);
@@ -79,6 +82,7 @@ public class InterfacesRestController {
         return ResponseEntity.ok(interfaceProfileUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-interface-profile/{interfaceId}")
     public ResponseEntity<?> removeInterfaceProfileById(@PathVariable("transformMapperId") String interfaceId) {
         List<InterfaceProfile> allRemainingInterfaceProfile =
@@ -131,6 +135,7 @@ public class InterfacesRestController {
         return ResponseEntity.ok(interfacePropertyUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-interface-property/{interfaceId}")
     public ResponseEntity<?> removeInterfacePropertyById(@PathVariable("interfaceId") String interfaceId) {
         List<InterfaceProperty> allRemainingInterfaceProperties =
@@ -138,6 +143,7 @@ public class InterfacesRestController {
         return ResponseEntity.ok(allRemainingInterfaceProperties);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-interface-property/{interfaceId}/{propertyName}")
     public ResponseEntity<?> removeInterfacePropertyById(@PathVariable("interfaceId") String interfaceId,
                                                          @PathVariable("propertyName") String propertyName) {

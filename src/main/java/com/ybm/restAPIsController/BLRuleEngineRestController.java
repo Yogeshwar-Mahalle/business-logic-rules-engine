@@ -13,11 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Slf4j
+@EnableMethodSecurity
 @RestController
 public class BLRuleEngineRestController {
     private static final Logger LOG = LoggerFactory.getLogger(BLRuleEngineRestController.class);
@@ -66,6 +69,7 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(ruleEntitiesUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule-entity/{entity}")
     public ResponseEntity<?> removeRuleEntityByEntityName(@PathVariable("entity") String entityName) {
         List<BusinessLogicRuleEntity> allRemainingBusinessLogicRuleEntities =
@@ -106,6 +110,8 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(rulesUpdated);
     }
 
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule-type/{entity}/{ruleTypeId}")
     public ResponseEntity<?> removeRuleTypeByTypeId(@PathVariable("entity") String entity,
                                                     @PathVariable("ruleTypeId") String ruleTypeId) {
@@ -203,6 +209,8 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(rulesUpdated);
     }
 
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule/{ruleId}")
     public ResponseEntity<?> removeRuleById(@PathVariable("ruleId") String ruleId) {
         List<BusinessLogicRule> allRemainingBusinessLogicRules = businessRulesService.removeRuleById(ruleId);
@@ -255,6 +263,8 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(ruleFunctionUpdated);
     }
 
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule-function/{functionId}")
     public ResponseEntity<?> removeRuleFunctionById(@PathVariable("functionId") String functionId) {
         List<BusinessLogicRuleFunctionTemplate> allRemainingRuleFunctions = businessRuleFunctionTemplateService.removeRuleFunctionById(functionId);
@@ -291,6 +301,8 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(ruleFieldListUpdated);
     }
 
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule-field-list/{ruleType}/{fieldName}")
     public ResponseEntity<?> removeRuleFieldByFieldId(@PathVariable("ruleType") String ruleType, @PathVariable("fieldName") String fieldName) {
         List<BusinessLogicRuleFieldList> allRemainingBusinessLogicRuleFieldList = businessRuleFieldListService.removeRuleFieldByFieldId(ruleType, fieldName);
@@ -328,6 +340,7 @@ public class BLRuleEngineRestController {
         return ResponseEntity.ok(ruleValueListUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-rule-value-list/{dataType}/{keyField}")
     public ResponseEntity<?> removeRuleValueByFieldId(@PathVariable("dataType") String dataType, @PathVariable("keyField") String keyField) {
         List<BusinessLogicRuleValueList> allRemainingBusinessLogicRuleValueList = businessRuleValueListService.removeRuleValueByFieldId(dataType, keyField);

@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@EnableMethodSecurity
 @RequestMapping(path = "/notifications")
 public class NotificationsRestController {
     private static final Logger LOG = LoggerFactory.getLogger(NotificationsRestController.class);
@@ -117,6 +120,7 @@ public class NotificationsRestController {
         return ResponseEntity.ok(alertNotificationsUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-alert-notification/{linkedEntity}/{type}/{userId}/{createTimeStamp}")
     public ResponseEntity<?> removeAlertNotificationById(@PathVariable("linkedEntity") String linkedEntity,
                                                          @PathVariable("type") String type,

@@ -14,12 +14,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
 @Slf4j
+@EnableMethodSecurity
 @RestController
 public class TransformationRestController {
     private static final Logger LOG = LoggerFactory.getLogger(TransformationRestController.class);
@@ -65,6 +68,7 @@ public class TransformationRestController {
         return ResponseEntity.ok(fieldsDataTransformMappingUpdated);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "/remove-transform-mapper/{transformMapperId}")
     public ResponseEntity<?> removeTransformMapperById(@PathVariable("transformMapperId") String transformMapperId) {
         List<FieldsDataTransformMapping> allRemainingFieldsDataTransformMapping =

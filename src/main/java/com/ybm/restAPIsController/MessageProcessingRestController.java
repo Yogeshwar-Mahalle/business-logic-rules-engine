@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
@@ -30,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
+@EnableMethodSecurity
 @RestController
 public class MessageProcessingRestController {
     private static final Logger LOG = LoggerFactory.getLogger(MessageProcessingRestController.class);
@@ -42,6 +45,7 @@ public class MessageProcessingRestController {
     @Autowired
     private ExchangeDataService exchangeDataService;
 
+    //@PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "/edo/{entityName}")
     public ResponseEntity<?> postPaymentDetails(@PathVariable("entityName") String entityName,
                                                 @RequestHeader LinkedHashMap<String, String> headers,
@@ -84,6 +88,7 @@ public class MessageProcessingRestController {
         return ResponseEntity.ok(result);
     }
 
+    //@PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "/wrkflow/{entityName}")
     public ResponseEntity<?> postToWorkFlow(@PathVariable("entityName") String entityName,
                                             @RequestHeader Map<String, String> headers,

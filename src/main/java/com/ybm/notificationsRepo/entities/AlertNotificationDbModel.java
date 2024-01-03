@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "ALERT_NNOTIFICATION")
+@Table(name = "ALERT_NOTIFICATION")
 @IdClass(AlertNotificationDbModel.IdClass.class)
 public class AlertNotificationDbModel implements Serializable {
     @Id
