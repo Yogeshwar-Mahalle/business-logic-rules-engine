@@ -67,9 +67,9 @@ public class InterfacesRestController {
 
     @PostMapping(value = "/update-interface-profile")
     public ResponseEntity<?> updateInterfaceProfile(@RequestBody InterfaceProfile interfaceProfile) {
-        InterfaceProfile interfaceProfileIUpdated =
+        InterfaceProfile interfaceProfileUpdated =
                 interfaceProfileService.saveInterfaceProfile(interfaceProfile);
-        return ResponseEntity.ok(interfaceProfileIUpdated);
+        return ResponseEntity.ok(interfaceProfileUpdated);
     }
 
     @PostMapping(value = "/update-all-interface-profiles")

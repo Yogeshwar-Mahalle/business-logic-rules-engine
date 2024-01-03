@@ -28,6 +28,7 @@ public class SchedulerLockDbModel {
     @Column(name = "LOCK_UNTIL", nullable=false)
     private Date lockUntil;
 
+    @Builder.Default
     @Column(name = "LOCKED_AT", nullable=false)
     private Date lockedAt = new Date();
 
