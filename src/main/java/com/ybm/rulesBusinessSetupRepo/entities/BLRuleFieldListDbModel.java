@@ -28,6 +28,10 @@ public class BLRuleFieldListDbModel implements Serializable {
     private String linkedEntity;
 
     @Id
+    @Column(name = "RULE_FIELD_ID", length = 128, nullable=false)
+    private String ruleFieldId;
+
+    @Id
     @Column(name = "RULE_TYPE", length = 25, nullable=false)
     private String ruleType;
 
@@ -50,6 +54,12 @@ public class BLRuleFieldListDbModel implements Serializable {
     @Column(name = "DEFAULT_VALUE", length = 128)
     private String defaultValue;
 
+    @Column(name = "GET_VALUE_PATH", length = 10240)
+    private String getValuePath;
+
+    @Column(name = "SET_VALUE_PATH", length = 10240)
+    private String setValuePath;
+
     @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
 
@@ -62,6 +72,7 @@ public class BLRuleFieldListDbModel implements Serializable {
     @Data
     static class IdClass implements Serializable {
         private String linkedEntity;
+        private String ruleFieldId;
         private String ruleType;
         private String fieldName;
     }

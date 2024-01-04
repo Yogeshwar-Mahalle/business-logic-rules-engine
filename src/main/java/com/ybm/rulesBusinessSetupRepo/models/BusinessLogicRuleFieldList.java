@@ -18,6 +18,7 @@ import java.util.Date;
 @Data
 public class BusinessLogicRuleFieldList implements Serializable {
     private String linkedEntity;
+    private String ruleFieldId;
     private String ruleType;
     private String fieldName;
     private String description;
@@ -25,6 +26,8 @@ public class BusinessLogicRuleFieldList implements Serializable {
     private String dataType;
     private String dataFormat;
     private String defaultValue;
+    private String getValuePath;
+    private String setValuePath;
     private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;
