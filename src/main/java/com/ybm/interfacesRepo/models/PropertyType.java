@@ -9,6 +9,7 @@ public enum PropertyType {
     THROTTLE_COUNT,
     THROTTLE_UNIT,
     JMS,
+    QUEUE_NAME,
     URL,
     CONTEXT_PATH,
     SERVER,
@@ -16,6 +17,7 @@ public enum PropertyType {
     FILE_PATH,
     FILE_EXT,
     USERID,
-    SECRETE
+    SECRETE,
+    BROKER_FACTORY
 
 }

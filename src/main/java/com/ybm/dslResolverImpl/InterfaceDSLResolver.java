@@ -67,7 +67,7 @@ public class InterfaceDSLResolver implements DSLResolver {
                 .getInterfaceProfileByLinkedEntityAndInterfaceName( parameters[0], parameters[1] );
 
         List<InterfaceProperty> interfacePropertyList = interfacePropertyService
-                .getInterfacePropertiesByInterfaceIdAndStatus( interfaceProfile.getInterfaceId(), "AC" );
+                .getInterfacePropertiesByInterfaceIdAndStatus( interfaceProfile.getInterfaceId(), StatusType.AC );
 
         Map<PropertyType, String> propertiesMap = interfacePropertyList.stream().collect(
                 Collectors.toMap(InterfaceProperty::getPropertyName,

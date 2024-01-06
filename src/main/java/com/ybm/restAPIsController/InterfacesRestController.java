@@ -8,6 +8,7 @@ import com.ybm.interfacesRepo.InterfaceProfileService;
 import com.ybm.interfacesRepo.InterfacePropertyService;
 import com.ybm.interfacesRepo.models.InterfaceProfile;
 import com.ybm.interfacesRepo.models.InterfaceProperty;
+import com.ybm.interfacesRepo.models.StatusType;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,7 @@ public class InterfacesRestController {
 
     @GetMapping(value = "/get-interface-properties/{interfaceId}/{status}")
     public ResponseEntity<?> getInterfacePropertiesById(@PathVariable("interfaceId") String interfaceId,
-                                                        @PathVariable("status") String status) {
+                                                        @PathVariable("status") StatusType status) {
         List<InterfaceProperty> interfaceProperties =
                 interfacePropertyService.getInterfacePropertiesByInterfaceIdAndStatus(interfaceId, status);
         return ResponseEntity.ok(interfaceProperties);

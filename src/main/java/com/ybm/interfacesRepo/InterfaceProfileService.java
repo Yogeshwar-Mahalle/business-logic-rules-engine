@@ -9,7 +9,7 @@ import com.ybm.interfacesRepo.entities.InterfaceProfileDbModel;
 import com.ybm.interfacesRepo.models.ComProtocolType;
 import com.ybm.interfacesRepo.models.DirectionType;
 import com.ybm.interfacesRepo.models.InterfaceProfile;
-import com.ybm.rulesBusinessSetupRepo.models.StatusType;
+import com.ybm.interfacesRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +27,29 @@ public class InterfaceProfileService {
 
     public List<InterfaceProfile> getAllInterfaceProfile() {
         return interfaceProfileRepository.findAll().stream()
+                .map(
+                        this::mapInterfaceProfileFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    public List<InterfaceProfile> getInterfaceProfileByDirectionAndStatus(DirectionType directionType,
+                                                                            StatusType statusType )
+    {
+        return interfaceProfileRepository.findByDirectionAndStatus(directionType.label.charAt(0), statusType.name()).stream()
+                .map(
+                        this::mapInterfaceProfileFromDbModel
+                )
+                .collect(Collectors.toList());
+    }
+
+    public List<InterfaceProfile> getInterfaceProfileByDirectionAndStatusAndComProto(DirectionType directionType,
+                                                                                     StatusType statusType,
+                                                                                     ComProtocolType comProtocolType)
+    {
+        return interfaceProfileRepository.findByDirectionAndStatusAndCommunicationProtocol(directionType.label.charAt(0),
+                        statusType.name(),
+                        comProtocolType.name()).stream()
                 .map(
                         this::mapInterfaceProfileFromDbModel
                 )
@@ -139,4 +162,6 @@ public class InterfaceProfileService {
                 .build();
 
     }
+
+
 }

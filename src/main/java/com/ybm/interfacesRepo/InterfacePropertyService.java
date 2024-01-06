@@ -8,7 +8,7 @@ import com.ybm.interfacesRepo.dbRepository.InterfacePropertyRepository;
 import com.ybm.interfacesRepo.entities.InterfacePropertyDbModel;
 import com.ybm.interfacesRepo.models.InterfaceProperty;
 import com.ybm.interfacesRepo.models.PropertyType;
-import com.ybm.rulesBusinessSetupRepo.models.StatusType;
+import com.ybm.interfacesRepo.models.StatusType;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,9 +49,9 @@ public class InterfacePropertyService {
 
     }
 
-    public List<InterfaceProperty> getInterfacePropertiesByInterfaceIdAndStatus(String interfaceId, String status) {
+    public List<InterfaceProperty> getInterfacePropertiesByInterfaceIdAndStatus(String interfaceId, StatusType status) {
 
-        return interfacePropertyRepository.findByInterfaceIdAndStatus(interfaceId, status).stream()
+        return interfacePropertyRepository.findByInterfaceIdAndStatus(interfaceId, status.name()).stream()
                 .map(
                         this::mapInterfacePropertiesFromDbModel
                 )

@@ -4,7 +4,6 @@
 
 package com.ybm.interfacesRepo.models;
 
-import com.ybm.rulesBusinessSetupRepo.models.StatusType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

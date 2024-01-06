@@ -22,4 +22,10 @@ public interface InterfaceProfileRepository extends JpaRepository<InterfaceProfi
     List<InterfaceProfileDbModel> findByLinkedEntity(String linkedEntity);
 
     List<InterfaceProfileDbModel> findByLinkedEntityAndStatus(String linkedEntity, String status);
+
+    List<InterfaceProfileDbModel> findByDirection(String directionType);
+
+    List<InterfaceProfileDbModel> findByDirectionAndStatus(char directionType, String status);
+
+    List<InterfaceProfileDbModel> findByDirectionAndStatusAndCommunicationProtocol(char directionType, String status, String comProtocolType);
 }
