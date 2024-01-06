@@ -310,6 +310,9 @@ public class RuleEngine {
      * @param inputData
      */
     public boolean evaluateCondition(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
+        LOG.info("Evaluate RuleId : " + businessLogicRule.getRuleId());
+        LOG.info("Evaluate rule condition : " + businessLogicRule.getCondition());
+        LOG.info("Evaluate rule action : " + businessLogicRule.getAction());
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         dataMap.put(ExchangeObjectType.INPUT_EXCHANGE_ID.getLabel(), inputData.getUniqueExchangeId());

@@ -5,6 +5,9 @@
 package com.ybm.interfacesRepo.models;
 
 public enum PropertyType {
+    ENTITY,
+    SOURCE,
+    PRODUCT,
     RETRY,
     THROTTLE_COUNT,
     THROTTLE_UNIT,
@@ -18,6 +21,8 @@ public enum PropertyType {
     FILE_EXT,
     USERID,
     SECRETE,
-    BROKER_FACTORY
+    BROKER_FACTORY,
+    FORMAT_TYPE,
+    MESSAGE_TYPE
 
 }

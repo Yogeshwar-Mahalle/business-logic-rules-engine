@@ -4,22 +4,24 @@
 
 package com.ybm.dslResolverImpl;
 
+import com.ybm.interfaces.jms.QueueMessageConsumer;
 import com.ybm.interfacesRepo.models.*;
 import com.ybm.interfacesRepo.InterfaceProfileService;
 import com.ybm.interfacesRepo.InterfacePropertyService;
 import com.ybm.ruleEngine.dslResolver.DSLResolver;
+import jakarta.jms.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -61,6 +63,9 @@ public class InterfaceDSLResolver implements DSLResolver {
 
     @Override
     public Object resolveValue(String keyword, String[] parameters) {
+
+        LOG.info("InterfaceDSLResolver.resolveValue parameters : " + Arrays.toString(parameters));
+
         Object result = null;
 
         InterfaceProfile interfaceProfile = interfaceProfileService
@@ -76,7 +81,9 @@ public class InterfaceDSLResolver implements DSLResolver {
 
         ComProtocolType comProtocolType = interfaceProfile.getCommunicationProtocol();
 
-
+        LOG.info("InterfaceDSLResolver.resolveValue INTERFACE ID : " + interfaceProfile.getInterfaceId());
+        LOG.info("InterfaceDSLResolver.resolveValue COMMUNICATION PROTOCOL : " + comProtocolType);
+        LOG.info("InterfaceDSLResolver.resolveValue INTERFACE PARAMETERS : " + propertiesMap);
 
         //Blocking : By using this keyword external interfaces APIs or DB service can be called
         if (keyword.equalsIgnoreCase(SYNCHRONOUS)){
@@ -117,6 +124,49 @@ public class InterfaceDSLResolver implements DSLResolver {
                     return "API-CALLED";
                 }
                 case MQ -> {
+
+                    try {
+
+                            Properties env = new Properties();
+                            //env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+                            //env.put(Context.PROVIDER_URL, "tcp://localhost:61616");
+
+                            env.put(Context.INITIAL_CONTEXT_FACTORY, propertiesMap.get(PropertyType.BROKER_FACTORY));
+                            env.put(Context.PROVIDER_URL, propertiesMap.get(PropertyType.URL));
+
+                            Context ctx = new InitialContext(env);
+
+                            QueueConnectionFactory queueConnectionFactory = (QueueConnectionFactory) ctx.lookup("ConnectionFactory");
+                            QueueConnection queueConnection =
+                                    queueConnectionFactory.createQueueConnection(propertiesMap.get(PropertyType.USERID), propertiesMap.get(PropertyType.SECRETE));
+
+                            queueConnection.start();
+
+                            String queueName = propertiesMap.get(PropertyType.QUEUE_NAME);
+
+                            QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+                            Destination destination = queueSession.createQueue(queueName);
+                            MessageProducer producer = queueSession.createProducer(destination);
+                            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+                            TextMessage message = queueSession.createTextMessage(parameters[3]);
+                            message.setJMSMessageID(UUID.randomUUID().toString());
+                            message.setJMSType(propertiesMap.get(PropertyType.FORMAT_TYPE));
+                            message.setJMSTimestamp(new Date().getTime());
+
+                            producer.send(message);
+
+                            // Clean up
+                            queueSession.close();
+                            queueConnection.close();
+
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.error("InterfaceRunner error : " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
                     return "JMS-CALLED";
                 }
                 case FTP -> {

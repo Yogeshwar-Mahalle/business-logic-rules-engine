@@ -45,6 +45,8 @@ public class WorkflowManager {
 
         for ( BusinessLogicRuleType businessLogicRuleType : listBusinessLogicRuleTypes ) {
 
+            LOG.info( "CHECK WORKFLOWS RULES FOR WORKFLOW RULE TYPE : " + businessLogicRuleType.getRuleType() );
+
             DataExchangeObject wrkFlowRulesXchangeObj = ruleEngine.run( businessLogicRuleType.getRuleType(), wrkflwDataExchangeObject );
             wrkflwDataExchangeObject.setProperties(wrkFlowRulesXchangeObj.getProperties());
             wrkflwDataExchangeObject.setRuleLogsList(wrkFlowRulesXchangeObj.getRuleLogsList());
