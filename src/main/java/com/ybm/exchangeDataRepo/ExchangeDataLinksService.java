@@ -42,7 +42,7 @@ public class ExchangeDataLinksService {
     }
 
     @Transactional
-    public ExchangeDataLinks saveRuleLogs(ExchangeDataLinks exchangeDataLinks) {
+    public ExchangeDataLinks saveExchangeDataLinks(ExchangeDataLinks exchangeDataLinks) {
         ExchangeDataLinksDbModel exchangeDataLinksDbModel = mapExchangeDataLinksToDbModel(exchangeDataLinks);
         exchangeDataLinksDbModel = exchangeDataLinksRepository.save(exchangeDataLinksDbModel);
 

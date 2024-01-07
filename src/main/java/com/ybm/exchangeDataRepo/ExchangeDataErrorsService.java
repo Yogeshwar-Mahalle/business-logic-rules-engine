@@ -32,7 +32,7 @@ public class ExchangeDataErrorsService {
     }
 
     @Transactional
-    public ExchangeDataErrors saveRuleLogs(ExchangeDataErrors exchangeDataErrors) {
+    public ExchangeDataErrors saveExchangeDataErrors(ExchangeDataErrors exchangeDataErrors) {
         ExchangeDataErrorsDbModel exchangeDataErrorsDbModel = mapExchangeDataErrorsToDbModel(exchangeDataErrors);
         exchangeDataErrorsDbModel = exchangeDataErrorsRepository.save(exchangeDataErrorsDbModel);
 

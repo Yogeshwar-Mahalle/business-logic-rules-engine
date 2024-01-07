@@ -39,11 +39,11 @@ public class InterfacesRestController {
         return ResponseEntity.ok(allInterfaceProfile);
     }
 
-    @GetMapping(value = "/get-interface-profiles/{interfaceId}")
+    @GetMapping(value = "/get-interface-profile/{interfaceId}")
     public ResponseEntity<?> getInterfaceProfileById(@PathVariable("interfaceId") String interfaceId) {
-        InterfaceProfile InterfaceProfile =
+        InterfaceProfile interfaceProfile =
                 interfaceProfileService.getInterfaceProfileByInterfaceId(interfaceId);
-        return ResponseEntity.ok(InterfaceProfile);
+        return ResponseEntity.ok(interfaceProfile);
     }
 
     @GetMapping(value = "/get-interface-profiles/{linkedEntity}")
@@ -61,7 +61,7 @@ public class InterfacesRestController {
         return ResponseEntity.ok(interfaceProfiles);
     }
 
-    @GetMapping(value = "/get-interface-profiles/{linkedEntity}/{interfaceName}")
+    @GetMapping(value = "/get-interface-profile/{linkedEntity}/{interfaceName}")
     public ResponseEntity<?> getInterfaceProfileByName(@PathVariable("linkedEntity") String linkedEntity,
                                                        @PathVariable("interfaceName") String interfaceName) {
         InterfaceProfile interfaceProfile =

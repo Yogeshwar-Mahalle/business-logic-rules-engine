@@ -32,7 +32,7 @@ public class ExchangeDataNotesService {
     }
 
     @Transactional
-    public ExchangeDataNotes saveRuleLogs(ExchangeDataNotes exchangeDataNotes) {
+    public ExchangeDataNotes saveExchangeDataNotes(ExchangeDataNotes exchangeDataNotes) {
         ExchangeDataNotesDbModel exchangeDataNotesDbModel = mapExchangeDataNotesToDbModel(exchangeDataNotes);
         exchangeDataNotesDbModel = exchangeDataNotesRepository.save(exchangeDataNotesDbModel);
 
