@@ -6,7 +6,11 @@ package com.ybm.interfacesRepo.models;
 
 public enum ComProtocolType {
     API,
-    MQ,
+    WMQ,
+    AMQ,
+    RMQ,
     FTP,
-    FILE
+    FILE,
+    WEBSOCKET,
+    KAFKA
 }

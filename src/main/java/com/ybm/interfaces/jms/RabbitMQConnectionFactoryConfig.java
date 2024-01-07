@@ -4,8 +4,7 @@
 
 package com.ybm.interfaces.jms;
 
-import com.ibm.mq.jms.MQConnectionFactory;
-import com.ibm.msg.client.wmq.WMQConstants;
+import com.rabbitmq.client.ConnectionFactory;
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import org.slf4j.Logger;
@@ -14,60 +13,61 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Properties;
 
 @Configuration
-public class IBMMQConnectionFactoryConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(IBMMQConnectionFactoryConfig.class);
+public class RabbitMQConnectionFactoryConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQConnectionFactoryConfig.class);
 
     private final LinkedHashMap<String, Connection> connectionMap;
 
-    public IBMMQConnectionFactoryConfig() {
+    public RabbitMQConnectionFactoryConfig() {
         this.connectionMap = new LinkedHashMap<>();
     }
 
     public Connection createConnection(String hostName,
                                        Integer port,
-                                       String queueManager,
-                                       String channel,
+                                       String userName,
+                                       String password,
+                                       String virtualHost,
                                        String clientID)
     {
         clientID = clientID  == null ? "BLRuleEngine" : clientID;
-        String connectionKey = hostName + port + queueManager + channel + clientID;
+        String connectionKey = hostName + port + userName + password + virtualHost + clientID;
         Connection connection = connectionMap.get(connectionKey);
 
         if( connection == null )
         {
             try {
-                MQConnectionFactory connectionFactory = new MQConnectionFactory();
-                connectionFactory.setHostName(hostName);
+
+                ConnectionFactory connectionFactory = new ConnectionFactory();
+                connectionFactory.setHost(hostName);
                 connectionFactory.setPort(port);
-                connectionFactory.setQueueManager(queueManager);
-                connectionFactory.setChannel(channel);
-                connectionFactory.setAppName(clientID);
-                connectionFactory.setClientID(clientID);
-                connectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
+                connectionFactory.setUsername(userName);
+                connectionFactory.setPassword(password);
+                connectionFactory.setVirtualHost(virtualHost);
 
                 Properties properties = new Properties();
-                properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.ibm.websphere.naming.WsnInitialContextFactory");
+                properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.rabbitmq.jms.admin.RMQObjectFactory");
                 //properties.put(Context.PROVIDER_URL, "iiop://localhost:2809");
                 properties.put("hostName", hostName);
                 properties.put("port", port);
-                properties.put("queueManager", queueManager);
-                properties.put("channel", channel);
-                properties.put("appName", clientID);
+                properties.put("userName", userName);
+                properties.put("password", password);
+                properties.put("virtualHost", virtualHost);
                 properties.put("clientID", clientID);
 
                 InitialContext context = new InitialContext(properties);
-                connectionFactory = (MQConnectionFactory) context.lookup("ConnectionFactory");
+                connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
 
-                connection = (Connection) connectionFactory.createConnection();
+                connection = (Connection) connectionFactory.newConnection();
                 connection.start();
 
                 connectionMap.put(connectionKey, connection);
 
             } catch (Exception e) {
-                LOG.info("IBMMQConnectionFactoryConfig.createConnectionFactory ERROR : " + e.getMessage());
+                LOG.info("RabbitMQConnectionFactoryConfig.createConnectionFactory ERROR : " + e.getMessage());
                 e.printStackTrace();
             }
 

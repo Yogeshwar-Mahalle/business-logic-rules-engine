@@ -4,59 +4,90 @@
 
 package com.ybm.interfaces.jms;
 
-
-import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jms.JmsProperties;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQConnectionDetails;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQConnectionFactoryCustomizer;
-import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.SimpleJmsListenerContainerFactory;
-import org.springframework.jms.connection.CachingConnectionFactory;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.util.LinkedHashMap;
+import java.util.Properties;
 
 @Configuration
-@ConditionalOnMissingBean(ConnectionFactory.class)
 public class ActiveMQConnectionFactoryConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(ActiveMQConnectionFactoryConfig.class);
 
-    @Value("${spring.activemq.broker-url}")
-    private String brokerUrl;
+    private final LinkedHashMap<String, Connection> connectionMap;
 
-    @Value("${spring.activemq.user}")
-    private String brokerUser;
-
-    @Value("${spring.activemq.password}")
-    private String brokerPassword;
-
-
-    @Bean
-    public ActiveMQConnectionFactory connectionFactory() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
-        connectionFactory.setBrokerURL(brokerUrl);
-        connectionFactory.setPassword(brokerUser);
-        connectionFactory.setUserName(brokerPassword);
-        connectionFactory.setUseCompression(true);
-        connectionFactory.setClientID("BLRuleEngine");
-        connectionFactory.setConnectionIDPrefix("DRR");
-        connectionFactory.setUseAsyncSend(true);
-        return connectionFactory;
-    }
-    @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory());
-        factory.setConcurrency("1-1");
-        factory.setPubSubDomain(true);
-        factory.setSubscriptionDurable(true);
-        return factory;
+    public ActiveMQConnectionFactoryConfig() {
+        this.connectionMap = new LinkedHashMap<>();
     }
 
+    public Connection createConnection(String brokerUrl,
+                                     String brokerUserName,
+                                     String brokerPassword,
+                                     String clientID,
+                                     String connectionIDPrefix)
+    {
 
+        clientID = clientID  == null ? "BLRuleEngine" : clientID;
+        connectionIDPrefix = connectionIDPrefix  == null ? "BLRE" : connectionIDPrefix;
 
+        String connectionKey = brokerUrl + brokerUserName + brokerPassword + clientID + connectionIDPrefix;
+        Connection connection = connectionMap.get(connectionKey);
+
+        if( connection == null )
+        {
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+            connectionFactory.setBrokerURL(brokerUrl);
+            connectionFactory.setUserName(brokerUserName);
+            connectionFactory.setPassword(brokerPassword);
+            connectionFactory.setUseCompression(true);
+            connectionFactory.setClientID(clientID);
+            connectionFactory.setConnectionIDPrefix(connectionIDPrefix);
+            connectionFactory.setUseAsyncSend(true);
+
+            Properties properties = null;
+            try {
+                properties = new Properties();
+                properties.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+                //properties.put(Context.PROVIDER_URL, "tcp://localhost:61616");
+                properties.put(Context.PROVIDER_URL, brokerUrl);
+                properties.put("userName", brokerUserName);
+                properties.put("password", brokerPassword);
+                properties.put("clientID", clientID);
+                properties.put("connectionIDPrefix", connectionIDPrefix);
+
+                InitialContext context = new InitialContext(properties);
+                connectionFactory = (ActiveMQConnectionFactory) context.lookup("ConnectionFactory");
+
+                connection = connectionFactory.createConnection(brokerUserName, brokerPassword);
+                connection.start();
+
+                connectionMap.put(connectionKey, connection);
+
+            } catch (Exception e) {
+                LOG.info("ActiveMQConnectionFactoryConfig.createConnectionFactory ERROR : " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+
+        return connection;
+    }
+
+    public void stopConnection() {
+        connectionMap.forEach( (key,connection) -> {
+            try {
+                connection.close();
+            } catch (JMSException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
 
 }

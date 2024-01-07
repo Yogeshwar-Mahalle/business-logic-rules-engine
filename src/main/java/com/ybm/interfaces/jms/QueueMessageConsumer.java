@@ -20,11 +20,13 @@ import com.ybm.workflow.WorkflowManager;
 import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
 import jakarta.jms.TextMessage;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -36,6 +38,7 @@ import java.util.UUID;
 @Component
 @AllArgsConstructor
 @Data
+@EnableTransactionManagement
 public class QueueMessageConsumer implements MessageListener {
     private static final Logger LOG = LoggerFactory.getLogger(QueueMessageConsumer.class);
 
@@ -50,6 +53,7 @@ public class QueueMessageConsumer implements MessageListener {
 
 
     @Override
+    @Transactional
     public void onMessage(Message message) {
         LOG.info("Inside On Message...");
         long t1 = System.currentTimeMillis();

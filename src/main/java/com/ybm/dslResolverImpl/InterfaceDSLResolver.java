@@ -4,7 +4,9 @@
 
 package com.ybm.dslResolverImpl;
 
-import com.ybm.interfaces.jms.QueueMessageConsumer;
+import com.ybm.interfaces.jms.ActiveMQConnectionFactoryConfig;
+import com.ybm.interfaces.jms.IBMMQConnectionFactoryConfig;
+import com.ybm.interfaces.jms.RabbitMQConnectionFactoryConfig;
 import com.ybm.interfacesRepo.models.*;
 import com.ybm.interfacesRepo.InterfaceProfileService;
 import com.ybm.interfacesRepo.InterfacePropertyService;
@@ -15,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -37,6 +37,13 @@ public class InterfaceDSLResolver implements DSLResolver {
 
     @Autowired
     private InterfacePropertyService interfacePropertyService;
+
+    @Autowired
+    ActiveMQConnectionFactoryConfig activeMQConnectionFactoryConfig;
+    @Autowired
+    IBMMQConnectionFactoryConfig ibmMQConnectionFactoryConfig;
+    @Autowired
+    RabbitMQConnectionFactoryConfig rabbitMQConnectionFactoryConfig;
 
     @Override
     public String getResolverKeyword() {
@@ -123,43 +130,32 @@ public class InterfaceDSLResolver implements DSLResolver {
                 case API -> {
                     return "API-CALLED";
                 }
-                case MQ -> {
-
+                case WMQ -> {
                     try {
 
-                            Properties env = new Properties();
-                            //env.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-                            //env.put(Context.PROVIDER_URL, "tcp://localhost:61616");
+                        Connection connection =
+                                ibmMQConnectionFactoryConfig.createConnection(propertiesMap.get(PropertyType.HOSTNAME),
+                                                                            Integer.valueOf(propertiesMap.get(PropertyType.PORT)),
+                                                                            propertiesMap.get(PropertyType.QUEUE_MANAGER),
+                                                                            propertiesMap.get(PropertyType.CHANNEL),
+                                                                            propertiesMap.get(PropertyType.CLIENT_ID));
 
-                            env.put(Context.INITIAL_CONTEXT_FACTORY, propertiesMap.get(PropertyType.BROKER_FACTORY));
-                            env.put(Context.PROVIDER_URL, propertiesMap.get(PropertyType.URL));
+                        String queueName = propertiesMap.get(PropertyType.QUEUE_NAME);
 
-                            Context ctx = new InitialContext(env);
+                        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        Destination destination = session.createQueue(queueName);
+                        MessageProducer producer = session.createProducer(destination);
+                        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
-                            QueueConnectionFactory queueConnectionFactory = (QueueConnectionFactory) ctx.lookup("ConnectionFactory");
-                            QueueConnection queueConnection =
-                                    queueConnectionFactory.createQueueConnection(propertiesMap.get(PropertyType.USERID), propertiesMap.get(PropertyType.SECRETE));
+                        TextMessage message = session.createTextMessage(parameters[3]);
+                        message.setJMSMessageID(UUID.randomUUID().toString());
+                        message.setJMSType(propertiesMap.get(PropertyType.FORMAT_TYPE));
+                        message.setJMSTimestamp(new Date().getTime());
 
-                            queueConnection.start();
+                        producer.send(message);
 
-                            String queueName = propertiesMap.get(PropertyType.QUEUE_NAME);
-
-                            QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-                            Destination destination = queueSession.createQueue(queueName);
-                            MessageProducer producer = queueSession.createProducer(destination);
-                            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-
-                            TextMessage message = queueSession.createTextMessage(parameters[3]);
-                            message.setJMSMessageID(UUID.randomUUID().toString());
-                            message.setJMSType(propertiesMap.get(PropertyType.FORMAT_TYPE));
-                            message.setJMSTimestamp(new Date().getTime());
-
-                            producer.send(message);
-
-                            // Clean up
-                            queueSession.close();
-                            queueConnection.close();
-
+                        // Clean up
+                        session.close();
                     }
                     catch (Exception e)
                     {
@@ -167,10 +163,88 @@ public class InterfaceDSLResolver implements DSLResolver {
                         e.printStackTrace();
                     }
 
-                    return "JMS-CALLED";
+                    return "IBM MQ-CALLED";
+                }
+                case AMQ -> {
+
+                    try {
+
+                        Connection connection =
+                                activeMQConnectionFactoryConfig.createConnection(propertiesMap.get(PropertyType.URL),
+                                                                                propertiesMap.get(PropertyType.USERID),
+                                                                                propertiesMap.get(PropertyType.SECRETE),
+                                                                                propertiesMap.get(PropertyType.CLIENT_ID),
+                                                                                propertiesMap.get(PropertyType.CONNECTION_ID));
+
+                        String queueName = propertiesMap.get(PropertyType.QUEUE_NAME);
+
+                        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        Destination destination = session.createQueue(queueName);
+                        MessageProducer producer = session.createProducer(destination);
+                        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+                        TextMessage message = session.createTextMessage(parameters[3]);
+                        message.setJMSMessageID(UUID.randomUUID().toString());
+                        message.setJMSType(propertiesMap.get(PropertyType.FORMAT_TYPE));
+                        message.setJMSTimestamp(new Date().getTime());
+
+                        producer.send(message);
+
+                        // Clean up
+                        session.close();
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.error("InterfaceRunner error : " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    return "AMQ-CALLED";
+                }
+                case RMQ -> {
+                    try {
+
+                        Connection connection =
+                                rabbitMQConnectionFactoryConfig.createConnection(propertiesMap.get(PropertyType.HOSTNAME),
+                                                                                Integer.valueOf(propertiesMap.get(PropertyType.PORT)),
+                                                                                propertiesMap.get(PropertyType.USERID),
+                                                                                propertiesMap.get(PropertyType.SECRETE),
+                                                                                propertiesMap.get(PropertyType.VIRTUAL_HOST),
+                                                                                propertiesMap.get(PropertyType.CLIENT_ID));
+
+                        String queueName = propertiesMap.get(PropertyType.QUEUE_NAME);
+
+                        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        Destination destination = session.createQueue(queueName);
+                        MessageProducer producer = session.createProducer(destination);
+                        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+                        TextMessage message = session.createTextMessage(parameters[3]);
+                        message.setJMSMessageID(UUID.randomUUID().toString());
+                        message.setJMSType(propertiesMap.get(PropertyType.FORMAT_TYPE));
+                        message.setJMSTimestamp(new Date().getTime());
+
+                        producer.send(message);
+
+                        // Clean up
+                        session.close();
+                    }
+                    catch (Exception e)
+                    {
+                        LOG.error("InterfaceRunner error : " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    return "RabbitMQ-CALLED";
                 }
                 case FTP -> {
                     return "SFTP-CALLED";
+                }
+                case WEBSOCKET -> {
+                    return "WEBSOCKET-CALLED";
+                }
+                case KAFKA -> {
+                    return "KAFKA-CALLED";
                 }
                 default ->  {
                     return "UNKNOWN-PROTOCOL";
