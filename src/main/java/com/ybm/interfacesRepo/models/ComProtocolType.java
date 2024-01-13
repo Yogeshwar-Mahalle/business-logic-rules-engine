@@ -9,7 +9,7 @@ public enum ComProtocolType {
     WMQ,
     AMQ,
     RMQ,
-    FTP,
+    SFTP,
     FILE,
     WEBSOCKET,
     KAFKA

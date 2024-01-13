@@ -8,7 +8,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileWatcherTemplate extends RouteBuilder {
+public class FileWatcherRouteTemplate extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
@@ -16,12 +16,13 @@ public class FileWatcherTemplate extends RouteBuilder {
         routeTemplate("filePollingTemplate")
                 // here we define the required input parameters (can have default values)
                 .templateParameter("directoryName")
+                .templateParameter("options")
                 .templateParameter("sourceName")
                 .templateParameter("entityName")
                 .templateParameter("formatType")
                 .templateParameter("messageType")
                 .templateParameter("prefixMessage", "File Content : ")
-                .from("file://{{directoryName}}?preMove=inprogress&moveFailed=error&move=backup")
+                .from("file://{{directoryName}}?{{options}}")
                     .log("*************************** File received ***************************")
                     .log("Exchange information: ${exchange}")
                     .setHeader("source", constant("{{sourceName}}"))

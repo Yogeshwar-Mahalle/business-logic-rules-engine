@@ -21,6 +21,7 @@ public enum PropertyType {
     PORT,
     FILE_PATH,
     FILE_EXT,
+    OPTIONS,
     USERID,
     SECRETE,
     CLIENT_ID,

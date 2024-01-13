@@ -8,6 +8,8 @@ package com.ybm.interfaces;
 import com.ybm.interfaces.files.FilePollingConfig;
 import com.ybm.interfaces.jms.*;
 
+import com.ybm.interfaces.sftp.SFTPClientConfig;
+import com.ybm.interfaces.websocket.WebsocketConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +24,18 @@ public class InterfaceRunner implements ApplicationRunner {
 
     @Autowired
     JMSConfig jmsConfig;
-
     @Autowired
     FilePollingConfig filePollingConfig;
+    @Autowired
+    SFTPClientConfig sftpClientConfig;
+    @Autowired
+    WebsocketConfig webSocketConfig;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
-        //TODO:: Add all incoming interfaces polling mechanism
-
         jmsConfig.run(args);
         filePollingConfig.run(args);
-
+        sftpClientConfig.run(args);
+        webSocketConfig.run(args);
     }
 }

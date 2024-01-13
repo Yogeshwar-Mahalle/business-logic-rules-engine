@@ -237,7 +237,7 @@ public class InterfaceDSLResolver implements DSLResolver {
 
                     return "RabbitMQ-CALLED";
                 }
-                case FTP -> {
+                case SFTP -> {
                     return "SFTP-CALLED";
                 }
                 case WEBSOCKET -> {
