@@ -124,7 +124,7 @@ public class JMSConfig {
                         businessRuleEntityService,
                         workflowManager,
                         exchangeDataService,
-                        propertiesMap.get(PropertyType.ENTITY),
+                        interfaceProfile.getLinkedEntity(),
                         propertiesMap.get(PropertyType.SOURCE),
                         propertiesMap.get(PropertyType.FORMAT_TYPE),
                         propertiesMap.get(PropertyType.MESSAGE_TYPE))
@@ -161,7 +161,7 @@ public class JMSConfig {
                         businessRuleEntityService,
                         workflowManager,
                         exchangeDataService,
-                        propertiesMap.get(PropertyType.ENTITY),
+                        interfaceProfile.getLinkedEntity(),
                         propertiesMap.get(PropertyType.SOURCE),
                         propertiesMap.get(PropertyType.FORMAT_TYPE),
                         propertiesMap.get(PropertyType.MESSAGE_TYPE))
@@ -199,7 +199,7 @@ public class JMSConfig {
                         businessRuleEntityService,
                         workflowManager,
                         exchangeDataService,
-                        propertiesMap.get(PropertyType.ENTITY),
+                        interfaceProfile.getLinkedEntity(),
                         propertiesMap.get(PropertyType.SOURCE),
                         propertiesMap.get(PropertyType.FORMAT_TYPE),
                         propertiesMap.get(PropertyType.MESSAGE_TYPE))

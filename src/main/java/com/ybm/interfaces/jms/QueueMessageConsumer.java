@@ -55,6 +55,7 @@ public class QueueMessageConsumer implements MessageListener {
     @Override
     @Transactional
     public void onMessage(Message message) {
+        LOG.info("*************************** Message received ***************************");
         LOG.info("Inside On Message...");
         long t1 = System.currentTimeMillis();
         LOG.info("Message consumed at ...."+t1);
@@ -63,19 +64,18 @@ public class QueueMessageConsumer implements MessageListener {
             if(message instanceof TextMessage) {
                 LOG.info("String message recieved >> "+((TextMessage) message).getText());
 
-                String source = getSource();
                 String messageId = message.getJMSCorrelationID();
                 String formatType = message.getJMSType() == null ? getFormatType() : message.getJMSType();
-                String messageType = getMessageType();
 
                 LinkedHashMap<String, String> headers = new LinkedHashMap<>();
                 String strPayload = ((TextMessage) message).getText();
 
-                headers.put("source", source);
                 headers.put("content-type", ContentType.setLabel(formatType).getLabel());
+                headers.put("entity", getEntity() );
+                headers.put("source", getSource() );
                 headers.put("formattype", formatType);
                 headers.put("message_id", messageId);
-                headers.put("messagetype", messageType);
+                headers.put("messagetype", getMessageType() );
                 headers.put("queue_name", message.getJMSDestination().toString());
                 headers.put("delivery_time", String.valueOf(message.getJMSDeliveryTime()));
                 //headers.put("properties", message.properties == null ? "" : message.properties);
@@ -99,77 +99,20 @@ public class QueueMessageConsumer implements MessageListener {
                         new LinkedList<>()
                 );
 
-                ExchangeData exchangeData = mapExchangeData(businessLogicRuleEntity, dataExchangeObject);
+                ExchangeData exchangeData = workflowManager.mapExchangeData(businessLogicRuleEntity, dataExchangeObject);
                 exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
                 DataExchangeObject result = workflowManager.run( dataExchangeObject );
 
-                exchangeData = mapExchangeData(businessLogicRuleEntity, result);
+                exchangeData = workflowManager.mapExchangeData(businessLogicRuleEntity, result);
                 exchangeData = exchangeDataService.saveExchangeData(exchangeData);
 
+                LOG.info("*************************** Message is processed ***************************");
             }
 
         }catch(Exception e){
             e.printStackTrace();
+            LOG.info("*************************** Message processing failed ***************************");
         }
-    }
-
-    private ExchangeData mapExchangeData(BusinessLogicRuleEntity businessLogicRuleEntity, DataExchangeObject dataExchangeObject) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> headers = dataExchangeObject.getInDataObject().getHeaders();
-        String strProperties = dataExchangeObject.getProperties().toString();
-        String strOrgHeaders = dataExchangeObject.getInDataObject().getHeaders().toString();
-        String strProcessedHeaders = dataExchangeObject.getOutDataObject().getHeaders().toString();
-        String strDataExtension = dataExchangeObject.getDataExtension().toString();
-
-        try {
-            strProperties = objectMapper.writeValueAsString(dataExchangeObject.getProperties());
-            strOrgHeaders = objectMapper.writeValueAsString(dataExchangeObject.getInDataObject().getHeaders());
-            strProcessedHeaders = objectMapper.writeValueAsString(dataExchangeObject.getOutDataObject().getHeaders());
-            strDataExtension = objectMapper.writeValueAsString(dataExchangeObject.getDataExtension());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
-        String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
-        sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
-
-        if( businessLogicRuleEntity == null )
-        {
-            businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName( "BLRuleEngine" );
-        }
-
-        String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");
-        messageId = dataExchangeObject.getProperties().get("messageId") != null ? (String) dataExchangeObject.getProperties().get("messageId") : messageId;
-        String messageType = headers.get("messagetype") != null ? headers.get("messagetype") : headers.get("MESSAGETYPE");
-        messageType = dataExchangeObject.getProperties().get("messageType") != null ? (String) dataExchangeObject.getProperties().get("messageType") : messageType;
-
-        dataExchangeObject.getProperties().putIfAbsent("entity", businessLogicRuleEntity.getEntityName());
-        dataExchangeObject.getProperties().putIfAbsent("source", sourceSys);
-        dataExchangeObject.getProperties().putIfAbsent("formatType", ContentType.setLabel(strOrgContentType).name());
-        dataExchangeObject.getProperties().putIfAbsent("messageType", messageType);
-        dataExchangeObject.getProperties().putIfAbsent("messageId", messageId);
-
-
-        ExchangeData exchangeData = new ExchangeData();
-        exchangeData.setUniqueExchangeId(dataExchangeObject.getUniqueExchangeId());
-        exchangeData.setLinkedEntity(businessLogicRuleEntity.getEntityName());
-        exchangeData.setSource(sourceSys);
-        exchangeData.setMessageId(messageId);
-        exchangeData.setWorkflowMonitor("{RuleTypesWorkFlow: [\"@@@@@@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@-@@@@@@@@@@@@@@@\"]}");//Rules-Interfaces-UserActionOnGUI
-        exchangeData.setOriginalContentType(ContentType.setLabel(strOrgContentType));
-        exchangeData.setOriginalData(dataExchangeObject.getInDataObject().getPayload().getStrMessage());
-        exchangeData.setOriginalHeaders(strOrgHeaders);
-        exchangeData.setContentType(ContentType.JSON);
-        exchangeData.setProcessedData(dataExchangeObject.getOutDataObject().getPayload().getStrMessage());
-        exchangeData.setProcessedHeaders(strProcessedHeaders);
-        exchangeData.setProperties(strProperties);
-        exchangeData.setDataExtension(strDataExtension);
-
-        if( exchangeData.getStatus() == null )
-            exchangeData.setStatus( StatusType.RECEIVED ) ;
-
-        return exchangeData;
     }
 }

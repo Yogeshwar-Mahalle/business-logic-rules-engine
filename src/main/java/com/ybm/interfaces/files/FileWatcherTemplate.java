@@ -22,17 +22,22 @@ public class FileWatcherTemplate extends RouteBuilder {
                 .templateParameter("messageType")
                 .templateParameter("prefixMessage", "File Content : ")
                 .from("file://{{directoryName}}?preMove=inprogress&moveFailed=error&move=backup")
+                    .log("*************************** File received ***************************")
                     .log("Exchange information: ${exchange}")
                     .setHeader("source", constant("{{sourceName}}"))
                     .setHeader("entity", constant("{{entityName}}"))
                     .setHeader("formattype", constant("{{formatType}}"))
                     .setHeader("messagetype", constant("{{messageType}}"))
                     .setHeader("messageId", simple("${exchangeId}"))
+                    .setHeader("message_id", simple("${exchangeId}"))
                     .setProperty("messageId", header("messageId"))
                     .log("File event with Headers : ${headers} occurred.")
                     .log("File event with messageId property : ${exchangeProperty.messageId} occurred.")
-                    .setBody(simple("{{prefixMessage}} ${body}"))
-                    .log("${body}");
+                    .log("{{prefixMessage}} ${body}")
+                    .process("fileContentProcessor")
+                    .log("Result Out Content :  ${body}")
+                    .log("Result Out Headers :  ${headers}")
+                    .log("*************************** File is parked after processing ***************************");
 
     }
 }

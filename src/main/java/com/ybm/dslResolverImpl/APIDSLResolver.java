@@ -138,7 +138,7 @@ public class APIDSLResolver implements DSLResolver {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
-        Map<String, String> headers = new LinkedHashMap<>();
+        Map<String, Object> headers = new LinkedHashMap<>();
         String urlQuery;
         String fullContextPath = "/" + contextPath;
         if ( parameters.length > 1 && parameters[1].contains("?"))
@@ -158,7 +158,7 @@ public class APIDSLResolver implements DSLResolver {
                 {
                     ObjectMapper jsonMapper = new ObjectMapper();
                     try {
-                        headers = jsonMapper.readValue(parameter, new TypeReference<LinkedHashMap<String, String>>() {});
+                        headers = jsonMapper.readValue(parameter, new TypeReference<LinkedHashMap<String, Object>>() {});
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
@@ -192,7 +192,7 @@ public class APIDSLResolver implements DSLResolver {
         {
             String reqBody = parameters.length > 1 ? parameters[parameters.length - 1] : "";
             String finalFullContextPath1 = fullContextPath;
-            Map<String, String> finalHeaders = headers;
+            Map<String, Object> finalHeaders = headers;
             response = webClient.post()
                     .uri(uriBuilder -> uriBuilder
                             .path(finalFullContextPath1)
@@ -202,7 +202,7 @@ public class APIDSLResolver implements DSLResolver {
 
                         finalHeaders.forEach((key, value) -> {
                             List<String> valueList = new ArrayList<>();
-                            valueList.add(value);
+                            valueList.add(value.toString());
                             reqHeaders.put(key, valueList);
                         });
 

@@ -4,13 +4,9 @@
 
 package com.ybm.interfaces.files;
 
-import com.ybm.exchangeDataRepo.ExchangeDataService;
 import com.ybm.interfacesRepo.InterfaceProfileService;
 import com.ybm.interfacesRepo.InterfacePropertyService;
 import com.ybm.interfacesRepo.models.*;
-import com.ybm.rulesBusinessSetupRepo.BusinessRuleEntityService;
-import com.ybm.workflow.WorkflowManager;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.TemplatedRouteBuilder;
 import org.slf4j.Logger;
@@ -19,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -28,12 +23,6 @@ public class FilePollingConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilePollingConfig.class);
 
-    @Autowired
-    private BusinessRuleEntityService businessRuleEntityService;
-    @Autowired
-    private WorkflowManager workflowManager;
-    @Autowired
-    private ExchangeDataService exchangeDataService;
     @Autowired
     private InterfaceProfileService interfaceProfileService;
     @Autowired
@@ -63,24 +52,21 @@ public class FilePollingConfig {
                                 InterfaceProperty::getPropertyValue)
                 );
 
+                String directoryPath = propertiesMap.get(PropertyType.FILE_PATH) == null ? "./FEED/" : propertiesMap.get(PropertyType.FILE_PATH);
+                String entityName = interfaceProfile.getLinkedEntity() == null ? "BLRuleEngine" : interfaceProfile.getLinkedEntity();
+                String sourceName = propertiesMap.get(PropertyType.SOURCE) == null ? "FEED" : propertiesMap.get(PropertyType.SOURCE);
+                String formatType = propertiesMap.get(PropertyType.FORMAT_TYPE) == null ? "JSON" : propertiesMap.get(PropertyType.FORMAT_TYPE);
+                String messageType = propertiesMap.get(PropertyType.MESSAGE_TYPE) == null ? "pacs.008" : propertiesMap.get(PropertyType.MESSAGE_TYPE);
+
                 TemplatedRouteBuilder.builder(camelContext, "filePollingTemplate")
                         .routeId(interfaceProfile.getInterfaceId())
-                        .parameter("directoryName", propertiesMap.get(PropertyType.FILE_PATH))
-                        .parameter("sourceName", "FEED")
-                        .parameter("entityName", interfaceProfile.getLinkedEntity())
-                        .parameter("formatType", "json")
-                        .parameter("messageType", "pacs.008")
+                        .parameter("directoryName", directoryPath)
+                        .parameter("entityName", entityName)
+                        .parameter("sourceName", sourceName)
+                        .parameter("formatType", formatType)
+                        .parameter("messageType", messageType)
                         .parameter("prefixMessage", "File Content : ")
                         .add();
-
-                /*new QueueMessageConsumer(
-                        businessRuleEntityService,
-                        workflowManager,
-                        exchangeDataService,
-                        propertiesMap.get(PropertyType.ENTITY),
-                        propertiesMap.get(PropertyType.SOURCE),
-                        propertiesMap.get(PropertyType.FORMAT_TYPE),
-                        propertiesMap.get(PropertyType.MESSAGE_TYPE))*/
 
             }
 
