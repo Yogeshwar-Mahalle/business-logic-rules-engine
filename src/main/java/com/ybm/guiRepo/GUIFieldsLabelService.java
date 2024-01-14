@@ -100,7 +100,9 @@ public class GUIFieldsLabelService {
                 .fieldDefaultValue(guiFieldsLabelDbModel.getFieldDefaultValue())
                 .fieldMinLength(guiFieldsLabelDbModel.getFieldMinLength())
                 .fieldMaxLength(guiFieldsLabelDbModel.getFieldMaxLength())
+                .fieldSequenceNumber(guiFieldsLabelDbModel.getFieldSequenceNumber())
                 .hiddenDataFieldFlag(guiFieldsLabelDbModel.getHiddenDataFieldFlag())
+                .apiContextPath(guiFieldsLabelDbModel.getApiContextPath())
                 .createTimeStamp(guiFieldsLabelDbModel.getCreateTimeStamp())
                 .build();
 
@@ -120,7 +122,9 @@ public class GUIFieldsLabelService {
                 .fieldDefaultValue(guiFieldsLabel.getFieldDefaultValue())
                 .fieldMinLength(guiFieldsLabel.getFieldMinLength())
                 .fieldMaxLength(guiFieldsLabel.getFieldMaxLength())
+                .fieldSequenceNumber(guiFieldsLabel.getFieldSequenceNumber())
                 .hiddenDataFieldFlag(guiFieldsLabel.getHiddenDataFieldFlag())
+                .apiContextPath(guiFieldsLabel.getApiContextPath())
                 .createTimeStamp(guiFieldsLabel.getCreateTimeStamp() == null ? new Date() : guiFieldsLabel.getCreateTimeStamp())
                 .build();
 

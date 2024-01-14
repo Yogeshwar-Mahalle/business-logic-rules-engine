@@ -28,12 +28,15 @@ public class BLRuleValueListDbModel implements Serializable {
     private String linkedEntity;
 
     @Id
-    @Column(name = "DATA_TYPE", length = 25, nullable=false)
-    private String dataType;
+    @Column(name = "LIST_TYPE", length = 25, nullable=false)
+    private String listType;
 
     @Id
     @Column(name = "KEY_FIELD", length = 128, nullable=false)
     private String keyField;
+
+    @Column(name = "DATA_TYPE", length = 25, nullable=false)
+    private String dataType;
 
     @Column(name = "VALUE_FIELD", length = 256)
     private String valueField;
@@ -53,7 +56,7 @@ public class BLRuleValueListDbModel implements Serializable {
     @Data
     static class IdClass implements Serializable {
         private String linkedEntity;
-        private String dataType;
+        private String listType;
         private String keyField;
     }
 

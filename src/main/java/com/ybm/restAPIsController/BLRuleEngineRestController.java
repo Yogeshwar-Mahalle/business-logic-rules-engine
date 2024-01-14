@@ -43,6 +43,9 @@ public class BLRuleEngineRestController {
     @Autowired
     private BusinessRuleValueListService businessRuleValueListService;
 
+    @Autowired
+    private BusinessRuleProcessProfileService businessRuleProcessProfileService;
+
     @GetMapping(value = "/get-all-rule-entity")
     public ResponseEntity<?> getAllRuleEntities() {
         List<BusinessLogicRuleEntity> allBusinessLogicRuleEntity = businessRuleEntityService.getAllEntities();
@@ -345,6 +348,45 @@ public class BLRuleEngineRestController {
     public ResponseEntity<?> removeRuleValueByFieldId(@PathVariable("dataType") String dataType, @PathVariable("keyField") String keyField) {
         List<BusinessLogicRuleValueList> allRemainingBusinessLogicRuleValueList = businessRuleValueListService.removeRuleValueByFieldId(dataType, keyField);
         return ResponseEntity.ok(allRemainingBusinessLogicRuleValueList);
+    }
+
+    @GetMapping(value = "/get-all-rule-process-profiles")
+    public ResponseEntity<?> getAllRuleProcessProfile() {
+        List<BusinessLogicRuleProcessProfile> allBusinessLogicRuleProcessProfiles = businessRuleProcessProfileService.getAllProcessProfiles();
+        return ResponseEntity.ok(allBusinessLogicRuleProcessProfiles);
+    }
+
+    @GetMapping(value = "/get-rule-process-profile/{entityName}/{profileName}")
+    public ResponseEntity<?> getRuleProcessProfileByProfileName(@PathVariable("entityName") String entityName,
+                                                                @PathVariable("profileName") String profileName) {
+        BusinessLogicRuleProcessProfile businessLogicRuleProcessProfile =
+                businessRuleProcessProfileService.getProcessProfileByEntityAndProfileName(entityName, profileName);
+        return ResponseEntity.ok(businessLogicRuleProcessProfile);
+    }
+
+    @PostMapping(value = "/update-rule-process-profile")
+    public ResponseEntity<?> updateRuleProcessProfile(@RequestBody BusinessLogicRuleProcessProfile businessLogicRuleProcessProfile) {
+
+        BusinessLogicRuleProcessProfile businessLogicRuleProcessProfileUpdated =
+                businessRuleProcessProfileService.saveRuleProcessProfile(businessLogicRuleProcessProfile);
+        return ResponseEntity.ok(businessLogicRuleProcessProfileUpdated);
+    }
+
+    @PostMapping(value = "/update-all-rule-process-profiles")
+    public ResponseEntity<?> updateRuleProcessProfiles(@RequestBody List<BusinessLogicRuleProcessProfile> businessLogicRuleProcessProfiles) {
+
+        List<BusinessLogicRuleProcessProfile> ruleProcessProfilesUpdated =
+                businessRuleProcessProfileService.saveRuleProcessProfiles(businessLogicRuleProcessProfiles);
+        return ResponseEntity.ok(ruleProcessProfilesUpdated);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping(value = "/remove-rule-process-profile/{entityName}/{profileName}")
+    public ResponseEntity<?> removeRuleProcessProfileByEntityName(@PathVariable("entityName") String entityName,
+                                                                  @PathVariable("profileName") String profileName) {
+        List<BusinessLogicRuleProcessProfile> allRemainingBusinessLogicRuleProcessProfiles =
+                businessRuleProcessProfileService.removeRuleProcessProfileByEntityAndProfileName(entityName, profileName);
+        return ResponseEntity.ok(allRemainingBusinessLogicRuleProcessProfiles);
     }
 
 }

@@ -11,18 +11,21 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BusinessLogicRuleValueList implements Serializable {
+public class BusinessLogicRuleProcessProfile implements Serializable {
     private String linkedEntity;
-    private String listType;
-    private String dataType;
-    private String keyField;
-    private String valueField;
-    private Integer sequenceNumber;
+    private String profileName;
+    private String description;
+    private String countryCode;
+    private String currencyCode;
+    private Date businessDate;
+    private TimeZone timeZone;
+    private String valueListType;
     private StatusType status;
     private Date createTimeStamp;
     private Date updateTimeStamp;

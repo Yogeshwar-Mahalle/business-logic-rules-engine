@@ -55,8 +55,14 @@ public class GUIFieldsLabelDbModel {
     @Column(name = "FIELD_MAX_LENGTH")
     private Integer fieldMaxLength;
 
+    @Column(name = "FIELD_SEQUENCE_NUMBER")
+    private Integer fieldSequenceNumber;
+
     @Column(name = "HIDDEN_DATA_FIELD_FLAG")
     private Boolean hiddenDataFieldFlag;
+
+    @Column(name = "API_CONTEXT_PATH", length = 100)
+    private String apiContextPath;
 
     @Column(name = "CREATE_TIME_STAMP", nullable=false)
     private Date createTimeStamp;

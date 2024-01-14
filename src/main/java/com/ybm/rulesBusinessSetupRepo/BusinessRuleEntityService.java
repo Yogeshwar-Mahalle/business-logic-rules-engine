@@ -38,15 +38,15 @@ public class BusinessRuleEntityService {
 
     @Transactional
     public BusinessLogicRuleEntity saveRuleEntity(BusinessLogicRuleEntity businessLogicRuleEntity) {
-        BLRuleEntityDbModel blRuleTypeDbModel = mapRuleEntityToDbModel(businessLogicRuleEntity);
-        blRuleTypeDbModel = blRuleEntityRepository.save(blRuleTypeDbModel);
-        return mapRuleEntityFromDbModel(blRuleTypeDbModel);
+        BLRuleEntityDbModel blRuleEntityDbModel = mapRuleEntityToDbModel(businessLogicRuleEntity);
+        blRuleEntityDbModel = blRuleEntityRepository.save(blRuleEntityDbModel);
+        return mapRuleEntityFromDbModel(blRuleEntityDbModel);
     }
 
     @Transactional
-    public List<BusinessLogicRuleEntity> saveRuleEntities(List<BusinessLogicRuleEntity> BusinessLogicRuleEntities) {
+    public List<BusinessLogicRuleEntity> saveRuleEntities(List<BusinessLogicRuleEntity> businessLogicRuleEntities) {
 
-        List<BLRuleEntityDbModel> listBLRuleEntityDBModel = BusinessLogicRuleEntities.stream()
+        List<BLRuleEntityDbModel> listBLRuleEntityDBModel = businessLogicRuleEntities.stream()
                 .map(
                         this::mapRuleEntityToDbModel
                 )

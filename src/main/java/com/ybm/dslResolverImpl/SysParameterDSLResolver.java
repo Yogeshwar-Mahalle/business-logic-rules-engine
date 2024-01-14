@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BankDSLResolver implements DSLResolver {
-    private static final Logger LOG = LoggerFactory.getLogger(BankDSLResolver.class);
-    private static final String DSL_RESOLVER_KEYWORD = "BANK";
+public class SysParameterDSLResolver implements DSLResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(SysParameterDSLResolver.class);
+    private static final String DSL_RESOLVER_KEYWORD = "SYSPARAMETER";
     private static final String INTEREST_RATE = "INTERESTRATE";
     private static final String ELIGIBLE_AMOUNT = "ELIGIBLEAMOUNT";
 

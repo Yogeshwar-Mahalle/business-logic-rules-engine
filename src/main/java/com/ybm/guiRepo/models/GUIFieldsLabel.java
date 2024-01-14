@@ -27,6 +27,8 @@ public class GUIFieldsLabel {
     private String fieldDefaultValue;
     private Integer fieldMinLength;
     private Integer fieldMaxLength;
+    private Integer fieldSequenceNumber;
     private Boolean hiddenDataFieldFlag;
+    private String apiContextPath;
     private Date createTimeStamp;
 }

@@ -19,30 +19,32 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BL_RULE_VALUE_LIST_PN_APRVL")
-@IdClass(BLRuleValueListPnAprvlDbModel.IdClass.class)
-public class BLRuleValueListPnAprvlDbModel implements Serializable {
+@Table(name = "BL_RULE_TYPES_PN_APRVL")
+@IdClass(BLRuleTypePnAprvlDbModel.IdClass.class)
+public class BLRuleTypePnAprvlDbModel implements Serializable {
 
     @Id
     @Column(name = "LINKED_ENTITY", length = 25, nullable=false)
     private String linkedEntity;
 
     @Id
-    @Column(name = "LIST_TYPE", length = 25, nullable=false)
-    private String listType;
+    @Column(name = "RULE_TYPE", length = 25, nullable=false)
+    private String ruleType;
 
-    @Id
-    @Column(name = "KEY_FIELD", length = 128, nullable=false)
-    private String keyField;
+    @Column(name = "DESCRIPTION", length = 256)
+    private String description;
 
-    @Column(name = "DATA_TYPE", length = 25, nullable=false)
-    private String dataType;
+    @Column(name = "COMPLEX_RULE_FLAG", nullable=false)
+    private Boolean complexRuleFlag;
 
-    @Column(name = "VALUE_FIELD", length = 256)
-    private String valueField;
+    @Column(name = "WORKFLOW_RULE_FLAG", nullable=false)
+    private Boolean workflowRuleFlag;
 
-    @Column(name = "SEQUENCE_NUMBER", nullable=false)
-    private Integer sequenceNumber;
+    @Column(name = "SYSTEM_RULE_FLAG", nullable=false)
+    private Boolean systemRuleFlag;
+
+    @Column(name = "APPLY_ALL_FLAG", nullable=false)
+    private Boolean applyAllFlag;
 
     @Column(name = "STATUS", length = 2, nullable=false)
     private String status;
@@ -56,8 +58,7 @@ public class BLRuleValueListPnAprvlDbModel implements Serializable {
     @Data
     static class IdClass implements Serializable {
         private String linkedEntity;
-        private String listType;
-        private String keyField;
+        private String ruleType;
     }
 
 }

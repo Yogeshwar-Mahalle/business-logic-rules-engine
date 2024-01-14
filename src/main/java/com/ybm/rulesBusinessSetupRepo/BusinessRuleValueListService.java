@@ -84,8 +84,9 @@ public class BusinessRuleValueListService {
 
         return BusinessLogicRuleValueList.builder()
                 .linkedEntity(blRuleValueListDbModel.getLinkedEntity())
-                .dataType(blRuleValueListDbModel.getDataType())
+                .listType(blRuleValueListDbModel.getListType())
                 .keyField(blRuleValueListDbModel.getKeyField())
+                .dataType(blRuleValueListDbModel.getDataType())
                 .valueField(blRuleValueListDbModel.getValueField())
                 .sequenceNumber(blRuleValueListDbModel.getSequenceNumber())
                 .status(StatusType.valueOf(blRuleValueListDbModel.getStatus()))
@@ -99,8 +100,9 @@ public class BusinessRuleValueListService {
 
         return BLRuleValueListDbModel.builder()
                 .linkedEntity(businessLogicRuleValueList.getLinkedEntity())
-                .dataType(businessLogicRuleValueList.getDataType())
+                .listType(businessLogicRuleValueList.getListType())
                 .keyField(businessLogicRuleValueList.getKeyField())
+                .dataType(businessLogicRuleValueList.getDataType())
                 .valueField(businessLogicRuleValueList.getValueField())
                 .sequenceNumber(businessLogicRuleValueList.getSequenceNumber())
                 .status(String.valueOf(businessLogicRuleValueList.getStatus()))
