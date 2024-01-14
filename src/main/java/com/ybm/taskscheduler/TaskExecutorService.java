@@ -30,12 +30,12 @@ import java.util.concurrent.*;
 @Setter
 @Getter
 @Service
-public class TaskExecutorService implements ExecutorService {
+public class TaskExecutorService implements Runnable { //ExecutorService {
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorService.class);
 
     private TaskDefinition taskDefinition;
 
-    //@Override
+    @Override
     public void run() {
         // Start the clock
         long startTime = System.currentTimeMillis();
@@ -52,7 +52,7 @@ public class TaskExecutorService implements ExecutorService {
         LOG.info("Elapsed time: " + (endTime - startTime));
     }
 
-    @Override
+   /* @Override
     public void shutdown() {
 
     }
@@ -115,5 +115,5 @@ public class TaskExecutorService implements ExecutorService {
     @Override
     public void execute(Runnable command) {
 
-    }
+    }*/
 }
