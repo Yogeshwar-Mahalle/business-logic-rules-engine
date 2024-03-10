@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ybm</groupId>
-    <artifactId>business-logic-rules-engine</artifactId>
+    <artifactId>EuclidPro</artifactId>
     <version>1.0-SNAPSHOT</version>
     <description>Runtime Business Logic change and data processing Rule Engine</description>
 

@@ -32,7 +32,7 @@ public class IBMMQConnectionFactoryConfig {
                                        String channel,
                                        String clientID)
     {
-        clientID = clientID  == null ? "BLRuleEngine" : clientID;
+        clientID = clientID  == null ? "EuclidPro" : clientID;
         String connectionKey = hostName + port + queueManager + channel + clientID;
         Connection connection = connectionMap.get(connectionKey);
 

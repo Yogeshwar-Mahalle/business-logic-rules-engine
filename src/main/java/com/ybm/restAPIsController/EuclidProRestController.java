@@ -22,8 +22,8 @@ import java.util.List;
 @Slf4j
 @EnableMethodSecurity
 @RestController
-public class BLRuleEngineRestController {
-    private static final Logger LOG = LoggerFactory.getLogger(BLRuleEngineRestController.class);
+public class EuclidProRestController {
+    private static final Logger LOG = LoggerFactory.getLogger(EuclidProRestController.class);
     @Autowired
     private RuleEngine ruleEngine;
     @Autowired

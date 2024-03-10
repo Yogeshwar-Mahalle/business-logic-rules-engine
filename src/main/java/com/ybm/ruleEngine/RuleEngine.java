@@ -364,11 +364,11 @@ public class RuleEngine {
      */
     public DataExchangeObject executeRule(BusinessLogicRule businessLogicRule, DataExchangeObject inputData) {
 
-        LOG.info("-------------------------------------------------------------------------------------");
-        LOG.info("SELECTED AND APPLIED RuleId : " + businessLogicRule.getRuleId());
-        LOG.info("Selected and applied rule condition : " + businessLogicRule.getCondition());
-        LOG.info("Selected and applied rule action : " + businessLogicRule.getAction());
-        LOG.info("-------------------------------------------------------------------------------------");
+        LOG.info("\n-------------------------------- SELECTED AND APPLIED RuleId : " + businessLogicRule.getRuleId() + "--------------------------------\n" +
+                "SELECTED AND APPLIED RuleId : " + businessLogicRule.getRuleId() + "\n" +
+                "            Rule conditions : " + businessLogicRule.getCondition() + "\n" +
+                "            Rule actions    : " + businessLogicRule.getAction() + "\n" +
+                "------------------------------------------------------------------------------------------------------------------------------------------");
 
         DataExchangeObject outputResult = inputData.copy();
 

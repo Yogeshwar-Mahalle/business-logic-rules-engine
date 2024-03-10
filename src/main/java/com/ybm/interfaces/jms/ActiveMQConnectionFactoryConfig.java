@@ -33,7 +33,7 @@ public class ActiveMQConnectionFactoryConfig {
                                      String connectionIDPrefix)
     {
 
-        clientID = clientID  == null ? "BLRuleEngine" : clientID;
+        clientID = clientID  == null ? "EuclidPro" : clientID;
         connectionIDPrefix = connectionIDPrefix  == null ? "BLRE" : connectionIDPrefix;
 
         String connectionKey = brokerUrl + brokerUserName + brokerPassword + clientID + connectionIDPrefix;

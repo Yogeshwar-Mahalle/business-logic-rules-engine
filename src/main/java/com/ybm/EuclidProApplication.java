@@ -19,14 +19,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ComponentScan(value = "com.ybm", lazyInit = true)
 @EnableTransactionManagement
-public class BLRuleEngineApplication {
-    private static final Logger LOG = LoggerFactory.getLogger(BLRuleEngineApplication.class);
+public class EuclidProApplication {
+    private static final Logger LOG = LoggerFactory.getLogger(EuclidProApplication.class);
 
     public static void main(String[] args) {
-        LOG.info("******************************* BLRuleEngine Loading *******************************");
-        SpringApplication.run(BLRuleEngineApplication.class, args);
-        //new SpringApplicationBuilder(BLRuleEngineApplication.class).run(args);
-        LOG.info("******************************* BLRuleEngine Started *******************************");
+        LOG.info("******************************* EuclidPro Loading *******************************");
+        SpringApplication.run(EuclidProApplication.class, args);
+        //new SpringApplicationBuilder(EuclidProApplication.class).run(args);
+        LOG.info("******************************* EuclidPro Started *******************************");
     }
 
 
@@ -39,7 +39,7 @@ public class BLRuleEngineApplication {
 
     @PreDestroy
     public void preDestroyGracefulShutdown() {
-        LOG.info("******************************* BLRuleEngine graceful shutdown started *******************************");
+        LOG.info("******************************* EuclidPro graceful shutdown started *******************************");
 
         activeMQConnectionFactoryConfig.stopConnection();
         ibmMQConnectionFactoryConfig.stopConnection();

@@ -33,7 +33,7 @@ public class RabbitMQConnectionFactoryConfig {
                                        String virtualHost,
                                        String clientID)
     {
-        clientID = clientID  == null ? "BLRuleEngine" : clientID;
+        clientID = clientID  == null ? "EuclidPro" : clientID;
         String connectionKey = hostName + port + userName + password + virtualHost + clientID;
         Connection connection = connectionMap.get(connectionKey);
 

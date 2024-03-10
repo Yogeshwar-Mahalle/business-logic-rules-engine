@@ -53,7 +53,7 @@ public class FilePollingConfig {
 
                 String directoryPath = propertiesMap.get(PropertyType.FILE_PATH) == null ? "./FEED/" : propertiesMap.get(PropertyType.FILE_PATH);
                 String options = propertiesMap.get(PropertyType.OPTIONS) == null ? "preMove=inprogress&moveFailed=error&move=backup" : propertiesMap.get(PropertyType.OPTIONS);
-                String entityName = interfaceProfile.getLinkedEntity() == null ? "BLRuleEngine" : interfaceProfile.getLinkedEntity();
+                String entityName = interfaceProfile.getLinkedEntity() == null ? "EuclidPro" : interfaceProfile.getLinkedEntity();
                 String sourceName = propertiesMap.get(PropertyType.SOURCE) == null ? "FEED" : propertiesMap.get(PropertyType.SOURCE);
                 String formatType = propertiesMap.get(PropertyType.FORMAT_TYPE) == null ? "JSON" : propertiesMap.get(PropertyType.FORMAT_TYPE);
                 String messageType = propertiesMap.get(PropertyType.MESSAGE_TYPE) == null ? "pacs.008" : propertiesMap.get(PropertyType.MESSAGE_TYPE);

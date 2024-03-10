@@ -62,7 +62,7 @@ public class TaskSchedulingConfigurer implements AsyncConfigurer, SchedulingConf
         executor.setCorePoolSize(corePoolSize);
         executor.setMaxPoolSize(maxPoolSize);
         executor.setQueueCapacity(queueCapacity);
-        executor.setThreadNamePrefix("BLRuleEngine-");
+        executor.setThreadNamePrefix("EuclidPro-");
         executor.initialize();
         return executor;
     }
@@ -72,7 +72,7 @@ public class TaskSchedulingConfigurer implements AsyncConfigurer, SchedulingConf
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 
         threadPoolTaskScheduler.setPoolSize(corePoolSize);
-        threadPoolTaskScheduler.setThreadNamePrefix("BLRuleEngine-taskscheduler-pool-");
+        threadPoolTaskScheduler.setThreadNamePrefix("EuclidPro-taskscheduler-pool-");
         threadPoolTaskScheduler.initialize();
 
         scheduledTaskRegistrar.setTaskScheduler(threadPoolTaskScheduler);

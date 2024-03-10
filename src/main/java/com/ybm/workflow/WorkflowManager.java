@@ -98,11 +98,11 @@ public class WorkflowManager {
 
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
         String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
-        sourceSys = sourceSys == null ? "BLRuleEngine" : sourceSys;
+        sourceSys = sourceSys == null ? "EuclidPro" : sourceSys;
 
         if( businessLogicRuleEntity == null )
         {
-            businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName( "BLRuleEngine" );
+            businessLogicRuleEntity = businessRuleEntityService.getEntityByEntityName( "EuclidPro" );
         }
 
         String messageId = headers.get("message_id") != null ? headers.get("message_id") : headers.get("MESSAGE_ID");

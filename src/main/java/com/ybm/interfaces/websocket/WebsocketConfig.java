@@ -56,7 +56,7 @@ public class WebsocketConfig {
                 String port = propertiesMap.get(PropertyType.PORT) == null ? "22" : propertiesMap.get(PropertyType.PORT);
                 String resourceUri = propertiesMap.get(PropertyType.USERID) == null ? "anonymous" : propertiesMap.get(PropertyType.USERID);
                 String options = propertiesMap.get(PropertyType.OPTIONS) == null ? "maxTextMessageSize=102400" : propertiesMap.get(PropertyType.OPTIONS);
-                String entityName = interfaceProfile.getLinkedEntity() == null ? "BLRuleEngine" : interfaceProfile.getLinkedEntity();
+                String entityName = interfaceProfile.getLinkedEntity() == null ? "EuclidPro" : interfaceProfile.getLinkedEntity();
                 String sourceName = propertiesMap.get(PropertyType.SOURCE) == null ? "FEED" : propertiesMap.get(PropertyType.SOURCE);
                 String formatType = propertiesMap.get(PropertyType.FORMAT_TYPE) == null ? "JSON" : propertiesMap.get(PropertyType.FORMAT_TYPE);
                 String messageType = propertiesMap.get(PropertyType.MESSAGE_TYPE) == null ? "pacs.008" : propertiesMap.get(PropertyType.MESSAGE_TYPE);
