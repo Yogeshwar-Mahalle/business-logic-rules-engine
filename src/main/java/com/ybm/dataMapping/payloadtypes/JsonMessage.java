@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class JsonMessage implements PayloadMessageInterface {
     private static final Logger LOG = LoggerFactory.getLogger(JsonMessage.class);
@@ -26,6 +28,8 @@ public class JsonMessage implements PayloadMessageInterface {
         ObjectMapper m_JsonMapper = new ObjectMapper();
         this.m_DataMap = m_JsonMapper.readValue(jsonMessage, new TypeReference<LinkedHashMap<String, Object>>() {});
         this.m_RootNodeName = dataName;
+
+        removeNull(this.m_DataMap);
     }
 
 
@@ -55,6 +59,18 @@ public class JsonMessage implements PayloadMessageInterface {
     @Override
     public LinkedHashMap<String, Object> getDataMap() {
         return this.m_DataMap;
+    }
+
+    private void removeNull(Map map) {
+        if( map != null ) {
+            map.values().removeIf(Objects::isNull);
+            for (Object value : map.values()) {
+                if (value instanceof Map) {
+                    // Apply a recursion on inner maps
+                    removeNull((Map) value);
+                }
+            }
+        }
     }
 
 }

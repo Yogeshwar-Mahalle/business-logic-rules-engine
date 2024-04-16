@@ -39,7 +39,7 @@ public class FieldsDataTransformMappingDbModel implements Serializable {
     @Column(name = "TRANSFORM_MAPPER_VERSION", length = 10, nullable=false)
     private String transformMapperVersion;
 
-    @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 20480)
+    @Column(name = "MAPPING_EXPRESSION_SCRIPT", length = 102400)
     private String mappingExpressionScript;
 
     @Column(name = "STATUS", length = 2, nullable=false)

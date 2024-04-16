@@ -17,10 +17,17 @@ public class TextMessage implements PayloadMessageInterface {
     private final String m_OrgMessage;
     private LinkedHashMap<String, Object> m_DataMap = null;
     private String m_RootNodeName;
+    private final String ROOT_NODE_NAME = "ROOT-NODE-NAME";
+    private final String TEXT_DATA = "TEXTDATA";
 
     public TextMessage(String dataName, String textMessage) {
         this.m_OrgMessage = textMessage;
         this.m_RootNodeName = dataName;
+
+        String[] lines = textMessage.split(System.lineSeparator());
+        this.m_DataMap = new LinkedHashMap<>();
+        this.m_DataMap.put(TEXT_DATA, lines);
+        this.m_DataMap.put(ROOT_NODE_NAME, this.m_RootNodeName);
 
     }
 

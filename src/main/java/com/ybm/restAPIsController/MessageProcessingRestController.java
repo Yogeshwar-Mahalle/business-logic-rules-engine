@@ -49,6 +49,8 @@ public class MessageProcessingRestController {
     public ResponseEntity<?> postPaymentDetails(@PathVariable("entityName") String entityName,
                                                 @RequestHeader LinkedHashMap<String, String> headers,
                                                 @RequestBody LinkedHashMap map) {
+        String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
+        headers.putIfAbsent("formattype", ContentType.setLabel(strOrgContentType).name());
         UUID uuid = UUID.randomUUID();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         LinkedHashMap<String, Object> extData = new LinkedHashMap<>();
@@ -93,6 +95,7 @@ public class MessageProcessingRestController {
                                             @RequestHeader Map<String, String> headers,
                                             @RequestBody String strPayload) {
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
+        headers.putIfAbsent("formattype", ContentType.setLabel(strOrgContentType).name());
         UUID uuid = UUID.randomUUID();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         LinkedHashMap<String, Object> extData = new LinkedHashMap<>();

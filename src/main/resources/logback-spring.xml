@@ -6,7 +6,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
 
-    <property name="LOG_FILE_NAME" value="BLRuleEngine"/>
+    <property name="LOG_FILE_NAME" value="EuclidPro"/>
 
     <springProfile name="default,dev">
         <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>

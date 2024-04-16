@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -197,7 +198,31 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
             else {
                 //String tagName = namespacePrefix + ":" + item.getKey();
                 String tagName = item.getKey();
-                xmlGenerator.writeObjectField(tagName, item.getValue());
+                if(item.getValue() instanceof ArrayList || item.getValue() instanceof Object[])
+                {
+                    Object[] valueList = null;
+                    if( item.getValue() instanceof ArrayList )
+                    {
+                        valueList = ((ArrayList<?>) item.getValue()).toArray();
+                    }
+                    else if( item.getValue() instanceof Object[] )
+                    {
+                        valueList = (Object[]) item.getValue();
+                    }
+
+                    for(Object value : valueList)
+                    {
+                        if(value != null) {
+                            xmlGenerator.writeObjectField(tagName, value);
+                        }
+                    }
+                }
+                else
+                {
+                    if(item.getValue() != null) {
+                        xmlGenerator.writeObjectField(tagName, item.getValue());
+                    }
+                }
             }
         }
     }

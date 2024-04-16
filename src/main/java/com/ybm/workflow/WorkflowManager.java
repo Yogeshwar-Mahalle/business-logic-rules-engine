@@ -97,6 +97,7 @@ public class WorkflowManager {
         Map<String, String> headers = dataExchangeObject.getInDataObject().getHeaders();
 
         String strOrgContentType = headers.get("content-type") != null ? headers.get("content-type") : headers.get("CONTENT-TYPE");
+        dataExchangeObject.getInDataObject().getHeaders().putIfAbsent("formattype", ContentType.setLabel(strOrgContentType).name());
         String sourceSys = headers.get("source") != null ? headers.get("source") : headers.get("SOURCE");
         sourceSys = sourceSys == null ? "EuclidPro" : sourceSys;
 
@@ -113,8 +114,8 @@ public class WorkflowManager {
         dataExchangeObject.getProperties().putIfAbsent("entity", businessLogicRuleEntity.getEntityName());
         dataExchangeObject.getProperties().putIfAbsent("source", sourceSys);
         dataExchangeObject.getProperties().putIfAbsent("formatType", ContentType.setLabel(strOrgContentType).name());
-        dataExchangeObject.getProperties().putIfAbsent("messageType", messageType);
-        dataExchangeObject.getProperties().putIfAbsent("messageId", messageId);
+        dataExchangeObject.getProperties().putIfAbsent("messageType", messageType == null ? "MESSAGE" : messageType);
+        dataExchangeObject.getProperties().putIfAbsent("messageId", messageId == null ? dataExchangeObject.getUniqueExchangeId() : messageId);
 
 
         String strProperties = dataExchangeObject.getProperties().toString();
