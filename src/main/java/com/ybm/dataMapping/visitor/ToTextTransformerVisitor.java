@@ -19,6 +19,19 @@ public class ToTextTransformerVisitor implements VisitorInterface {
 
     @Override
     public String getResult() {
-        return null;
+
+        StringBuilder returnResult = new StringBuilder((String) m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode()));
+
+        if( returnResult.isEmpty() )
+        {
+            returnResult = new StringBuilder();
+            for( Object textLine : m_PayloadMessageInterface.getDataMap().values() )
+            {
+                returnResult.append(textLine.toString());
+                returnResult.append("\n");
+            }
+        }
+
+        return returnResult.toString();
     }
 }
