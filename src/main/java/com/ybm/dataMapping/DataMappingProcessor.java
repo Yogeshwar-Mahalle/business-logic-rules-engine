@@ -27,7 +27,7 @@ public class DataMappingProcessor {
 
     @Autowired
     DataMapProcessing dataMapProcessing;
-    public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT, UNKNOWN}
+    public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT, ISO8583, SWIFT, UNKNOWN}
     public String transformMessage(String dataName,
                                           MessageFormat fromMessageFormat,
                                           MessageFormat toMessageFormat,
@@ -80,6 +80,14 @@ public class DataMappingProcessor {
             }
             case TEXT: {
                 payloadMessageInterface = new TextMessage( dataName, message );
+                break;
+            }
+            case ISO8583: {
+                payloadMessageInterface = new ISO8583Message( dataName, message );
+                break;
+            }
+            case SWIFT: {
+                payloadMessageInterface = new SWIFTMessage( dataName, message );
                 break;
             }
             default: {
@@ -152,6 +160,16 @@ public class DataMappingProcessor {
                 case TEXT: {
                     returnResult = payloadMessageInterface.accept(new ToTextTransformerVisitor());
                     payloadMessageInterface = new TextMessage( dataName, returnResult );
+                    break;
+                }
+                case ISO8583: {
+                    returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor());
+                    payloadMessageInterface = new ISO8583Message( dataName, returnResult );
+                    break;
+                }
+                case SWIFT: {
+                    returnResult = payloadMessageInterface.accept(new ToSWIFTTransformerVisitor());
+                    payloadMessageInterface = new SWIFTMessage( dataName, returnResult );
                     break;
                 }
                 default: {
