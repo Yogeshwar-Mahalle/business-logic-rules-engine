@@ -83,7 +83,11 @@ public class DataMappingProcessor {
                 break;
             }
             case ISO8583: {
-                payloadMessageInterface = new ISO8583Message( dataName, message );
+                try {
+                    payloadMessageInterface = new ISO8583Message( dataName, message );
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             }
             case SWIFT: {
@@ -164,7 +168,11 @@ public class DataMappingProcessor {
                 }
                 case ISO8583: {
                     returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor());
-                    payloadMessageInterface = new ISO8583Message( dataName, returnResult );
+                    try {
+                        payloadMessageInterface = new ISO8583Message( dataName, returnResult );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
                 }
                 case SWIFT: {

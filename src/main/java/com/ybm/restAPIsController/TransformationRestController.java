@@ -95,6 +95,7 @@ public class TransformationRestController {
 
         return ResponseEntity.ok()
                 .contentType(contentType)
+                .contentLength(result.length())
                 .body(result);
     }
 
@@ -118,7 +119,7 @@ public class TransformationRestController {
             case CSV -> {
                 contentType = MediaType.valueOf("text/csv");
             }
-            case TEXT -> {
+            case TEXT, ISO8583, SWIFT -> {
                 contentType = MediaType.TEXT_PLAIN;
             }
             default -> {
