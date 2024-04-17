@@ -90,7 +90,7 @@ public class ISO8583Message implements PayloadMessageInterface {
      * @param formatMap Object containing format and variable
      * @return Return JSON Object containing common specs that exists on the message
      */
-    public JSONObject parseISO8583(String message, JSONObject formatMap)
+    private JSONObject parseISO8583(String message, JSONObject formatMap)
     {
         JSONObject json = new JSONObject();
         if(!formatMap.equals(new JSONObject()))
@@ -98,7 +98,7 @@ public class ISO8583Message implements PayloadMessageInterface {
             String tmp1 = "", tmp2 = "", key = "", value = "";
             if(message.length() > 36)
             {
-                String type = (message.length() > 4)?message.substring(0, 4):"0800";
+                String type = message.substring(0, 4);
                 this.iso8583Structure = new ISO8583Structure(type, formatMap);
                 iso8583Structure.parse(message);
                 String[] arrFormat;
@@ -124,7 +124,7 @@ public class ISO8583Message implements PayloadMessageInterface {
                             fieldName = "f"+idx;
                             if(iso8583Structure.hasField(idx))
                             {
-                                subfield = iso8583Structure.getValue(idx).toString();
+                                subfield = iso8583Structure.getValue(idx);
                                 if(ISO8583Structure.inArray(fieldFromTemplate, fieldName))
                                 {
                                     String jostr = formatMap.get(fieldName).toString();
@@ -176,7 +176,7 @@ public class ISO8583Message implements PayloadMessageInterface {
                                                     if(arrFormat[j+1].contains("d"))
                                                     {
                                                         tmp2 = ISO8583Structure.lTrim(tmp1, "0");
-                                                        if(tmp2.equals(""))
+                                                        if(tmp2.isEmpty())
                                                         {
                                                             tmp2 = "0";
                                                         }
@@ -203,7 +203,7 @@ public class ISO8583Message implements PayloadMessageInterface {
                                             if(format.contains("d"))
                                             {
                                                 value = ISO8583Structure.lTrim(tmp1, "0");
-                                                if(value.equals(""))
+                                                if(value.isEmpty())
                                                 {
                                                     value = "0";
                                                 }
@@ -214,6 +214,7 @@ public class ISO8583Message implements PayloadMessageInterface {
                                     catch (JSONException e)
                                     {
                                         e.printStackTrace();
+                                        LOG.error(e.getMessage());
                                     }
                                 }
                                 else
@@ -226,15 +227,18 @@ public class ISO8583Message implements PayloadMessageInterface {
                     catch(Exception e)
                     {
                         e.printStackTrace();
+                        LOG.error(e.getMessage());
                     }
                 }
                 catch (NullPointerException e)
                 {
                     e.printStackTrace();
+                    LOG.error(e.getMessage());
                 }
                 catch (Exception e)
                 {
                     e.printStackTrace();
+                    LOG.error(e.getMessage());
                 }
             }
         }

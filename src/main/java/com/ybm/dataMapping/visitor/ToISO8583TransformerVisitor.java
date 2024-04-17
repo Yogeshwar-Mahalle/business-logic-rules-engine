@@ -81,7 +81,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
      * @param mti_id Message type
      * @return Return byte contains ISO 8583 message
      */
-    public byte[] buildISO8583(JSONObject json, JSONObject formatMap, String mti_id)
+    private byte[] buildISO8583(JSONObject json, JSONObject formatMap, String mti_id)
     {
         this.iso8583Structure = new ISO8583Structure(mti_id, formatMap);
 
@@ -108,7 +108,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                     String key = iter.next().toString();
                     key_tmp = key.replaceAll("f", "");
                     key_tmp = key_tmp.replaceAll("_", "");
-                    if(key_tmp.equals(""))
+                    if(key_tmp.isEmpty())
                     {
                         key_tmp = "0";
                     }
@@ -124,18 +124,18 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                         field_length = Integer.parseInt(row.get("field_length").toString());
                         options = row.get("options").toString();
                         field_type = row.get("type").toString();
-                        if(options.length() > 0)
+                        if(!options.isEmpty())
                         {
                             json = ISO8583Structure.applyOption(json, options);
                         }
-                        String subfield = "";
-                        if(variable.length() > 0)
+                        StringBuilder subfield = new StringBuilder();
+                        if(!variable.isEmpty())
                         {
                             if(variable.contains(","))
                             {
                                 // split format
-                                String subformat[] = ISO8583Structure.listSubformat(format);
-                                String vars[] = variable.split(",");
+                                String[] subformat = ISO8583Structure.listSubformat(format);
+                                String[] vars = variable.split(",");
                                 String subfiedldata = "";
                                 int[] sfl = ISO8583Structure.getSubfieldLength(format);
                                 int i;
@@ -155,7 +155,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                         String tmp = subdata;
                                         tmp = tmp.replaceAll("[^\\d.\\-]", "");
                                         tmp = ISO8583Structure.lTrim(tmp, "0");
-                                        if(tmp.equals(""))
+                                        if(tmp.isEmpty())
                                         {
                                             tmp = "0";
                                         }
@@ -165,7 +165,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                         {
                                             subfiedldata = ISO8583Structure.right(subfiedldata, sfl[i]);
                                         }
-                                        subfield += subfiedldata;
+                                        subfield.append(subfiedldata);
                                     }
                                     else
                                     {
@@ -174,19 +174,19 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                         {
                                             subfiedldata = ISO8583Structure.left(subfiedldata, sfl[i]);
                                         }
-                                        subfield += subfiedldata;
+                                        subfield.append(subfiedldata);
                                     }
                                 }
                                 field_length = ISO8583Structure.getSubfieldLengthTotal(format);
                                 if(field_length > 0)
                                 {
                                     fmt = "%-"+field_length+"s";
-                                    data = String.format(fmt, subfield);
+                                    data = String.format(fmt, subfield.toString());
                                 }
                                 else
                                 {
                                     fmt = "%-s";
-                                    data = String.format(fmt, subfield);
+                                    data = String.format(fmt, subfield.toString());
                                 }
                             }
                             else
@@ -194,23 +194,23 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 variable = variable.trim();
                                 if(json.get(variable) != null)
                                 {
-                                    subfield = json.get(variable).toString();
+                                    subfield = new StringBuilder(json.get(variable).toString());
                                 }
                                 else
                                 {
-                                    subfield = "";
+                                    subfield = new StringBuilder();
                                 }
                                 String data_type = "string";
                                 if(format.contains("d") || field_type.equals("NUMERIC"))
                                 {
-                                    subfield = subfield.replaceAll("[^\\d.\\-]", "");
-                                    subfield = ISO8583Structure.lTrim(subfield, "0");
-                                    if(subfield.equals(""))
+                                    subfield = new StringBuilder(subfield.toString().replaceAll("[^\\d.\\-]", ""));
+                                    subfield = new StringBuilder(ISO8583Structure.lTrim(subfield.toString(), "0"));
+                                    if(subfield.isEmpty())
                                     {
-                                        subfield = "0";
+                                        subfield = new StringBuilder("0");
                                     }
-                                    long val = Long.parseLong(subfield);
-                                    subfield = String.format(format, val);
+                                    long val = Long.parseLong(subfield.toString());
+                                    subfield = new StringBuilder(String.format(format, val));
                                     data_type = "numeric";
                                 }
 
@@ -220,24 +220,24 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                     if(field_length > 0)
                                     {
                                         fmt = "%-"+field_length+"s";
-                                        data = String.format(fmt, subfield);
+                                        data = String.format(fmt, subfield.toString());
 
                                     }
                                     else
                                     {
                                         fmt = "%s";
-                                        data = String.format(fmt, subfield);
+                                        data = String.format(fmt, subfield.toString());
                                     }
                                 }
                                 else
                                 {
-                                    subfield = subfield.replaceAll("[^\\d.\\-]", "");
-                                    subfield = ISO8583Structure.lTrim(subfield, "0");
-                                    if(subfield.equals(""))
+                                    subfield = new StringBuilder(subfield.toString().replaceAll("[^\\d.\\-]", ""));
+                                    subfield = new StringBuilder(ISO8583Structure.lTrim(subfield.toString(), "0"));
+                                    if(subfield.isEmpty())
                                     {
-                                        subfield = "0";
+                                        subfield = new StringBuilder("0");
                                     }
-                                    long val = Long.parseLong(subfield);
+                                    long val = Long.parseLong(subfield.toString());
                                     if(field_length > 0)
                                     {
                                         fmt = "%0"+field_length+"d";
@@ -262,7 +262,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
-                                if(data.equals(""))
+                                if(data.isEmpty())
                                 {
                                     data = "0";
                                 }
@@ -274,7 +274,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
-                                if(data.equals(""))
+                                if(data.isEmpty())
                                 {
                                     data = "0";
                                 }
@@ -286,7 +286,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
-                                if(data.equals(""))
+                                if(data.isEmpty())
                                 {
                                     data = "0";
                                 }
@@ -299,7 +299,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
                                 data = data.trim();
-                                if(data.equals(""))
+                                if(data.isEmpty())
                                 {
                                     data = "0";
                                 }
@@ -328,15 +328,18 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
             catch(Exception e)
             {
                 e.printStackTrace();
+                LOG.error(e.getMessage());
             }
         }
         catch (NullPointerException e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
         }
         return message;
     }

@@ -42,6 +42,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new JsonMessage( dataName, message );
                 } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -50,6 +51,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new XMLMessage( dataName, message );
                 } catch (IOException | ParserConfigurationException | SAXException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -58,6 +60,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new YamlMessage( dataName, message );
                 } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -66,6 +69,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new PropMessage( dataName, message );
                 } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -74,6 +78,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new CsvMessage( dataName, message );
                 } catch (IOException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -86,6 +91,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new ISO8583Message( dataName, message );
                 } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
                 break;
@@ -98,6 +104,7 @@ public class DataMappingProcessor {
                 try {
                     payloadMessageInterface = new JsonErrMessage( dataName, message );
                 } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
                     throw new RuntimeException(e);
                 }
             }
@@ -121,6 +128,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new JsonMessage( dataName, returnResult );
                     } catch (JsonProcessingException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -130,6 +138,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new XMLMessage( dataName, returnResult );
                     } catch (IOException | ParserConfigurationException | SAXException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -139,6 +148,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new YamlMessage( dataName, returnResult );
                     } catch (JsonProcessingException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -148,6 +158,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new PropMessage( dataName, returnResult );
                     } catch (JsonProcessingException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -157,6 +168,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new CsvMessage( dataName, returnResult );
                     } catch (IOException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -171,6 +183,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new ISO8583Message( dataName, returnResult );
                     } catch (JsonProcessingException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     break;
@@ -185,6 +198,7 @@ public class DataMappingProcessor {
                     try {
                         payloadMessageInterface = new JsonErrMessage( dataName, returnResult );
                     } catch (JsonProcessingException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                 }
@@ -203,6 +217,7 @@ public class DataMappingProcessor {
             returnResult = payloadMessageInterface.accept(new MessageWrapperVisitor() );
 
         } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage());
             throw new RuntimeException(e);
         }
 

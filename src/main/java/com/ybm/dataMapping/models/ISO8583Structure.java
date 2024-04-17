@@ -4,11 +4,13 @@
 
 package com.ybm.dataMapping.models;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,7 +23,19 @@ public class ISO8583Structure {
 
     /**
      * Message Type Indicator (default : Version 1987, Financial messages, Request, Acquirer )
+     * -- GETTER --
+     *  Get Message Type Indicator
+     *
+     *
+     * -- SETTER --
+     *  Set Message Type Indicator
+     *
+     @return Message Type Indicator
+      * @param type Message Type Indicator
+
      */
+    @Setter
+    @Getter
     private String type = "0200";
 
     /**
@@ -42,7 +56,19 @@ public class ISO8583Structure {
 
     /**
      * ISO8583 configuration
+     * -- GETTER --
+     *  Get configuration of the specs
+     *
+     *
+     * -- SETTER --
+     *  Set configuration of the specs
+     *
+     @return JSONObject contians configuration of the specs
+      * @param config JSONObject contians configuration of the specs
+
      */
+    @Setter
+    @Getter
     private JSONObject config = new JSONObject();
 
     /**
@@ -68,8 +94,17 @@ public class ISO8583Structure {
 
     /**
      * The greatest field number
+     * -- GETTER --
+     *  Get maximum field
+     *
+     * @return Maximum field
+
      */
+    @Getter
     public int maxField = 1;
+
+    private static char hexNdx[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    private static Pattern patHex = Pattern.compile("[0-9A-Z]*");
 
     /**
      * Default constructor
@@ -118,22 +153,6 @@ public class ISO8583Structure {
     }
 
     /**
-     * Set Message Type Indicator
-     * @param type Message Type Indicator
-     */
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-    /**
-     * Get Message Type Indicator
-     * @return Message Type Indicator
-     */
-    public String getType()
-    {
-        return this.type;
-    }
-    /**
      * Set field
      * @param field ISO8583 field number
      * @param data ISO8583 field data
@@ -155,11 +174,14 @@ public class ISO8583Structure {
         try
         {
             data = (JSONObject) this.jsonItem.get("F"+field);
-            fieldData.setField(data.optString("data", "").toString(), data.optString("type", "STRING").toString(), Integer.parseInt(data.optString("length", "1").toString()));
+            fieldData.setField( data.optString("data", ""),
+                    data.optString("type", "STRING"),
+                    Integer.parseInt(data.optString("length", "1")) );
         }
         catch(Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
         }
         return fieldData;
     }
@@ -206,15 +228,14 @@ public class ISO8583Structure {
         int tertiaryBitMap0Int = 0;
         int tertiaryBitMap1Int = 0;
 
-        String typeStr = message.substring(0, 4);
-        this.type = typeStr;
+        this.type = message.substring(0, 4);
         primaryBitMap0Str = message.substring(4, 12).replaceAll("[^A-Fa-f0-9]", "");
         primaryBitMap1Str = message.substring(12, 20).replaceAll("[^A-Fa-f0-9]", "");
-        if(primaryBitMap0Str.equals(""))
+        if(primaryBitMap0Str.isEmpty())
         {
             primaryBitMap0Str = "0";
         }
-        if(primaryBitMap1Str.equals(""))
+        if(primaryBitMap1Str.isEmpty())
         {
             primaryBitMap1Str = "0";
         }
@@ -226,11 +247,11 @@ public class ISO8583Structure {
         {
             secondaryBitMap0Str = message.substring(20, 28).replaceAll("[^A-Fa-f0-9]", "");
             secondaryBitMap1Str = message.substring(28, 36).replaceAll("[^A-Fa-f0-9]", "");
-            if(secondaryBitMap0Str.equals(""))
+            if(secondaryBitMap0Str.isEmpty())
             {
                 secondaryBitMap0Str = "0";
             }
-            if(secondaryBitMap1Str.equals(""))
+            if(secondaryBitMap1Str.isEmpty())
             {
                 secondaryBitMap1Str = "0";
             }
@@ -394,7 +415,7 @@ public class ISO8583Structure {
                                     rawData = shiftedData.substring(0, 3);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.equals(""))
+                                    if(ln.isEmpty())
                                     {
                                         ln = "0";
                                     }
@@ -419,7 +440,7 @@ public class ISO8583Structure {
                                     rawData = shiftedData.substring(0, 2);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.equals(""))
+                                    if(ln.isEmpty())
                                     {
                                         ln = "0";
                                     }
@@ -439,12 +460,12 @@ public class ISO8583Structure {
                             }
                             else if(dataType.equals("LVAR"))
                             {
-                                if(shiftedData.length() >= 1)
+                                if(!shiftedData.isEmpty())
                                 {
                                     rawData = shiftedData.substring(0, 1);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.equals(""))
+                                    if(ln.isEmpty())
                                     {
                                         ln = "0";
                                     }
@@ -469,7 +490,7 @@ public class ISO8583Structure {
                                     rawData = shiftedData.substring(0, 12);
                                     rawData = rawData.replaceAll("[^\\d]", "");
                                     rawData = lTrim(rawData, "0");
-                                    if(rawData.equals(""))
+                                    if(rawData.isEmpty())
                                     {
                                         rawData = "0";
                                     }
@@ -498,15 +519,15 @@ public class ISO8583Structure {
     public String showAsList()
     {
         int i;
-        String ret = "";
+        StringBuilder ret = new StringBuilder();
         for(i = 2; i<=this.maxField; i++)
         {
             if(this.hasField(i))
             {
-                ret += String.format("%3d %s\r\n", i, this.getValue(i));
+                ret.append(String.format("%3d %s\r\n", i, this.getValue(i)));
             }
         }
-        return ret;
+        return ret.toString();
     }
 
     /**
@@ -515,7 +536,7 @@ public class ISO8583Structure {
      * @param option Function
      * @return String result of the function
      */
-    public static String applyFunction(String value, String option)
+    private static String applyFunction(String value, String option)
     {
         /**
          * substring(start)
@@ -548,7 +569,7 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 if(opt.contains(","))
                 {
@@ -594,10 +615,6 @@ public class ISO8583Structure {
                 }
                 else
                 {
-                    if(opt.equals(""))
-                    {
-                        opt = "0";
-                    }
                     iargs0 = Integer.parseInt(opt);
                     if(iargs0 < 0) iargs0 = 0;
                     if(value.length() < iargs0)
@@ -619,12 +636,8 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
-                if(opt.equals(""))
-                {
-                    opt = "0";
-                }
                 iargs0 = Integer.parseInt(opt);
                 if(iargs0 < 0) iargs0 = 0;
                 if(value.length() < iargs0)
@@ -645,12 +658,8 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
-                if(opt.equals(""))
-                {
-                    opt = "0";
-                }
                 iargs0 = Integer.parseInt(opt);
 
                 if(value.length() < iargs0)
@@ -695,6 +704,7 @@ public class ISO8583Structure {
             catch(Exception e)
             {
                 e.printStackTrace();
+                LOG.error(e.getMessage());
             }
         }
         else if(option.contains("times("))
@@ -705,16 +715,16 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 opt = opt.replaceAll("[^\\d.\\-]", "");
-                if(opt.equals(""))
+                if(opt.isEmpty())
                 {
                     opt = "0";
                 }
                 dargs0 = Double.parseDouble(opt);
                 val = val.replaceAll("[^\\d.\\-]", "");
-                if(val.equals(""))
+                if(val.isEmpty())
                 {
                     val = "0";
                 }
@@ -731,16 +741,16 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 opt = opt.replaceAll("[^\\d.\\-]", "");
-                if(opt.equals(""))
+                if(opt.isEmpty())
                 {
                     opt = "0";
                 }
                 double args0 = Double.parseDouble(opt);
                 val = val.replaceAll("[^\\d.\\-]", "");
-                if(val.equals(""))
+                if(val.isEmpty())
                 {
                     val = "0";
                 }
@@ -757,16 +767,16 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 opt = opt.replaceAll("[^\\d.\\-]", "");
-                if(opt.equals(""))
+                if(opt.isEmpty())
                 {
                     opt = "0";
                 }
                 double args0 = Double.parseDouble(opt);
                 val = val.replaceAll("[^\\d.\\-]", "");
-                if(val.equals(""))
+                if(val.isEmpty())
                 {
                     val = "0";
                 }
@@ -783,16 +793,16 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 opt = opt.replaceAll("[^\\d.\\-]", "");
-                if(opt.equals(""))
+                if(opt.isEmpty())
                 {
                     opt = "0";
                 }
                 double args0 = Double.parseDouble(opt);
                 val = val.replaceAll("[^\\d.\\-]", "");
-                if(val.equals(""))
+                if(val.isEmpty())
                 {
                     val = "0";
                 }
@@ -809,14 +819,14 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
             opt = opt.replaceAll("[^\\d.\\-]", "");
-            if(opt.equals(""))
+            if(opt.isEmpty())
             {
                 opt = "1";
             }
             double args0 = Double.parseDouble(opt);
 
             val = val.replaceAll("[^\\d.\\-]", "");
-            if(val.equals(""))
+            if(val.isEmpty())
             {
                 val = "0";
             }
@@ -841,7 +851,7 @@ public class ISO8583Structure {
             opt = opt.trim();
             opt = urlDecode(opt);
 
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 val = opt + val;
             }
@@ -854,7 +864,7 @@ public class ISO8583Structure {
             opt = rTrim(opt, "\\)");
             opt = opt.trim();
             opt = urlDecode(opt);
-            if(opt.length() > 0)
+            if(!opt.isEmpty())
             {
                 val = val + opt;
             }
@@ -870,7 +880,7 @@ public class ISO8583Structure {
      */
     public static JSONObject applyOption(JSONObject json, String options)
     {
-        if(options.length() > 0)
+        if(!options.isEmpty())
         {
             options = options.replaceAll("substring \\(", "substring\\(");
             options = options.replaceAll("left \\(", "left\\(");
@@ -917,7 +927,7 @@ public class ISO8583Structure {
              * before(string)
              * after(string)
              */
-            if(options.length() == 0)
+            if(options.isEmpty())
             {
             }
             else
@@ -952,8 +962,8 @@ public class ISO8583Structure {
                         {
                             if(json.has(key))
                             {
-                                value = json.optString(key, "").toString();
-                                if(options.length() > 0)
+                                value = json.optString(key, "");
+                                if(!options.isEmpty())
                                 {
                                     value = applyFunction(value, option);
                                 }
@@ -963,6 +973,7 @@ public class ISO8583Structure {
                         catch(Exception e)
                         {
                             e.printStackTrace();
+                            LOG.error(e.getMessage());
                         }
                     }
                 }
@@ -976,17 +987,10 @@ public class ISO8583Structure {
      * @param input Encoded string
      * @return Decoded string
      */
-    public static String urlDecode(String input)
+    private static String urlDecode(String input)
     {
         String result = "";
-        try
-        {
-            result = java.net.URLDecoder.decode(input, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }
+        result = java.net.URLDecoder.decode(input, StandardCharsets.UTF_8);
         return result;
     }
     /**
@@ -994,17 +998,10 @@ public class ISO8583Structure {
      * @param input String to be encoded
      * @return Encoded string
      */
-    public static String urlEncode(String input)
+    private String urlEncode(String input)
     {
         String result = "";
-        try
-        {
-            result = java.net.URLEncoder.encode(input, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }
+        result = java.net.URLEncoder.encode(input, StandardCharsets.UTF_8);
         return result;
     }
 
@@ -1023,7 +1020,7 @@ public class ISO8583Structure {
         {
             i++;
         }
-        String subformats[] = new String[i];
+        String[] subformats = new String[i];
         p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         m = p.matcher(format);
         i = 0;
@@ -1031,7 +1028,7 @@ public class ISO8583Structure {
         {
             fmt = m.group(0);
             fmt = fmt.trim();
-            if(fmt.equals(""))
+            if(fmt.isEmpty())
             {
                 fmt = "0";
             }
@@ -1082,7 +1079,7 @@ public class ISO8583Structure {
      * @param n Length expected
      * @return Padded string
      */
-    public static String padRight(String s, int n)
+    private String padRight(String s, int n)
     {
         return String.format("%1$-" + n + "s", s);
     }
@@ -1092,7 +1089,7 @@ public class ISO8583Structure {
      * @param n Length expected
      * @return Padded string
      */
-    public static String padLeft(String s, int n)
+    private String padLeft(String s, int n)
     {
         return String.format("%1$" + n + "s", s);
     }
@@ -1122,7 +1119,7 @@ public class ISO8583Structure {
      * @param mask Character mask to strip string
      * @return Stripped string
      */
-    public static String rTrim(String input, String mask)
+    private static String rTrim(String input, String mask)
     {
         int lastLen = input.length();
         int curLen = lastLen;
@@ -1185,7 +1182,7 @@ public class ISO8583Structure {
         for(i = 0; i<fields.length; i++)
         {
             fieldStr = this.fields[i];
-            if(fieldStr.equals(""))
+            if(fieldStr.isEmpty())
             {
                 fieldStr = "0";
             }
@@ -1252,7 +1249,7 @@ public class ISO8583Structure {
     {
         String fieldStr = "";
         JSONObject jo = new JSONObject();
-        String body = "";
+        StringBuilder body = new StringBuilder();
         String data = "";
         String finalItemData = "";
         String dataType = "";
@@ -1276,7 +1273,7 @@ public class ISO8583Structure {
                 {
                     dataLength = 12;
                     data = data.trim();
-                    if(data.equals(""))
+                    if(data.isEmpty())
                     {
                         data = "0";
                     }
@@ -1301,7 +1298,7 @@ public class ISO8583Structure {
                 else if(dataType.equals("NUMERIC"))
                 {
                     data = data.trim();
-                    if(data.equals(""))
+                    if(data.isEmpty())
                     {
                         data = "0";
                     }
@@ -1316,10 +1313,11 @@ public class ISO8583Structure {
             catch(Exception e)
             {
                 e.printStackTrace();
+                LOG.error(e.getMessage());
             }
-            body += finalItemData;
+            body.append(finalItemData);
         }
-        return body;
+        return body.toString();
     }
     /**
      * Add bit to ISO 8583 message. It will affect to the bitmap.
@@ -1398,7 +1396,7 @@ public class ISO8583Structure {
                 {
                     dataLength = c_field_length;
                 }
-                if(dataType.equals(""))
+                if(dataType.isEmpty())
                 {
                     dataType = c_type;
                 }
@@ -1422,7 +1420,7 @@ public class ISO8583Structure {
             jo = (JSONObject) this.jsonItem.get("F"+field);
             if(jo != null)
             {
-                return jo.optString("data", "").toString();
+                return jo.optString("data", "");
             }
             else
             {
@@ -1432,6 +1430,7 @@ public class ISO8583Structure {
         catch(Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
             return "";
         }
     }
@@ -1449,7 +1448,7 @@ public class ISO8583Structure {
             jo = (JSONObject) this.jsonItem.get("F"+field);
             if(jo != null)
             {
-                return jo.optString("data", defaultValue).toString();
+                return jo.optString("data", defaultValue);
             }
             else
             {
@@ -1459,40 +1458,15 @@ public class ISO8583Structure {
         catch(Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
             return defaultValue;
         }
-    }
-    
-    /**
-     * Set configuration of the specs
-     * @param config JSONObject contians configuration of the specs
-     */
-    public void setConfig(JSONObject config)
-    {
-        this.config = config;
-    }
-    /**
-     * Get configuration of the specs
-     * @return JSONObject contians configuration of the specs
-     */
-    public JSONObject getConfig()
-    {
-        return this.config;
-    }
-
-    /**
-     * Get maximum field
-     * @return Maximum field
-     */
-    public int getMaxField()
-    {
-        return this.maxField;
     }
 
     /**
      * Create general configuration of ISO 8583
      */
-    public static void parseGeneralConfig()
+    private static void parseGeneralConfig()
     {
         try
         {
@@ -1501,6 +1475,7 @@ public class ISO8583Structure {
         catch (JSONException e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
         }
     }
 
@@ -1561,7 +1536,7 @@ public class ISO8583Structure {
             }
             fmt = lTrim(fmt, "0");
             fmt = fmt.trim();
-            if(fmt.equals(""))
+            if(fmt.isEmpty())
             {
                 fmt = "0";
             }
@@ -1598,7 +1573,7 @@ public class ISO8583Structure {
             }
             fmt = lTrim(fmt, "0");
             fmt = fmt.trim();
-            if(fmt.equals(""))
+            if(fmt.isEmpty())
             {
                 fmt = "0";
             }
@@ -1608,121 +1583,35 @@ public class ISO8583Structure {
     }
 
     /**
-     * Plain text message builder
-     * @param json Data package on common specs
-     * @param format Format message
-     * @param variable Reserved word
-     * @return Return string containing XML format message
-     */
-    public String buildString(JSONObject json, String format, String variable)
-    {
-        String[] data = variable.split(",");
-        Pattern p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
-        Matcher m = p.matcher(format);
-        String dataType = "s";
-        String fmt = "";
-        String result = "";
-        int curstart = 0, curend = 0;
-        int i = 0;
-        String currentData = "";
-        long currentDataInt = 0;
-        String formater = "";
-        String dataIndex = "";
-        while(m.find())
-        {
-            fmt = m.group(0);
-            if(fmt.contains("s"))
-                dataType = "s";
-            if(fmt.contains("d"))
-                dataType = "d";
-            curend = m.start();
-            result += substringOf(format, curstart, curend);
-            try
-            {
-                dataIndex = data[i];
-            }
-            catch(Exception e)
-            {
-                dataIndex = "";
-                e.printStackTrace();
-            }
-            currentData = "";
-            if(dataIndex == null)
-            {
-                currentData = "";
-            }
-            else if(!dataIndex.equals(""))
-            {
-                if(dataType == "s")
-                {
-                    currentData = (String) json.get(dataIndex);
-                }
-                if(dataType == "d")
-                {
-                    currentData = (String) json.get(dataIndex);
-                }
-            }
-            else
-            {
-                currentData = "";
-            }
-            if(!currentData.equals(""))
-            {
-                if(dataType == "s")
-                {
-                    formater = m.group(0);
-                    currentData = String.format(formater, currentData);
-                }
-                if(dataType == "d")
-                {
-                    formater = m.group(0);
-                    currentData = currentData.replaceAll("[^\\d.\\-]", "");
-                    currentData = lTrim(currentData, "0");
-                    if(currentData.equals(""))
-                    {
-                        currentData = "0";
-                    }
-                    currentDataInt = Long.parseLong(currentData);
-                    currentData = String.format(formater, currentDataInt);
-                }
-            }
-            result += currentData;
-            curstart = m.end();
-            i++;
-        }
-        result += substringOf(format, curstart);
-        return result;
-    }
-
-    /**
      * Because substring in Java not supported multi line string, so use this function instead
      * @param input Input string
      * @param start Start offset
      * @param end End offset
      * @return Return substring from start to end
      */
-    public static String substringOf(String input, int start, int end)
+    private String substringOf(String input, int start, int end)
     {
-        byte inputByte[] = input.getBytes();
+        byte[] inputByte = input.getBytes();
         String tmp2;
-        byte tmp3[] = new byte[1];
+        byte[] tmp3 = new byte[1];
         int i;
-        String output = "";
+        StringBuilder output = new StringBuilder();
         try
         {
             for(i = start; i<end; i++)
             {
                 tmp3[0] = inputByte[i];
                 tmp2 = new String(tmp3);
-                output += tmp2;
+                output.append(tmp2);
             }
         }
         catch(Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
             return input;
         }
-        return output;
+        return output.toString();
     }
 
     /**
@@ -1731,29 +1620,30 @@ public class ISO8583Structure {
      * @param start Start offset
      * @return Return substring from start
      */
-    public static String substringOf(String input, int start)
+    private String substringOf(String input, int start)
     {
-        byte inputByte[] = input.getBytes();
+        byte[] inputByte = input.getBytes();
         int end = input.length();
         String tmp2;
-        byte tmp3[] = new byte[1];
+        byte[] tmp3 = new byte[1];
         int i;
-        String output = "";
+        StringBuilder output = new StringBuilder();
         try
         {
             for(i = start; i<end; i++)
             {
                 tmp3[0] = inputByte[i];
                 tmp2 = new String(tmp3);
-                output += tmp2;
+                output.append(tmp2);
             }
         }
         catch(Exception e)
         {
             e.printStackTrace();
+            LOG.error(e.getMessage());
             return input;
         }
-        return output;
+        return output.toString();
     }
 
 
@@ -1796,7 +1686,7 @@ public class ISO8583Structure {
      * @param strict Flag for case sensitive or insensitive
      * @return true if word is in array. Otherwise return false
      */
-    public static boolean inArray(String[] haystack, String needle, boolean strict)
+    private static boolean inArray(String[] haystack, String needle, boolean strict)
     {
         int i;
         String t1, t2;
@@ -1837,9 +1727,59 @@ public class ISO8583Structure {
         return inArray(haystack, needle, false);
     }
 
+    /**
+     * Converts a hex String to array of bytes
+     * @param hex string
+     * @return binary array, is half the length of the input string
+     * @throws IllegalArgumentException
+     */
+    public static byte[] hex2bin(String hex) throws IllegalArgumentException {
+        byte[] ret = null;
+        if (hex == null || "".equals(hex)) {
+            ret = new byte[] {0};
+            return ret;
+        }
 
+        String uhex = hex.toUpperCase();
+        if (!patHex.matcher(uhex).matches()) {
+            throw new IllegalArgumentException("Expecting Hex String got [" + hex + "]");
+        }
 
-
-
+        if ((uhex.length() % 2) != 0) {
+            uhex = "0" + uhex;
+        }
+        ret = new byte[uhex.length() / 2];
+        for (int i = 0, j = 0; i < ret.length; i++, j += 2) {
+            char l = uhex.charAt(j + 1);
+            char m = uhex.charAt(j);
+            byte lsb, msb;
+            lsb = (l >= '0' && l <= '9') ? (byte) (l - '0') : (byte) ((l - 'A') + 10);
+            msb = (m >= '0' && m <= '9') ? (byte) (m - '0') : (byte) ((m - 'A') + 10);
+            ret[i] = 0;
+            ret[i] = (byte) (lsb & (byte) 0xf);
+            ret[i] |= (byte) ((msb << 4) & 0xf0);
+        }
+        return ret;
+    }
+    /**
+     * Converts a binary array into a String of Hex
+     * @param bin
+     * @return Hex String, twice the size of input byte array
+     */
+    public static String bin2hex(byte[] bin) {
+        return bin2hex(bin,0,bin.length);
+    }
+    public static String bin2hex(byte[] bin, int curOffset, int len) {
+        if (bin == null || curOffset >= len || curOffset < 0 || bin.length < (len-curOffset)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(bin.length * 2);
+        for (int i = curOffset; i < len; i++) {
+            int ndx = bin[i] & 0xff;
+            sb.append(hexNdx[(ndx >>> 4)]);
+            sb.append(hexNdx[(ndx & 0xf)]);
+        }
+        return sb.toString();
+    }
 
 }

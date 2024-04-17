@@ -104,6 +104,7 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                         try {
                             xmlGenerator.getStaxWriter().writeAttribute(attributeKey, pair.getValue());
                         } catch (XMLStreamException e) {
+                            LOG.error(e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -142,6 +143,7 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                         //xmlGenerator.getStaxWriter().writeNamespace(namespacePrefix, namespaceURL);
                         xmlGenerator.getStaxWriter().setPrefix(namespacePrefix, namespaceURL);
                     } catch (XMLStreamException e) {
+                        LOG.error(e.getMessage());
                         throw new RuntimeException(e);
                     }
                     QName qName = new QName(namespaceURL, item.getKey(), namespacePrefix);
@@ -205,8 +207,7 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                     {
                         valueList = ((ArrayList<?>) item.getValue()).toArray();
                     }
-                    else if( item.getValue() instanceof Object[] )
-                    {
+                    else {
                         valueList = (Object[]) item.getValue();
                     }
 
