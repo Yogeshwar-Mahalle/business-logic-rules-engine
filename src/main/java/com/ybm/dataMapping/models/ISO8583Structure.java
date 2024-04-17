@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
+import com.ybm.dataMapping.interfaces.ISO8583MTI;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
@@ -36,7 +38,8 @@ public class ISO8583Structure {
      */
     @Setter
     @Getter
-    private String type = "0200";
+    //private String mtiType = "0200";
+    private byte mtiType[] = new byte[ISO8583MTI.MTI_LEN];
 
     /**
      * Primary bitmap. Java int takes 4 bytes for int hence for 2 int it takes 8 bytes.
@@ -111,6 +114,11 @@ public class ISO8583Structure {
      */
     public ISO8583Structure()
     {
+        mtiType[ISO8583MTI.MTI_VER_NO] = ISO8583MTI.VER_1987;
+        mtiType[ISO8583MTI.MTI_MSG_CLASS] = ISO8583MTI.MSG_CLASS_NETWORK_MANAGEMENT;
+        mtiType[ISO8583MTI.MTI_MSG_FUNC] = ISO8583MTI.MSG_FUNC_NOTIFICATION;
+        mtiType[ISO8583MTI.MTI_TXN_ORIG] = ISO8583MTI.TXN_ORIG_OTHER;
+
         if(ISO8583Structure.generalConfig == null)
         {
             ISO8583Structure.parseGeneralConfig();
@@ -122,7 +130,7 @@ public class ISO8583Structure {
      */
     public ISO8583Structure(String mti_id)
     {
-        this.setType(mti_id);
+        this.setMtiType(mti_id.getBytes());
         if(ISO8583Structure.generalConfig == null)
         {
             ISO8583Structure.parseGeneralConfig();
@@ -135,7 +143,7 @@ public class ISO8583Structure {
      */
     public ISO8583Structure(String mti_id, JSONObject config)
     {
-        this.setType(mti_id);
+        this.setMtiType(mti_id.getBytes());
         this.setConfig(config);
     }
 
@@ -147,20 +155,68 @@ public class ISO8583Structure {
      */
     public ISO8583Structure(String mti_id, JSONObject config, String message)
     {
-        this.setType(mti_id);
+        this.setMtiType(mti_id.getBytes());
         this.setConfig(config);
         this.parse(message);
+    }
+
+    public int getVersionNumer() {
+        return mtiType[ISO8583MTI.MTI_VER_NO];
+    }
+
+    public int getMessageClass() {
+        return mtiType[ISO8583MTI.MTI_MSG_CLASS];
+    }
+
+    public int getMessageFunction() {
+        return mtiType[ISO8583MTI.MTI_MSG_FUNC];
+    }
+
+    public int getTransactionOriginator() {
+        return mtiType[ISO8583MTI.MTI_TXN_ORIG];
+    }
+
+    public void setVersionNumer(int i) {
+        if (i < 0 || i > 9) {
+            LOG.error(" Expecting values between 0 & 9");
+            throw new IllegalArgumentException(" Expecting values between 0 & 9");
+        }
+        mtiType[ISO8583MTI.MTI_VER_NO] = (byte) i;
+    }
+
+    public void setMessageClass(int i) {
+        if (i < 0 || i > 9) {
+            LOG.error(" Expecting values between 0 & 9");
+            throw new IllegalArgumentException(" Expecting values between 0 & 9");
+        }
+        mtiType[ISO8583MTI.MTI_MSG_CLASS] = (byte) i;
+    }
+
+    public void setMessageFunction(int i) {
+        if (i < 0 || i > 9) {
+            LOG.error(" Expecting values between 0 & 9");
+            throw new IllegalArgumentException(" Expecting values between 0 & 9");
+        }
+        mtiType[ISO8583MTI.MTI_MSG_FUNC] = (byte) i;
+    }
+
+    public void setTransactionOriginator(int i) {
+        if (i < 0 || i > 9) {
+            LOG.error(" Expecting values between 0 & 9");
+            throw new IllegalArgumentException(" Expecting values between 0 & 9");
+        }
+        mtiType[ISO8583MTI.MTI_TXN_ORIG] = (byte) i;
     }
 
     /**
      * Set field
      * @param field ISO8583 field number
-     * @param data ISO8583 field data
+     * @param iso8583Field ISO8583 field data
      */
-    public void setField(int field, ISO8583Field data)
+    public void setField(int field, ISO8583Field iso8583Field)
     {
         this.addBit(field);
-        this.setValue(field, data.data, data.type, data.length);
+        this.setValue(field, iso8583Field.data, iso8583Field.type, iso8583Field.length);
     }
     /**
      * Get ISO8583 field
@@ -175,7 +231,7 @@ public class ISO8583Structure {
         {
             data = (JSONObject) this.jsonItem.get("F"+field);
             fieldData.setField( data.optString("data", ""),
-                    data.optString("type", "STRING"),
+                    ISO8583FieldInfo.Format.valueOf(data.optString("type", "STRING")),
                     Integer.parseInt(data.optString("length", "1")) );
         }
         catch(Exception e)
@@ -228,7 +284,7 @@ public class ISO8583Structure {
         int tertiaryBitMap0Int = 0;
         int tertiaryBitMap1Int = 0;
 
-        this.type = message.substring(0, 4);
+        this.mtiType = message.substring(0, 4).getBytes();
         primaryBitMap0Str = message.substring(4, 12).replaceAll("[^A-Fa-f0-9]", "");
         primaryBitMap1Str = message.substring(12, 20).replaceAll("[^A-Fa-f0-9]", "");
         if(primaryBitMap0Str.isEmpty())
@@ -352,7 +408,7 @@ public class ISO8583Structure {
             }
         }
         JSONObject jo = new JSONObject();
-        String dataType = "";
+        ISO8583FieldInfo.Format dataType = ISO8583FieldInfo.Format.UNKNOWN;
         int dataLength = 0;
         int realLength = 0;
         int fieldLength = 0;
@@ -403,12 +459,12 @@ public class ISO8583Structure {
                     {
                         if(jo.get("type") != null)
                         {
-                            dataType = jo.get("type").toString();
+                            dataType = ISO8583FieldInfo.Format.valueOf(jo.get("type").toString());
                             fieldLength = Integer.parseInt(jo.get("field_length").toString());
                             dataLength = fieldLength;
                             realLength = dataLength;
                             rawData = "";
-                            if(dataType.equals("LLLVAR"))
+                            if(dataType == ISO8583FieldInfo.Format.LLLVAR)
                             {
                                 if(shiftedData.length() >= 3)
                                 {
@@ -433,7 +489,7 @@ public class ISO8583Structure {
                                     }
                                 }
                             }
-                            else if(dataType.equals("LLVAR"))
+                            else if(dataType == ISO8583FieldInfo.Format.LLVAR)
                             {
                                 if(shiftedData.length() >= 2)
                                 {
@@ -458,7 +514,7 @@ public class ISO8583Structure {
                                     }
                                 }
                             }
-                            else if(dataType.equals("LVAR"))
+                            else if(dataType == ISO8583FieldInfo.Format.LVAR)
                             {
                                 if(!shiftedData.isEmpty())
                                 {
@@ -483,7 +539,7 @@ public class ISO8583Structure {
                                     }
                                 }
                             }
-                            else if(dataType.equals("AMOUNT"))
+                            else if(dataType == ISO8583FieldInfo.Format.AMOUNT)
                             {
                                 if(shiftedData.length() >= 12)
                                 {
@@ -498,6 +554,69 @@ public class ISO8583Structure {
                                     rawData = String.format("%012d", numVal);
                                     shiftedData = shiftedData.substring(12);
                                     realLength = 12;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.YYMM)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.YYMMDD)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.DDMMYY)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.MMDDhhmmss)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.YYMMDDhhmmss)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.STRING)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
+                                }
+                            }
+                            else if(dataType == ISO8583FieldInfo.Format.FIXED)
+                            {
+                                if(shiftedData.length() >= dataLength)
+                                {
+                                    rawData = shiftedData.substring(0, dataLength);
+                                    shiftedData = shiftedData.substring(dataLength);
+                                    realLength = dataLength;
                                 }
                             }
                             else
@@ -1069,7 +1188,7 @@ public class ISO8583Structure {
                 this.fields[i] = fieldsInt[i]+"";
             }
             this.fieldStr = String.join(",", this.fields);
-            message = this.type+this.getBitmap()+this.getBody();
+            message = new String(this.mtiType) + this.getBitmap() + this.getBody();
         }
         return message;
     }
@@ -1252,7 +1371,7 @@ public class ISO8583Structure {
         StringBuilder body = new StringBuilder();
         String data = "";
         String finalItemData = "";
-        String dataType = "";
+        ISO8583FieldInfo.Format dataType = ISO8583FieldInfo.Format.UNKNOWN;
         int dataLength = 0;
         int iter = 0;
 
@@ -1267,9 +1386,9 @@ public class ISO8583Structure {
             {
                 data = jo.get("data").toString();
                 finalItemData = data;
-                dataType = jo.get("type").toString();
+                dataType = ISO8583FieldInfo.Format.valueOf(jo.get("type").toString());
                 dataLength = Integer.parseInt(jo.get("length").toString());
-                if(dataType.equals("AMOUNT"))
+                if(dataType == ISO8583FieldInfo.Format.AMOUNT)
                 {
                     dataLength = 12;
                     data = data.trim();
@@ -1280,22 +1399,22 @@ public class ISO8583Structure {
                     val = Long.parseLong(data);
                     finalItemData = String.format("%012d", val);
                 }
-                else if(dataType.equals("LLLVAR"))
+                else if(dataType == ISO8583FieldInfo.Format.LLLVAR)
                 {
                     len = String.format("%03d", data.length());
-                    finalItemData = len+data;
+                    finalItemData = len + data;
                 }
-                else if(dataType.equals("LLVAR"))
+                else if(dataType == ISO8583FieldInfo.Format.LLVAR)
                 {
                     len = String.format("%02d", data.length());
-                    finalItemData = len+data;
+                    finalItemData = len + data;
                 }
-                else if(dataType.equals("LVAR"))
+                else if(dataType == ISO8583FieldInfo.Format.LVAR)
                 {
                     len = String.format("%1d", data.length());
-                    finalItemData = len+data;
+                    finalItemData = len + data;
                 }
-                else if(dataType.equals("NUMERIC"))
+                else if(dataType == ISO8583FieldInfo.Format.NUMERIC)
                 {
                     data = data.trim();
                     if(data.isEmpty())
@@ -1359,7 +1478,7 @@ public class ISO8583Structure {
      * @param dataType field Type
      * @param dataLength Data length
      */
-    public void addValue(int field, String data, String dataType, int dataLength)
+    public void addValue(int field, String data, ISO8583FieldInfo.Format dataType, int dataLength)
     {
         this.addBit(field);
         this.setValue(field, data, dataType, dataLength);
@@ -1371,16 +1490,18 @@ public class ISO8583Structure {
      * @param dataType field Type
      * @param dataLength Data length
      */
-    public void setValue(int field, String data, String dataType, int dataLength)
+    public void setValue(int field, String data, ISO8583FieldInfo.Format dataType, int dataLength)
     {
         JSONObject jo = new JSONObject();
         JSONObject j = new JSONObject();
 
-        if(dataType.equals("AMOUNT"))
+        if(dataType == ISO8583FieldInfo.Format.AMOUNT)
         {
             dataLength = 12;
         }
-        if(dataType.equals("LVAR") || dataType.equals("LLVAR") || dataType.equals("LLLVAR"))
+        if( dataType == ISO8583FieldInfo.Format.LVAR ||
+                dataType == ISO8583FieldInfo.Format.LLVAR ||
+                dataType == ISO8583FieldInfo.Format.LLLVAR )
         {
             dataLength = data.length();
         }
@@ -1391,12 +1512,13 @@ public class ISO8583Structure {
             if(j != null)
             {
                 int c_field_length = Integer.parseInt(j.get("field_length").toString());
-                String c_type = j.get("type").toString();
+                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf( j.get("type").toString() );
                 if(dataLength < c_field_length)
                 {
                     dataLength = c_field_length;
                 }
-                if(dataType.isEmpty())
+
+                if(dataType == ISO8583FieldInfo.Format.UNKNOWN)
                 {
                     dataType = c_type;
                 }

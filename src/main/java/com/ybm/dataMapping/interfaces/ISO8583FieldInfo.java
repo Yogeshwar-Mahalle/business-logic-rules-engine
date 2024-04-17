@@ -13,22 +13,12 @@ public interface ISO8583FieldInfo extends Cloneable {
      section of ISO8583:87
      */
     public enum Format {
-
-        LLVAR, LLLVAR, FIXED, YYMM, YYMMDD, DDMMYY, MMDDhhmmss, YYMMDDhhmmss, MTI, BITMAP
+        MTI, BITMAP, FIXED, LVAR, LLVAR, LLLVAR, YYMM, YYMMDD, DDMMYY, MMDDhhmmss, YYMMDDhhmmss,  CNUMERIC, DNUMERIC, NUMERIC, AMOUNT, STRING, UNKNOWN
     };
 
     public enum Attribute {
 
-        ALPHA, ALNUM, ALNUMPAD, ALPHA_OR_NUM, NUM, SIGN_NUM, ALNUMSPECIAL, SPECIAL, BIN
+        ALPHA, ALNUM, ALNUMPAD, ALPHA_OR_NUM, NUM, SIGN_NUM, ALNUMSPECIAL, SPECIAL, BIN, NUMERIC, STRING, AMOUNT, UNKNOWN
     };
 
-    public Format getFormat();
-
-    public Attribute getAttribute();
-
-    public int getLength();
-
-    public String getPropertyName();
-
-    public int getBitMapIndex(); // offset in the bitmap
 }

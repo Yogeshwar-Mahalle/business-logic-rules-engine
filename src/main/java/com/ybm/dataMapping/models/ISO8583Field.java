@@ -4,13 +4,15 @@
 
 package com.ybm.dataMapping.models;
 
+import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
+
 import java.lang.reflect.Field;
 
 public class ISO8583Field {
     /**
      * Field type
      */
-    public String type = "";
+    public ISO8583FieldInfo.Format type = ISO8583FieldInfo.Format.UNKNOWN;
     /**
      * Field data
      */
@@ -50,7 +52,7 @@ public class ISO8583Field {
         this.data = field.data;
         return this;
     }
-    public ISO8583Field setField(String data, String type, int length)
+    public ISO8583Field setField(String data, ISO8583FieldInfo.Format type, int length)
     {
         this.isSet = true;
         this.type = type;
@@ -73,7 +75,7 @@ public class ISO8583Field {
         int j = 0;
         for(i = 0; i < max; i++)
         {
-            fieldName = fields[i].getName().toString();
+            fieldName = fields[i].getName();
             fieldType = fields[i].getType().toString();
             if(i == 0)
             {

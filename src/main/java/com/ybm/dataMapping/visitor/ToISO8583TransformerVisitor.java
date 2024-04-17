@@ -6,6 +6,7 @@ package com.ybm.dataMapping.visitor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 import com.ybm.dataMapping.models.ISO8583Structure;
@@ -96,7 +97,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
         int field = 0;
         String options = "";
         String key_tmp = "";
-        String field_type = "";
+        ISO8583FieldInfo.Format field_type = ISO8583FieldInfo.Format.UNKNOWN;
         try
         {
             try
@@ -123,7 +124,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                         variable = variable.trim();
                         field_length = Integer.parseInt(row.get("field_length").toString());
                         options = row.get("options").toString();
-                        field_type = row.get("type").toString();
+                        field_type = ISO8583FieldInfo.Format.valueOf(row.get("type").toString());
                         if(!options.isEmpty())
                         {
                             json = ISO8583Structure.applyOption(json, options);
@@ -200,8 +201,8 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 {
                                     subfield = new StringBuilder();
                                 }
-                                String data_type = "string";
-                                if(format.contains("d") || field_type.equals("NUMERIC"))
+                                ISO8583FieldInfo.Attribute data_type = ISO8583FieldInfo.Attribute.valueOf("STRING");
+                                if(format.contains("d") || field_type == ISO8583FieldInfo.Format.NUMERIC)
                                 {
                                     subfield = new StringBuilder(subfield.toString().replaceAll("[^\\d.\\-]", ""));
                                     subfield = new StringBuilder(ISO8583Structure.lTrim(subfield.toString(), "0"));
@@ -211,11 +212,11 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                     }
                                     long val = Long.parseLong(subfield.toString());
                                     subfield = new StringBuilder(String.format(format, val));
-                                    data_type = "numeric";
+                                    data_type = ISO8583FieldInfo.Attribute.valueOf("NUMERIC");
                                 }
 
                                 field_length = ISO8583Structure.getSubfieldLengthTotal(format);
-                                if(!data_type.equals("numeric"))
+                                if(data_type != ISO8583FieldInfo.Attribute.NUMERIC)
                                 {
                                     if(field_length > 0)
                                     {
@@ -258,7 +259,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                             {
                                 data = data.substring(0, field_length);
                             }
-                            if(field_type.equals("AMOUNT"))
+                            if(field_type == ISO8583FieldInfo.Format.AMOUNT)
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
@@ -268,9 +269,9 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 }
                                 data_amount = Long.parseLong(data);
                                 data = String.format("%012d", data_amount);
-                                iso8583Structure.addValue(field, data, "AMOUNT", 12);
+                                iso8583Structure.addValue(field, data, ISO8583FieldInfo.Format.AMOUNT, 12);
                             }
-                            else if(field_type.equals("CNUMERIC"))
+                            else if(field_type == ISO8583FieldInfo.Format.CNUMERIC)
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
@@ -280,9 +281,9 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 }
                                 data_amount = Long.parseLong(data);
                                 data = String.format("C%0"+field_length+"d", data_amount);
-                                iso8583Structure.addValue(field, data, "CNUMERIC", field_length+1);
+                                iso8583Structure.addValue(field, data, ISO8583FieldInfo.Format.CNUMERIC, field_length+1);
                             }
-                            else if(field_type.equals("DNUMERIC"))
+                            else if(field_type == ISO8583FieldInfo.Format.DNUMERIC)
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
@@ -292,9 +293,9 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 }
                                 data_amount = Long.parseLong(data);
                                 data = String.format("D%0"+field_length+"d", data_amount);
-                                iso8583Structure.addValue(field, data, "DNUMERIC", field_length+1);
+                                iso8583Structure.addValue(field, data, ISO8583FieldInfo.Format.DNUMERIC, field_length+1);
                             }
-                            else if(field_type.equals("NUMERIC"))
+                            else if(field_type == ISO8583FieldInfo.Format.NUMERIC)
                             {
                                 long data_amount = 0;
                                 data = ISO8583Structure.lTrim(data, "0");
@@ -305,11 +306,11 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 }
                                 data_amount = Long.parseLong(data);
                                 data = String.format("%0"+field_length+"d", data_amount);
-                                iso8583Structure.addValue(field, data, "NUMERIC", field_length);
+                                iso8583Structure.addValue(field, data, ISO8583FieldInfo.Format.NUMERIC, field_length);
                             }
                             else
                             {
-                                if((field_type.equals("LVAR") || field_type.equals("LLVAR") || field_type.equals("LLLVAR")) && !variable.contains(","))
+                                if((field_type == ISO8583FieldInfo.Format.LVAR || field_type == ISO8583FieldInfo.Format.LLVAR || field_type == ISO8583FieldInfo.Format.LLLVAR) && !variable.contains(","))
                                 {
                                     field_length = data.length();
                                     iso8583Structure.addValue(field, data, field_type, field_length);
