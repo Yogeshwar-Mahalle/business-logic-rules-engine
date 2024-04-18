@@ -39,5 +39,8 @@ public interface ISO8583MTI {
     int TXN_ORIG_OTHER = 4;
     int TXN_ORIG_OTHER_REPEAT = 5;
 
+    int BIT_MAP_HEX_LEN = 16;
+    int BIT_MAP_BIN_LEN = 64;
+
 }
 

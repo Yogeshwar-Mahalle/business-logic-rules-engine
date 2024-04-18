@@ -39,23 +39,20 @@ public class ISO8583Structure {
     @Setter
     @Getter
     //private String mtiType = "0200";
-    private byte mtiType[] = new byte[ISO8583MTI.MTI_LEN];
+    private byte[] mtiType = new byte[ISO8583MTI.MTI_LEN];
 
     /**
-     * Primary bitmap. Java int takes 4 bytes for int hence for 2 int it takes 8 bytes.
-     * 8 bytes * 8 bits = 64 bits bitmap
+     * Primary bitmap. Java long takes 8 bytes hence 8 bytes * 8 bits = 64 bits bitmap.
      */
-    private int[] primaryBitMap = {0, 0};
+    private long primaryBitMap = 0;
     /**
-     * Secondary bitmap. Java int takes 4 bytes for int hence for 2 int it takes 8 bytes.
-     * 8 bytes * 8 bits = 64 bits bitmap
+     * Secondary bitmap. Java long takes 8 bytes hence 8 bytes * 8 bits = 64 bits bitmap.
      */
-    private int[] secondaryBitMap = {0, 0};
+    private long secondaryBitMap = 0;
     /**
-     * Tertiary bitmap. Java int takes 4 bytes for int hence for 2 int it takes 8 bytes.
-     * 8 bytes * 8 bits = 64 bits bitmap
+     * Tertiary bitmap. Java long takes 8 bytes hence 8 bytes * 8 bits = 64 bits bitmap.
      */
-    private int[] tertiaryBitMap = {0, 0};
+    private long tertiaryBitMap = 0;
 
     /**
      * ISO8583 configuration
@@ -230,9 +227,9 @@ public class ISO8583Structure {
         try
         {
             data = (JSONObject) this.jsonItem.get("F"+field);
-            fieldData.setField( data.optString("data", ""),
-                    ISO8583FieldInfo.Format.valueOf(data.optString("type", "STRING")),
-                    Integer.parseInt(data.optString("length", "1")) );
+            fieldData.setField( data.optString(ISO8583FieldInfo.DataElementConfig.DATA.getText(), ""),
+                    ISO8583FieldInfo.Format.valueOf(data.optString(ISO8583FieldInfo.DataElementConfig.TYPE.getText(), ISO8583FieldInfo.Format.STRING.name())),
+                    Integer.parseInt(data.optString(ISO8583FieldInfo.DataElementConfig.LENGTH.getText(), "1")) );
         }
         catch(Exception e)
         {
@@ -269,140 +266,89 @@ public class ISO8583Structure {
 
         String ln = "";
 
-        String primaryBitMap0Str = "";
-        String primaryBitMap1Str = "";
-        int primaryBitMap0Int = 0;
-        int primaryBitMap1Int = 0;
+        String primaryBitMapStr = "";
+        long primaryBitMapInt = 0;
 
-        String secondaryBitMap0Str = "";
-        String secondaryBitMap1Str = "";
-        int secondaryBitMap0Int = 0;
-        int secondaryBitMap1Int = 0;
+        String secondaryBitMapStr = "";
+        long secondaryBitMapInt = 0;
 
-        String tertiaryBitMap0Str = "";
-        String tertiaryBitMap1Str = "";
-        int tertiaryBitMap0Int = 0;
-        int tertiaryBitMap1Int = 0;
+        String tertiaryBitMapStr = "";
+        long tertiaryBitMapInt = 0;
 
         this.mtiType = message.substring(0, 4).getBytes();
-        primaryBitMap0Str = message.substring(4, 12).replaceAll("[^A-Fa-f0-9]", "");
-        primaryBitMap1Str = message.substring(12, 20).replaceAll("[^A-Fa-f0-9]", "");
-        if(primaryBitMap0Str.isEmpty())
+        primaryBitMapStr = message.substring(4, 20).replaceAll("[^A-Fa-f0-9]", "");
+        if(primaryBitMapStr.isEmpty())
         {
-            primaryBitMap0Str = "0";
+            primaryBitMapStr = "0";
         }
-        if(primaryBitMap1Str.isEmpty())
+
+        primaryBitMapInt = Long.parseUnsignedLong(primaryBitMapStr, 16);
+        this.primaryBitMap = primaryBitMapInt;
+
+        if((this.primaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
         {
-            primaryBitMap1Str = "0";
+            secondaryBitMapStr = message.substring(20, 36).replaceAll("[^A-Fa-f0-9]", "");
+            if(secondaryBitMapStr.isEmpty())
+            {
+                secondaryBitMapStr = "0";
+            }
+
+            secondaryBitMapInt = Long.parseUnsignedLong(secondaryBitMapStr, 16);
+            this.secondaryBitMap = secondaryBitMapInt;
         }
-        primaryBitMap0Int = (int)Long.parseLong(primaryBitMap0Str, 16);
-        primaryBitMap1Int = (int)Long.parseLong(primaryBitMap1Str, 16);
-        this.primaryBitMap[0] = primaryBitMap0Int;
-        this.primaryBitMap[1] = primaryBitMap1Int;
-        if((this.primaryBitMap[0] & 0x80000000) == 0x80000000)
+        if((this.secondaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
         {
-            secondaryBitMap0Str = message.substring(20, 28).replaceAll("[^A-Fa-f0-9]", "");
-            secondaryBitMap1Str = message.substring(28, 36).replaceAll("[^A-Fa-f0-9]", "");
-            if(secondaryBitMap0Str.isEmpty())
+            tertiaryBitMapStr = message.substring(36, 44).replaceAll("[^A-Fa-f0-9]", "");
+            if(tertiaryBitMapStr.equals(""))
             {
-                secondaryBitMap0Str = "0";
+                tertiaryBitMapStr = "0";
             }
-            if(secondaryBitMap1Str.isEmpty())
-            {
-                secondaryBitMap1Str = "0";
-            }
-            secondaryBitMap0Int = (int)Long.parseLong(secondaryBitMap0Str, 16);
-            secondaryBitMap1Int = (int)Long.parseLong(secondaryBitMap1Str, 16);
-            this.secondaryBitMap[0] = secondaryBitMap0Int;
-            this.secondaryBitMap[1] = secondaryBitMap1Int;
+
+            tertiaryBitMapInt = Long.parseUnsignedLong(tertiaryBitMapStr, 16);
+            this.tertiaryBitMap = tertiaryBitMapInt;
         }
-        if((this.secondaryBitMap[0] & 0x80000000) == 0x80000000)
-        {
-            tertiaryBitMap0Str = message.substring(36, 44).replaceAll("[^A-Fa-f0-9]", "");
-            tertiaryBitMap1Str = message.substring(44, 52).replaceAll("[^A-Fa-f0-9]", "");
-            if(tertiaryBitMap0Str.equals(""))
-            {
-                tertiaryBitMap0Str = "0";
-            }
-            if(tertiaryBitMap1Str.equals(""))
-            {
-                tertiaryBitMap1Str = "0";
-            }
-            tertiaryBitMap0Int = (int)Long.parseLong(tertiaryBitMap0Str, 16);
-            tertiaryBitMap1Int = (int)Long.parseLong(tertiaryBitMap1Str, 16);
-            this.tertiaryBitMap[0] = tertiaryBitMap0Int;
-            this.tertiaryBitMap[1] = tertiaryBitMap1Int;
-        }
-        int iter = 0;
+
         // get field list from bitmap
         int i = 0;
-        int k = 0;
+        long k = 0;
 
-        k = this.primaryBitMap[0];
-        for(i = 1; i <= 32; i++)
+        k = this.primaryBitMap;
+        for(i = 1; i <= 64; i++)
         {
-            if((k & 0x80000000) == 0x80000000 && i > 1)
+            if((k & 0x8000000000000000L) == 0x8000000000000000L && i > 1)
             {
                 this.addBit(i);
             }
-            k = k - 0x80000000;
+            k = k - 0x8000000000000000L;
             k = k << 1;
         }
-        k = this.primaryBitMap[1];
-        for(i = 33; i <= 64; i++)
-        {
-            if((k & 0x80000000) == 0x80000000)
-            {
-                this.addBit(i);
-            }
-            k = k - 0x80000000;
-            k = k << 1;
-        }
+
         int bitmapLength = 16;
-        if((this.primaryBitMap[0] & 0x80000000) == 0x80000000)
+        if((this.primaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
         {
             bitmapLength = 32;
-            k = this.secondaryBitMap[0];
-            for(i = 65; i <= 96; i++)
+            k = this.secondaryBitMap;
+            for(i = 65; i <= 128; i++)
             {
-                if((k & 0x80000000) == 0x80000000)
+                if((k & 0x8000000000000000L) == 0x8000000000000000L)
                 {
                     this.addBit(i);
                 }
-                k = k - 0x80000000;
+                k = k - 0x8000000000000000L;
                 k = k << 1;
             }
-            k = this.secondaryBitMap[1];
-            for(i = 97; i <= 128; i++)
-            {
-                if((k & 0x80000000) == 0x80000000)
-                {
-                    this.addBit(i);
-                }
-                k = k - 0x80000000;
-                k = k << 1;
-            }
-            if((this.secondaryBitMap[0] & 0x80000000) == 0x80000000)
+
+            if((this.secondaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
             {
                 bitmapLength = 48;
-                k = this.tertiaryBitMap[0];
-                for(i = 129; i <= 160; i++)
+                k = this.tertiaryBitMap;
+                for(i = 129; i <= 192; i++)
                 {
-                    if((k & 0x80000000) == 0x80000000)
+                    if((k & 0x8000000000000000L) == 0x8000000000000000L)
                     {
                         this.addBit(i);
                     }
-                    k = k - 0x80000000;
-                    k = k << 1;
-                }
-                k = this.tertiaryBitMap[1];
-                for(i = 161; i <= 192; i++)
-                {
-                    if((k & 0x80000000) == 0x80000000)
-                    {
-                        this.addBit(i);
-                    }
-                    k = k - 0x80000000;
+                    k = k - 0x8000000000000000L;
                     k = k << 1;
                 }
             }
@@ -417,137 +363,102 @@ public class ISO8583Structure {
         int field = 0;
 
         boolean validMessage = true;
-        for(iter = 0; iter<this.fields.length; iter++)
-        {
-            field = Integer.parseInt(this.fields[iter]);
+        for (String strField : this.fields) {
+            field = Integer.parseInt(strField);
             // get config
-            jo = this.config.optJSONObject("f"+field);
-            if(jo == null)
-            {
+            jo = this.config.optJSONObject("f" + field);
+            if (jo == null) {
 
-                if(ISO8583Structure.generalConfig != null)
-                {
-                    jo = (JSONObject) ISO8583Structure.generalConfig.get("f"+field);
-                    if(jo == null)
-                    {
+                if (ISO8583Structure.generalConfig != null) {
+                    jo = (JSONObject) ISO8583Structure.generalConfig.get("f" + field);
+                    if (jo == null) {
                         validMessage = false;
                     }
-                }
-                else
-                {
+                } else {
                     validMessage = false;
                 }
             }
         }
         if(validMessage)
         {
-            if(message.length() > bitmapLength+4)
+            if(message.length() > ( bitmapLength + ISO8583MTI.MTI_LEN ) )
             {
-                shiftedData = message.substring(bitmapLength+4);
-                for(iter = 0; iter<this.fields.length; iter++)
-                {
-                    field = Integer.parseInt(this.fields[iter]);
-                    jo = this.config.optJSONObject("f"+field);
-                    if(jo == null)
-                    {
-                        if(ISO8583Structure.generalConfig != null)
-                        {
-                            jo = (JSONObject) ISO8583Structure.generalConfig.get("f"+field);
+                shiftedData = message.substring( bitmapLength + ISO8583MTI.MTI_LEN );
+                for (String strField : this.fields) {
+                    field = Integer.parseInt(strField);
+                    jo = this.config.optJSONObject("f" + field);
+                    if (jo == null) {
+                        if (ISO8583Structure.generalConfig != null) {
+                            jo = (JSONObject) ISO8583Structure.generalConfig.get("f" + field);
                         }
                     }
-                    if(jo != null)
-                    {
-                        if(jo.get("type") != null)
-                        {
-                            dataType = ISO8583FieldInfo.Format.valueOf(jo.get("type").toString());
-                            fieldLength = Integer.parseInt(jo.get("field_length").toString());
+                    if (jo != null) {
+                        if (jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()) != null) {
+                            dataType = ISO8583FieldInfo.Format.valueOf(jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
+                            fieldLength = Integer.parseInt(jo.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
                             dataLength = fieldLength;
                             realLength = dataLength;
                             rawData = "";
-                            if(dataType == ISO8583FieldInfo.Format.LLLVAR)
-                            {
-                                if(shiftedData.length() >= 3)
-                                {
+                            if (dataType == ISO8583FieldInfo.Format.LLLVAR) {
+                                if (shiftedData.length() >= 3) {
                                     rawData = shiftedData.substring(0, 3);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.isEmpty())
-                                    {
+                                    if (ln.isEmpty()) {
                                         ln = "0";
                                     }
                                     realLength = Integer.parseInt(ln);
                                     shiftedData = shiftedData.substring(3);
-                                    if(shiftedData.length() >= realLength)
-                                    {
+                                    if (shiftedData.length() >= realLength) {
                                         rawData = shiftedData.substring(0, realLength);
                                         shiftedData = shiftedData.substring(realLength);
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         // insufficient data
                                         rawData = "";
                                     }
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.LLVAR)
-                            {
-                                if(shiftedData.length() >= 2)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.LLVAR) {
+                                if (shiftedData.length() >= 2) {
                                     rawData = shiftedData.substring(0, 2);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.isEmpty())
-                                    {
+                                    if (ln.isEmpty()) {
                                         ln = "0";
                                     }
                                     realLength = Integer.parseInt(ln);
                                     shiftedData = shiftedData.substring(2);
-                                    if(shiftedData.length() >= realLength)
-                                    {
+                                    if (shiftedData.length() >= realLength) {
                                         rawData = shiftedData.substring(0, realLength);
                                         shiftedData = shiftedData.substring(realLength);
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         // insufficient data
                                         rawData = "";
                                     }
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.LVAR)
-                            {
-                                if(!shiftedData.isEmpty())
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.LVAR) {
+                                if (!shiftedData.isEmpty()) {
                                     rawData = shiftedData.substring(0, 1);
                                     ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
-                                    if(ln.isEmpty())
-                                    {
+                                    if (ln.isEmpty()) {
                                         ln = "0";
                                     }
                                     realLength = Integer.parseInt(ln);
                                     shiftedData = shiftedData.substring(1);
-                                    if(shiftedData.length() >= realLength)
-                                    {
+                                    if (shiftedData.length() >= realLength) {
                                         rawData = shiftedData.substring(0, realLength);
                                         shiftedData = shiftedData.substring(realLength);
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         // insufficient data
                                         rawData = "";
                                     }
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.AMOUNT)
-                            {
-                                if(shiftedData.length() >= 12)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.AMOUNT) {
+                                if (shiftedData.length() >= 12) {
                                     rawData = shiftedData.substring(0, 12);
                                     rawData = rawData.replaceAll("[^\\d]", "");
                                     rawData = lTrim(rawData, "0");
-                                    if(rawData.isEmpty())
-                                    {
+                                    if (rawData.isEmpty()) {
                                         rawData = "0";
                                     }
                                     long numVal = Long.parseLong(rawData);
@@ -555,74 +466,50 @@ public class ISO8583Structure {
                                     shiftedData = shiftedData.substring(12);
                                     realLength = 12;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.YYMM)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.YYMM) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.YYMMDD)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.YYMMDD) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.DDMMYY)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.DDMMYY) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.MMDDhhmmss)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.MMDDhhmmss) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.YYMMDDhhmmss)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.YYMMDDhhmmss) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.STRING)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.STRING) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else if(dataType == ISO8583FieldInfo.Format.FIXED)
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else if (dataType == ISO8583FieldInfo.Format.FIXED) {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            }
-                            else
-                            {
-                                if(shiftedData.length() >= dataLength)
-                                {
+                            } else {
+                                if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
@@ -1310,51 +1197,41 @@ public class ISO8583Structure {
             {
                 maxField = fieldInt;
             }
-            if(fieldInt >= 1 && fieldInt <= 32)
+            if(fieldInt >= 1 && fieldInt <= ISO8583MTI.BIT_MAP_BIN_LEN)
             {
-                primaryBitMap[0] = (primaryBitMap[0] | (1 << (32-fieldInt)));
+                primaryBitMap = (primaryBitMap | (1L << (ISO8583MTI.BIT_MAP_BIN_LEN - fieldInt)));
             }
-            if(fieldInt >= 33 && fieldInt <= 64)
+
+            if(fieldInt >= 65 && fieldInt <= (ISO8583MTI.BIT_MAP_BIN_LEN + ISO8583MTI.BIT_MAP_BIN_LEN ))
             {
-                primaryBitMap[1] = (primaryBitMap[1] | (1 << (32-fieldInt)));
+                secondaryBitMap = (secondaryBitMap | (1L << (ISO8583MTI.BIT_MAP_BIN_LEN - fieldInt)));
             }
-            if(fieldInt >= 65 && fieldInt <= 96)
+
+            if(fieldInt >= 129 && fieldInt <= (ISO8583MTI.BIT_MAP_BIN_LEN + ISO8583MTI.BIT_MAP_BIN_LEN + ISO8583MTI.BIT_MAP_BIN_LEN))
             {
-                secondaryBitMap[0] = (secondaryBitMap[0] | (1 << (32-fieldInt)));
-            }
-            if(fieldInt >= 97 && fieldInt <= 128)
-            {
-                secondaryBitMap[1] = (secondaryBitMap[1] | (1 << (32-fieldInt)));
-            }
-            if(fieldInt >= 129 && fieldInt <= 160)
-            {
-                tertiaryBitMap[0] = (tertiaryBitMap[0] | (1 << (32-fieldInt)));
-            }
-            if(fieldInt >= 161 && fieldInt <= 192)
-            {
-                tertiaryBitMap[1] = (tertiaryBitMap[1] | (1 << (32-fieldInt)));
+                tertiaryBitMap = (tertiaryBitMap | (1L << (ISO8583MTI.BIT_MAP_BIN_LEN - fieldInt)));
             }
         }
         String h1 = "", h2 = "", h3 = "";
         if(maxField > 128)
         {
-            primaryBitMap[0] = (primaryBitMap[0] | (1 << 31));
-            secondaryBitMap[0] = (secondaryBitMap[0] | (1 << 31));
-            h1 = String.format("%08x%08x", primaryBitMap[0], primaryBitMap[1]);
-            h2 = String.format("%08x%08x", secondaryBitMap[0], secondaryBitMap[1]);
-            h3 = String.format("%08x%08x", tertiaryBitMap[0], tertiaryBitMap[1]);
+            primaryBitMap = (primaryBitMap | (1L << 63));
+            secondaryBitMap = (secondaryBitMap | (1L << 63));
+            h1 = String.format("%016x", primaryBitMap);
+            h2 = String.format("%016x", secondaryBitMap);
+            h3 = String.format("%016x", tertiaryBitMap);
             bitmap = h1+h2+h3;
         }
         else if(maxField > 64)
         {
-            primaryBitMap[0] = (primaryBitMap[0] | (1 << 31));
-            h1 = String.format("%08x%08x", primaryBitMap[0], primaryBitMap[1]);
-            h2 = String.format("%08x%08x", secondaryBitMap[0], secondaryBitMap[1]);
+            primaryBitMap = (primaryBitMap | (1L << 63));
+            h1 = String.format("%016x", primaryBitMap);
+            h2 = String.format("%016x", secondaryBitMap);
             bitmap = h1+h2;
         }
         else
         {
-            h1 = String.format("%08x%08x", primaryBitMap[0], primaryBitMap[1]);
+            h1 = String.format("%016x", primaryBitMap);
             bitmap = h1;
         }
         return bitmap.toUpperCase();
@@ -1384,10 +1261,10 @@ public class ISO8583Structure {
             jo = (JSONObject) this.jsonItem.get("F"+fieldStr.trim());
             try
             {
-                data = jo.get("data").toString();
+                data = jo.get(ISO8583FieldInfo.DataElementConfig.DATA.getText()).toString();
                 finalItemData = data;
-                dataType = ISO8583FieldInfo.Format.valueOf(jo.get("type").toString());
-                dataLength = Integer.parseInt(jo.get("length").toString());
+                dataType = ISO8583FieldInfo.Format.valueOf(jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
+                dataLength = Integer.parseInt(jo.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
                 if(dataType == ISO8583FieldInfo.Format.AMOUNT)
                 {
                     dataLength = 12;
@@ -1511,8 +1388,8 @@ public class ISO8583Structure {
             j = this.config.optJSONObject(f);
             if(j != null)
             {
-                int c_field_length = Integer.parseInt(j.get("field_length").toString());
-                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf( j.get("type").toString() );
+                int c_field_length = Integer.parseInt(j.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
+                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf( j.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString() );
                 if(dataLength < c_field_length)
                 {
                     dataLength = c_field_length;
@@ -1524,9 +1401,9 @@ public class ISO8583Structure {
                 }
             }
         }
-        jo.put("data", data);
-        jo.put("type", dataType);
-        jo.put("length", dataLength);
+        jo.put(ISO8583FieldInfo.DataElementConfig.DATA.getText(), data);
+        jo.put(ISO8583FieldInfo.DataElementConfig.TYPE.getText(), dataType);
+        jo.put(ISO8583FieldInfo.DataElementConfig.LENGTH.getText(), dataLength);
         this.jsonItem.put("F"+field, jo);
     }
     /**
@@ -1542,7 +1419,7 @@ public class ISO8583Structure {
             jo = (JSONObject) this.jsonItem.get("F"+field);
             if(jo != null)
             {
-                return jo.optString("data", "");
+                return jo.optString(ISO8583FieldInfo.DataElementConfig.DATA.getText(), "");
             }
             else
             {
@@ -1570,7 +1447,7 @@ public class ISO8583Structure {
             jo = (JSONObject) this.jsonItem.get("F"+field);
             if(jo != null)
             {
-                return jo.optString("data", defaultValue);
+                return jo.optString(ISO8583FieldInfo.DataElementConfig.DATA.getText(), defaultValue);
             }
             else
             {
@@ -1592,7 +1469,7 @@ public class ISO8583Structure {
     {
         try
         {
-            ISO8583Structure.generalConfig = new JSONObject("{\"f94\":{\"format\":\"%-7s\",\"variable\":\"F94\",\"options\":\"\",\"field_length\":7,\"type\":\"STRING\"},\"f93\":{\"format\":\"%05d\",\"variable\":\"F93\",\"options\":\"\",\"field_length\":5,\"type\":\"NUMERIC\"},\"f96\":{\"format\":\"%-8s\",\"variable\":\"F96\",\"options\":\"\",\"field_length\":8,\"type\":\"STRING\"},\"f95\":{\"format\":\"%-42s\",\"variable\":\"F95\",\"options\":\"\",\"field_length\":42,\"type\":\"STRING\"},\"f10\":{\"format\":\"%08d\",\"variable\":\"F10\",\"options\":\"\",\"field_length\":8,\"type\":\"NUMERIC\"},\"f98\":{\"format\":\"%-25s\",\"variable\":\"F98\",\"options\":\"\",\"field_length\":25,\"type\":\"STRING\"},\"f97\":{\"format\":\"%-17s\",\"variable\":\"F97\",\"options\":\"\",\"field_length\":17,\"type\":\"STRING\"},\"f12\":{\"format\":\"%06d\",\"variable\":\"F12\",\"options\":\"\",\"field_length\":6,\"type\":\"NUMERIC\"},\"f11\":{\"format\":\"%06d\",\"variable\":\"F11\",\"options\":\"\",\"field_length\":6,\"type\":\"NUMERIC\"},\"f99\":{\"format\":\"%011d\",\"variable\":\"F99\",\"options\":\"\",\"field_length\":11,\"type\":\"LLVAR\"},\"f14\":{\"format\":\"%04d\",\"variable\":\"F14\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f13\":{\"format\":\"%04d\",\"variable\":\"F13\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f16\":{\"format\":\"%04d\",\"variable\":\"F16\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%04d\",\"variable\":\"F15\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f18\":{\"format\":\"%04d\",\"variable\":\"F18\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f17\":{\"format\":\"%04d\",\"variable\":\"F17\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f19\":{\"format\":\"%03d\",\"variable\":\"F19\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f126\":{\"format\":\"%-6s\",\"variable\":\"F126\",\"options\":\"\",\"field_length\":6,\"type\":\"LVAR\"},\"f125\":{\"format\":\"%-50s\",\"variable\":\"F125\",\"options\":\"\",\"field_length\":50,\"type\":\"LLVAR\"},\"f124\":{\"format\":\"%-255s\",\"variable\":\"F124\",\"options\":\"\",\"field_length\":255,\"type\":\"LLLVAR\"},\"f123\":{\"format\":\"%-999s\",\"variable\":\"F123\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f21\":{\"format\":\"%03d\",\"variable\":\"F21\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f122\":{\"format\":\"%-999s\",\"variable\":\"F122\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f20\":{\"format\":\"%03d\",\"variable\":\"F20\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f121\":{\"format\":\"%-999s\",\"variable\":\"F121\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f23\":{\"format\":\"%03d\",\"variable\":\"F23\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f120\":{\"format\":\"%-999s\",\"variable\":\"F120\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f22\":{\"format\":\"%03d\",\"variable\":\"F22\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f25\":{\"format\":\"%02d\",\"variable\":\"F25\",\"options\":\"\",\"field_length\":2,\"type\":\"NUMERIC\"},\"f24\":{\"format\":\"%03d\",\"variable\":\"F24\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f27\":{\"format\":\"%01d\",\"variable\":\"F27\",\"options\":\"\",\"field_length\":1,\"type\":\"NUMERIC\"},\"f26\":{\"format\":\"%02d\",\"variable\":\"F26\",\"options\":\"\",\"field_length\":2,\"type\":\"NUMERIC\"},\"f29\":{\"format\":\"%-9s\",\"variable\":\"F29\",\"options\":\"\",\"field_length\":9,\"type\":\"STRING\"},\"f28\":{\"format\":\"%08d\",\"variable\":\"F28\",\"options\":\"\",\"field_length\":8,\"type\":\"NUMERIC\"},\"f127\":{\"format\":\"%-999s\",\"variable\":\"F127\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f30\":{\"format\":\"%08d\",\"variable\":\"F30\",\"options\":\"\",\"field_length\":8,\"type\":\"NUMERIC\"},\"f32\":{\"format\":\"%011d\",\"variable\":\"F32\",\"options\":\"\",\"field_length\":11,\"type\":\"LLVAR\"},\"f31\":{\"format\":\"%-9s\",\"variable\":\"F31\",\"options\":\"\",\"field_length\":9,\"type\":\"STRING\"},\"f34\":{\"format\":\"%-28s\",\"variable\":\"F34\",\"options\":\"\",\"field_length\":28,\"type\":\"LLVAR\"},\"f33\":{\"format\":\"%011d\",\"variable\":\"F33\",\"options\":\"\",\"field_length\":11,\"type\":\"LLVAR\"},\"f36\":{\"format\":\"%0104d\",\"variable\":\"F36\",\"options\":\"\",\"field_length\":104,\"type\":\"LLLVAR\"},\"f35\":{\"format\":\"%-28s\",\"variable\":\"F35\",\"options\":\"\",\"field_length\":37,\"type\":\"LLVAR\"},\"f38\":{\"format\":\"%-6s\",\"variable\":\"F38\",\"options\":\"\",\"field_length\":6,\"type\":\"STRING\"},\"f37\":{\"format\":\"%-12s\",\"variable\":\"F37\",\"options\":\"\",\"field_length\":12,\"type\":\"STRING\"},\"f39\":{\"format\":\"%-2s\",\"variable\":\"F39\",\"options\":\"\",\"field_length\":2,\"type\":\"STRING\"},\"f41\":{\"format\":\"%-8s\",\"variable\":\"F41\",\"options\":\"\",\"field_length\":8,\"type\":\"STRING\"},\"f40\":{\"format\":\"%-3s\",\"variable\":\"F40\",\"options\":\"\",\"field_length\":3,\"type\":\"STRING\"},\"f43\":{\"format\":\"%-40s\",\"variable\":\"F43\",\"options\":\"\",\"field_length\":40,\"type\":\"STRING\"},\"f42\":{\"format\":\"%-15s\",\"variable\":\"F42\",\"options\":\"\",\"field_length\":15,\"type\":\"STRING\"},\"f45\":{\"format\":\"%-76s\",\"variable\":\"F45\",\"options\":\"\",\"field_length\":76,\"type\":\"LLVAR\"},\"f44\":{\"format\":\"%-25s\",\"variable\":\"F44\",\"options\":\"\",\"field_length\":25,\"type\":\"LLVAR\"},\"f47\":{\"format\":\"%-999s\",\"variable\":\"F47\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f46\":{\"format\":\"%-999s\",\"variable\":\"F46\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f49\":{\"format\":\"%-3s\",\"variable\":\"F49\",\"options\":\"\",\"field_length\":3,\"type\":\"STRING\"},\"f48\":{\"format\":\"%-119s\",\"variable\":\"F48\",\"options\":\"\",\"field_length\":119,\"type\":\"LLLVAR\"},\"f50\":{\"format\":\"%-3s\",\"variable\":\"F50\",\"options\":\"\",\"field_length\":3,\"type\":\"STRING\"},\"f52\":{\"format\":\"%-16s\",\"variable\":\"F52\",\"options\":\"\",\"field_length\":16,\"type\":\"STRING\"},\"f51\":{\"format\":\"%-3s\",\"variable\":\"F51\",\"options\":\"\",\"field_length\":3,\"type\":\"STRING\"},\"f54\":{\"format\":\"%-120s\",\"variable\":\"F54\",\"options\":\"\",\"field_length\":120,\"type\":\"STRING\"},\"f53\":{\"format\":\"%-18s\",\"variable\":\"F53\",\"options\":\"\",\"field_length\":18,\"type\":\"STRING\"},\"f56\":{\"format\":\"%-999s\",\"variable\":\"F56\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f55\":{\"format\":\"%-999s\",\"variable\":\"F55\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f58\":{\"format\":\"%-999s\",\"variable\":\"F58\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f57\":{\"format\":\"%-999s\",\"variable\":\"F57\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f59\":{\"format\":\"%-99s\",\"variable\":\"F59\",\"options\":\"\",\"field_length\":99,\"type\":\"LLVAR\"},\"f2\":{\"format\":\"%-19s\",\"variable\":\"F2\",\"options\":\"\",\"field_length\":19,\"type\":\"LLVAR\"},\"f3\":{\"format\":\"%06d\",\"variable\":\"F3\",\"options\":\"\",\"field_length\":6,\"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\",\"variable\":\"F4\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f5\":{\"format\":\"%012d\",\"variable\":\"F5\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f6\":{\"format\":\"%012d\",\"variable\":\"F6\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\",\"variable\":\"F7\",\"options\":\"\",\"field_length\":10,\"type\":\"STRING\"},\"f8\":{\"format\":\"%08d\",\"variable\":\"F8\",\"options\":\"\",\"field_length\":8,\"type\":\"NUMERIC\"},\"f9\":{\"format\":\"%08d\",\"variable\":\"F9\",\"options\":\"\",\"field_length\":8,\"type\":\"NUMERIC\"},\"f61\":{\"format\":\"%-99s\",\"variable\":\"F61\",\"options\":\"\",\"field_length\":99,\"type\":\"LLVAR\"},\"f60\":{\"format\":\"%-60s\",\"variable\":\"F60\",\"options\":\"\",\"field_length\":60,\"type\":\"LLVAR\"},\"f63\":{\"format\":\"%-999s\",\"variable\":\"F63\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f62\":{\"format\":\"%-999s\",\"variable\":\"F62\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f67\":{\"format\":\"%02d\",\"variable\":\"F67\",\"options\":\"\",\"field_length\":2,\"type\":\"NUMERIC\"},\"f66\":{\"format\":\"%01d\",\"variable\":\"F66\",\"options\":\"\",\"field_length\":1,\"type\":\"NUMERIC\"},\"f69\":{\"format\":\"%03d\",\"variable\":\"F69\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f68\":{\"format\":\"%03d\",\"variable\":\"F68\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f70\":{\"format\":\"%03d\",\"variable\":\"F70\",\"options\":\"\",\"field_length\":3,\"type\":\"NUMERIC\"},\"f72\":{\"format\":\"%-999s\",\"variable\":\"F72\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f115\":{\"format\":\"%-999s\",\"variable\":\"F115\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f71\":{\"format\":\"%04d\",\"variable\":\"F71\",\"options\":\"\",\"field_length\":4,\"type\":\"NUMERIC\"},\"f114\":{\"format\":\"%-999s\",\"variable\":\"F114\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f74\":{\"format\":\"%010d\",\"variable\":\"F74\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f113\":{\"format\":\"%011d\",\"variable\":\"F113\",\"options\":\"\",\"field_length\":11,\"type\":\"LLVAR\"},\"f73\":{\"format\":\"%06d\",\"variable\":\"F73\",\"options\":\"\",\"field_length\":6,\"type\":\"NUMERIC\"},\"f112\":{\"format\":\"%-999s\",\"variable\":\"F112\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f76\":{\"format\":\"%010d\",\"variable\":\"F76\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f111\":{\"format\":\"%-999s\",\"variable\":\"F111\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f75\":{\"format\":\"%010d\",\"variable\":\"F75\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f110\":{\"format\":\"%-999s\",\"variable\":\"F110\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f78\":{\"format\":\"%010d\",\"variable\":\"F78\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f77\":{\"format\":\"%010d\",\"variable\":\"F77\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f79\":{\"format\":\"%010d\",\"variable\":\"F79\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f119\":{\"format\":\"%-999s\",\"variable\":\"F119\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f118\":{\"format\":\"%-999s\",\"variable\":\"F118\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f81\":{\"format\":\"%010d\",\"variable\":\"F81\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f117\":{\"format\":\"%-999s\",\"variable\":\"F117\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f80\":{\"format\":\"%010d\",\"variable\":\"F80\",\"options\":\"\",\"field_length\":10,\"type\":\"NUMERIC\"},\"f116\":{\"format\":\"%-999s\",\"variable\":\"F116\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f83\":{\"format\":\"%012d\",\"variable\":\"F83\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f104\":{\"format\":\"%-100s\",\"variable\":\"F104\",\"options\":\"\",\"field_length\":100,\"type\":\"LLLVAR\"},\"f82\":{\"format\":\"%012d\",\"variable\":\"F82\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f103\":{\"format\":\"%-28s\",\"variable\":\"F103\",\"options\":\"\",\"field_length\":28,\"type\":\"LLVAR\"},\"f85\":{\"format\":\"%012d\",\"variable\":\"F85\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f102\":{\"format\":\"%-28s\",\"variable\":\"F102\",\"options\":\"\",\"field_length\":28,\"type\":\"LLVAR\"},\"f84\":{\"format\":\"%012d\",\"variable\":\"F84\",\"options\":\"\",\"field_length\":12,\"type\":\"NUMERIC\"},\"f101\":{\"format\":\"%-17s\",\"variable\":\"F101\",\"options\":\"\",\"field_length\":17,\"type\":\"STRING\"},\"f87\":{\"format\":\"%-16s\",\"variable\":\"F87\",\"options\":\"\",\"field_length\":16,\"type\":\"STRING\"},\"f100\":{\"format\":\"%011d\",\"variable\":\"F100\",\"options\":\"\",\"field_length\":11,\"type\":\"LLVAR\"},\"f86\":{\"format\":\"%015d\",\"variable\":\"F86\",\"options\":\"\",\"field_length\":15,\"type\":\"NUMERIC\"},\"f89\":{\"format\":\"%016d\",\"variable\":\"F89\",\"options\":\"\",\"field_length\":16,\"type\":\"NUMERIC\"},\"f88\":{\"format\":\"%016d\",\"variable\":\"F88\",\"options\":\"\",\"field_length\":16,\"type\":\"NUMERIC\"},\"f109\":{\"format\":\"%-999s\",\"variable\":\"F109\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f90\":{\"format\":\"%-42s\",\"variable\":\"F90\",\"options\":\"\",\"field_length\":42,\"type\":\"STRING\"},\"f108\":{\"format\":\"%-999s\",\"variable\":\"F108\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f107\":{\"format\":\"%-999s\",\"variable\":\"F107\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f92\":{\"format\":\"%02d\",\"variable\":\"F92\",\"options\":\"\",\"field_length\":2,\"type\":\"NUMERIC\"},\"f106\":{\"format\":\"%-999s\",\"variable\":\"F106\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"},\"f91\":{\"format\":\"%-1s\",\"variable\":\"F91\",\"options\":\"\",\"field_length\":1,\"type\":\"STRING\"},\"f105\":{\"format\":\"%-999s\",\"variable\":\"F105\",\"options\":\"\",\"field_length\":999,\"type\":\"LLLVAR\"}}");
+            ISO8583Structure.generalConfig = new JSONObject("{\"f94\":{\"format\":\"%-7s\",\"name\":\"F94\",\"options\":\"\",\"length\":7,\"type\":\"STRING\"},\"f93\":{\"format\":\"%05d\",\"name\":\"F93\",\"options\":\"\",\"length\":5,\"type\":\"NUMERIC\"},\"f96\":{\"format\":\"%-8s\",\"name\":\"F96\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f95\":{\"format\":\"%-42s\",\"name\":\"F95\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f10\":{\"format\":\"%08d\",\"name\":\"F10\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f98\":{\"format\":\"%-25s\",\"name\":\"F98\",\"options\":\"\",\"length\":25,\"type\":\"STRING\"},\"f97\":{\"format\":\"%-17s\",\"name\":\"F97\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f12\":{\"format\":\"%06d\",\"name\":\"F12\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f11\":{\"format\":\"%06d\",\"name\":\"F11\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f99\":{\"format\":\"%011d\",\"name\":\"F99\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f14\":{\"format\":\"%04d\",\"name\":\"F14\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f13\":{\"format\":\"%04d\",\"name\":\"F13\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f16\":{\"format\":\"%04d\",\"name\":\"F16\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%04d\",\"name\":\"F15\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f18\":{\"format\":\"%04d\",\"name\":\"F18\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f17\":{\"format\":\"%04d\",\"name\":\"F17\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f19\":{\"format\":\"%03d\",\"name\":\"F19\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f126\":{\"format\":\"%-6s\",\"name\":\"F126\",\"options\":\"\",\"length\":6,\"type\":\"LVAR\"},\"f125\":{\"format\":\"%-50s\",\"name\":\"F125\",\"options\":\"\",\"length\":50,\"type\":\"LLVAR\"},\"f124\":{\"format\":\"%-255s\",\"name\":\"F124\",\"options\":\"\",\"length\":255,\"type\":\"LLLVAR\"},\"f123\":{\"format\":\"%-999s\",\"name\":\"F123\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f21\":{\"format\":\"%03d\",\"name\":\"F21\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f122\":{\"format\":\"%-999s\",\"name\":\"F122\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f20\":{\"format\":\"%03d\",\"name\":\"F20\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f121\":{\"format\":\"%-999s\",\"name\":\"F121\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f23\":{\"format\":\"%03d\",\"name\":\"F23\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f120\":{\"format\":\"%-999s\",\"name\":\"F120\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f22\":{\"format\":\"%03d\",\"name\":\"F22\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f25\":{\"format\":\"%02d\",\"name\":\"F25\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f24\":{\"format\":\"%03d\",\"name\":\"F24\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f27\":{\"format\":\"%01d\",\"name\":\"F27\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f26\":{\"format\":\"%02d\",\"name\":\"F26\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f29\":{\"format\":\"%-9s\",\"name\":\"F29\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f28\":{\"format\":\"%08d\",\"name\":\"F28\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f127\":{\"format\":\"%-999s\",\"name\":\"F127\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f30\":{\"format\":\"%08d\",\"name\":\"F30\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f32\":{\"format\":\"%011d\",\"name\":\"F32\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f31\":{\"format\":\"%-9s\",\"name\":\"F31\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f34\":{\"format\":\"%-28s\",\"name\":\"F34\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f33\":{\"format\":\"%011d\",\"name\":\"F33\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f36\":{\"format\":\"%0104d\",\"name\":\"F36\",\"options\":\"\",\"length\":104,\"type\":\"LLLVAR\"},\"f35\":{\"format\":\"%-28s\",\"name\":\"F35\",\"options\":\"\",\"length\":37,\"type\":\"LLVAR\"},\"f38\":{\"format\":\"%-6s\",\"name\":\"F38\",\"options\":\"\",\"length\":6,\"type\":\"STRING\"},\"f37\":{\"format\":\"%-12s\",\"name\":\"F37\",\"options\":\"\",\"length\":12,\"type\":\"STRING\"},\"f39\":{\"format\":\"%-2s\",\"name\":\"F39\",\"options\":\"\",\"length\":2,\"type\":\"STRING\"},\"f41\":{\"format\":\"%-8s\",\"name\":\"F41\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f40\":{\"format\":\"%-3s\",\"name\":\"F40\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f43\":{\"format\":\"%-40s\",\"name\":\"F43\",\"options\":\"\",\"length\":40,\"type\":\"STRING\"},\"f42\":{\"format\":\"%-15s\",\"name\":\"F42\",\"options\":\"\",\"length\":15,\"type\":\"STRING\"},\"f45\":{\"format\":\"%-76s\",\"name\":\"F45\",\"options\":\"\",\"length\":76,\"type\":\"LLVAR\"},\"f44\":{\"format\":\"%-25s\",\"name\":\"F44\",\"options\":\"\",\"length\":25,\"type\":\"LLVAR\"},\"f47\":{\"format\":\"%-999s\",\"name\":\"F47\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f46\":{\"format\":\"%-999s\",\"name\":\"F46\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f49\":{\"format\":\"%-3s\",\"name\":\"F49\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f48\":{\"format\":\"%-119s\",\"name\":\"F48\",\"options\":\"\",\"length\":119,\"type\":\"LLLVAR\"},\"f50\":{\"format\":\"%-3s\",\"name\":\"F50\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f52\":{\"format\":\"%-16s\",\"name\":\"F52\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f51\":{\"format\":\"%-3s\",\"name\":\"F51\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f54\":{\"format\":\"%-120s\",\"name\":\"F54\",\"options\":\"\",\"length\":120,\"type\":\"STRING\"},\"f53\":{\"format\":\"%-18s\",\"name\":\"F53\",\"options\":\"\",\"length\":18,\"type\":\"STRING\"},\"f56\":{\"format\":\"%-999s\",\"name\":\"F56\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f55\":{\"format\":\"%-999s\",\"name\":\"F55\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f58\":{\"format\":\"%-999s\",\"name\":\"F58\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f57\":{\"format\":\"%-999s\",\"name\":\"F57\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f59\":{\"format\":\"%-99s\",\"name\":\"F59\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f2\":{\"format\":\"%-19s\",\"name\":\"F2\",\"options\":\"\",\"length\":19,\"type\":\"LLVAR\"},\"f3\":{\"format\":\"%06d\",\"name\":\"F3\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\",\"name\":\"F4\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f5\":{\"format\":\"%012d\",\"name\":\"F5\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f6\":{\"format\":\"%012d\",\"name\":\"F6\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\",\"name\":\"F7\",\"options\":\"\",\"length\":10,\"type\":\"STRING\"},\"f8\":{\"format\":\"%08d\",\"name\":\"F8\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f9\":{\"format\":\"%08d\",\"name\":\"F9\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f61\":{\"format\":\"%-99s\",\"name\":\"F61\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f60\":{\"format\":\"%-60s\",\"name\":\"F60\",\"options\":\"\",\"length\":60,\"type\":\"LLVAR\"},\"f63\":{\"format\":\"%-999s\",\"name\":\"F63\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f62\":{\"format\":\"%-999s\",\"name\":\"F62\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f67\":{\"format\":\"%02d\",\"name\":\"F67\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f66\":{\"format\":\"%01d\",\"name\":\"F66\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f69\":{\"format\":\"%03d\",\"name\":\"F69\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f68\":{\"format\":\"%03d\",\"name\":\"F68\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f70\":{\"format\":\"%03d\",\"name\":\"F70\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f72\":{\"format\":\"%-999s\",\"name\":\"F72\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f115\":{\"format\":\"%-999s\",\"name\":\"F115\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f71\":{\"format\":\"%04d\",\"name\":\"F71\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f114\":{\"format\":\"%-999s\",\"name\":\"F114\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f74\":{\"format\":\"%010d\",\"name\":\"F74\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f113\":{\"format\":\"%011d\",\"name\":\"F113\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f73\":{\"format\":\"%06d\",\"name\":\"F73\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f112\":{\"format\":\"%-999s\",\"name\":\"F112\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f76\":{\"format\":\"%010d\",\"name\":\"F76\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f111\":{\"format\":\"%-999s\",\"name\":\"F111\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f75\":{\"format\":\"%010d\",\"name\":\"F75\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f110\":{\"format\":\"%-999s\",\"name\":\"F110\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f78\":{\"format\":\"%010d\",\"name\":\"F78\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f77\":{\"format\":\"%010d\",\"name\":\"F77\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f79\":{\"format\":\"%010d\",\"name\":\"F79\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f119\":{\"format\":\"%-999s\",\"name\":\"F119\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f118\":{\"format\":\"%-999s\",\"name\":\"F118\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f81\":{\"format\":\"%010d\",\"name\":\"F81\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f117\":{\"format\":\"%-999s\",\"name\":\"F117\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f80\":{\"format\":\"%010d\",\"name\":\"F80\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f116\":{\"format\":\"%-999s\",\"name\":\"F116\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f83\":{\"format\":\"%012d\",\"name\":\"F83\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f104\":{\"format\":\"%-100s\",\"name\":\"F104\",\"options\":\"\",\"length\":100,\"type\":\"LLLVAR\"},\"f82\":{\"format\":\"%012d\",\"name\":\"F82\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f103\":{\"format\":\"%-28s\",\"name\":\"F103\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f85\":{\"format\":\"%012d\",\"name\":\"F85\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f102\":{\"format\":\"%-28s\",\"name\":\"F102\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f84\":{\"format\":\"%012d\",\"name\":\"F84\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f101\":{\"format\":\"%-17s\",\"name\":\"F101\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f87\":{\"format\":\"%-16s\",\"name\":\"F87\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f100\":{\"format\":\"%011d\",\"name\":\"F100\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f86\":{\"format\":\"%015d\",\"name\":\"F86\",\"options\":\"\",\"length\":15,\"type\":\"NUMERIC\"},\"f89\":{\"format\":\"%016d\",\"name\":\"F89\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f88\":{\"format\":\"%016d\",\"name\":\"F88\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f109\":{\"format\":\"%-999s\",\"name\":\"F109\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f90\":{\"format\":\"%-42s\",\"name\":\"F90\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f108\":{\"format\":\"%-999s\",\"name\":\"F108\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f107\":{\"format\":\"%-999s\",\"name\":\"F107\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f92\":{\"format\":\"%02d\",\"name\":\"F92\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f106\":{\"format\":\"%-999s\",\"name\":\"F106\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f91\":{\"format\":\"%-1s\",\"name\":\"F91\",\"options\":\"\",\"length\":1,\"type\":\"STRING\"},\"f105\":{\"format\":\"%-999s\",\"name\":\"F105\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"}}");
         }
         catch (JSONException e)
         {
@@ -1608,8 +1485,8 @@ public class ISO8583Structure {
      */
     public static List<String> listFormatMapKey(JSONObject formatMap)
     {
-        Set<?> s =  formatMap.keySet();
-        Iterator<?> iter = s.iterator();
+        Set<?> set =  formatMap.keySet();
+        Iterator<?> iter = set.iterator();
         List<String> keys = new ArrayList<>();
         String key;
         do
@@ -1637,7 +1514,7 @@ public class ISO8583Structure {
             i++;
         }
 
-        int lengths[] = new int[i];
+        int[] lengths = new int[i];
         p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         m = p.matcher(format);
         i = 0;

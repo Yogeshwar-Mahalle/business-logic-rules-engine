@@ -20,7 +20,7 @@ public class ToTextTransformerVisitor implements VisitorInterface {
     @Override
     public String getResult() {
 
-        StringBuilder returnResult = new StringBuilder((String) m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode()));
+        StringBuilder returnResult = new StringBuilder( m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode()).toString());
 
         if( returnResult.isEmpty() )
         {

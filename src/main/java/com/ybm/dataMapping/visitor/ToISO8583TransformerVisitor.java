@@ -10,6 +10,8 @@ import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
 import com.ybm.dataMapping.interfaces.VisitorInterface;
 import com.ybm.dataMapping.models.ISO8583Structure;
+import com.ybm.dataMappingRepo.FieldsDataTransformMappingService;
+import com.ybm.dataMappingRepo.models.FieldsDataTransformMapping;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +22,18 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
     private static final Logger LOG = LoggerFactory.getLogger(ToISO8583TransformerVisitor.class);
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final ObjectMapper m_JsonMapper = new ObjectMapper();
+    private final FieldsDataTransformMappingService m_fieldsDataTransformMappingService;
     /**
      * ISO8583Structure to get all ISO 8583 fields
      */
     public ISO8583Structure iso8583Structure = new ISO8583Structure();
 
-    String configStr = "{\"f41\":{\"format\":\"%-8s\", \"variable\":\"card_acceptor_terminal\", \"options\":\"\", \"field_length\":\"8\", \"type\":\"STRING\"},\"f63\":{\"format\":\"%-32s%-30s%-50s%-18s\", \"variable\":\"locket_code, locket_name, locket_address, locket_phone\", \"options\":\"\", \"field_length\":\"130\", \"type\":\"LLLVAR\"},\"f32\":{\"format\":\"%-11s\", \"variable\":\"acq_institution_code\", \"options\":\"\", \"field_length\":\"11\", \"type\":\"LLVAR\"},\"f42\":{\"format\":\"%15s\", \"variable\":\"acceptor_identification_code\", \"options\":\"\", \"field_length\":\"15\", \"type\":\"STRING\"},\"f121\":{\"format\":\"%-32s\", \"variable\":\"payment_reference\", \"options\":\"\", \"field_length\":\"32\", \"type\":\"LLLVAR\"},\"f12\":{\"format\":\"%-6s\", \"variable\":\"local_time\", \"options\":\"\", \"field_length\":\"6\", \"type\":\"STRING\"},\"f120\":{\"format\":\"%-20s\", \"variable\":\"product_code\", \"options\":\"\", \"field_length\":\"20\", \"type\":\"LLLVAR\"},\"f11\":{\"format\":\"%06d\", \"variable\":\"stan\", \"options\":\"\", \"field_length\":\"6\", \"type\":\"NUMERIC\"},\"f33\":{\"format\":\"%-11s\", \"variable\":\"fwd_institution_code\", \"options\":\"\", \"field_length\":\"11\", \"type\":\"LLVAR\"},\"f13\":{\"format\":\"%-4s\", \"variable\":\"local_date\", \"options\":\"\", \"field_length\":\"4\", \"type\":\"STRING\"},\"f49\":{\"format\":\"%03d\", \"variable\":\"transaction_currency_code\", \"options\":\"\", \"field_length\":\"3\", \"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%-4s\", \"variable\":\"settlement_date\", \"options\":\"\", \"field_length\":\"4\", \"type\":\"STRING\"},\"f37\":{\"format\":\"%012d\", \"variable\":\"reference_number\", \"options\":\"\", \"field_length\":\"12\", \"type\":\"NUMERIC\"},\"f48\":{\"format\":\"%11s%12s%01d\", \"variable\":\"meter_id, customer_id, id_selector\", \"options\":\"\", \"field_length\":\"24\", \"type\":\"LLLVAR\"},\"f2\":{\"format\":\"%-19s\", \"variable\":\"pan\", \"options\":\"\", \"field_length\":\"19\", \"type\":\"LLVAR\"},\"f18\":{\"format\":\"%04d\", \"variable\":\"merchant_type\", \"options\":\"\", \"field_length\":\"4\", \"type\":\"NUMERIC\"},\"f3\":{\"format\":\"%06d\", \"variable\":\"processing_code\", \"options\":\"\", \"field_length\":\"6\", \"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\", \"variable\":\"amount\", \"options\":\"\", \"field_length\":\"12\", \"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\", \"variable\":\"transmission_date_time\", \"options\":\"\", \"field_length\":\"10\", \"type\":\"STRING\"},\"f127\":{\"format\":\"%-20s%-32s\", \"variable\":\"username, password\", \"options\":\"\", \"field_length\":\"52\", \"type\":\"LLLVAR\"}}";
-    String mti_id = "0210";
+    String configStr = "{\"f41\":{\"format\":\"%-8s\", \"name\":\"card_acceptor_terminal\", \"options\":\"\", \"length\":\"8\", \"type\":\"STRING\"},\"f63\":{\"format\":\"%-32s%-30s%-50s%-18s\", \"name\":\"locket_code, locket_name, locket_address, locket_phone\", \"options\":\"\", \"length\":\"130\", \"type\":\"LLLVAR\"},\"f32\":{\"format\":\"%-11s\", \"name\":\"acq_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f42\":{\"format\":\"%15s\", \"name\":\"acceptor_identification_code\", \"options\":\"\", \"length\":\"15\", \"type\":\"STRING\"},\"f121\":{\"format\":\"%-32s\", \"name\":\"payment_reference\", \"options\":\"\", \"length\":\"32\", \"type\":\"LLLVAR\"},\"f12\":{\"format\":\"%-6s\", \"name\":\"local_time\", \"options\":\"\", \"length\":\"6\", \"type\":\"STRING\"},\"f120\":{\"format\":\"%-20s\", \"name\":\"product_code\", \"options\":\"\", \"length\":\"20\", \"type\":\"LLLVAR\"},\"f11\":{\"format\":\"%06d\", \"name\":\"stan\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f33\":{\"format\":\"%-11s\", \"name\":\"fwd_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f13\":{\"format\":\"%-4s\", \"name\":\"local_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f49\":{\"format\":\"%03d\", \"name\":\"transaction_currency_code\", \"options\":\"\", \"length\":\"3\", \"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%-4s\", \"name\":\"settlement_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f37\":{\"format\":\"%012d\", \"name\":\"reference_number\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f48\":{\"format\":\"%11s%12s%01d\", \"name\":\"meter_id, customer_id, id_selector\", \"options\":\"\", \"length\":\"24\", \"type\":\"LLLVAR\"},\"f2\":{\"format\":\"%-19s\", \"name\":\"pan\", \"options\":\"\", \"length\":\"19\", \"type\":\"LLVAR\"},\"f18\":{\"format\":\"%04d\", \"name\":\"merchant_type\", \"options\":\"\", \"length\":\"4\", \"type\":\"NUMERIC\"},\"f3\":{\"format\":\"%06d\", \"name\":\"processing_code\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\", \"name\":\"amount\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\", \"name\":\"transmission_date_time\", \"options\":\"\", \"length\":\"10\", \"type\":\"STRING\"},\"f127\":{\"format\":\"%-20s%-32s\", \"name\":\"username, password\", \"options\":\"\", \"length\":\"52\", \"type\":\"LLLVAR\"}}";
     JSONObject config = new JSONObject(configStr);
-    JSONObject jsonObject = new JSONObject();
+
+    public ToISO8583TransformerVisitor(FieldsDataTransformMappingService fieldsDataTransformMappingService) {
+        m_fieldsDataTransformMappingService = fieldsDataTransformMappingService;
+    }
 
     @Override
     public void visit(PayloadMessageInterface payloadMessageInterface) {
@@ -43,28 +48,41 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
         try {
 
             Object objValue = m_PayloadMessageInterface.getDataMap().get( m_PayloadMessageInterface.getRootNode() );
-
-            if( objValue instanceof ArrayList || objValue instanceof Object[] )
+            if( objValue instanceof Map || objValue instanceof ArrayList || objValue instanceof Object[] )
             {
-                Object[] jsonArray = null;
-                if( objValue instanceof ArrayList )
+                if( objValue instanceof Map )
                 {
-                    jsonArray = ((ArrayList<?>) objValue).toArray();
+                    LinkedHashMap<String, Object> iso8583Map = (LinkedHashMap) objValue;
+
+                    for( String mtiTypeKey : iso8583Map.keySet() )
+                    {
+                        objValue = iso8583Map.get( mtiTypeKey );
+                        iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey ) );
+                    }
                 }
                 else {
-                    jsonArray = (Object[]) objValue;
-                }
+                    Object[] jsonArray = null;
+                    if( objValue instanceof ArrayList )
+                    {
+                        jsonArray = ((ArrayList<?>) objValue).toArray();
+                    }
+                    else {
+                        jsonArray = (Object[]) objValue;
+                    }
 
-                for ( Object json : jsonArray )
-                {
-                    jsonObject = new JSONObject( m_JsonMapper.writeValueAsString( json ) );
-                    String iso8583Msg = new String( buildISO8583(jsonObject, config, mti_id) );
-                    iso8583Batch = iso8583Batch.concat( iso8583Msg + "\n" );
+                    for ( Object object : jsonArray ) {
+                        LinkedHashMap<String, Object> iso8583Map = (LinkedHashMap) object;
+                        for( String mtiTypeKey : iso8583Map.keySet() )
+                        {
+                            objValue = iso8583Map.get( mtiTypeKey );
+                            iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey ) );
+                        }
+                    }
                 }
             }
             else {
-                jsonObject = new JSONObject( m_JsonMapper.writeValueAsString( objValue ) );
-                iso8583Batch = new String(  buildISO8583(jsonObject, config, mti_id) );
+                LOG.error("Invalid data map.");
+                return "Invalid data map.";
             }
 
         } catch (JsonProcessingException e) {
@@ -74,16 +92,60 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
         return iso8583Batch;
     }
 
+    /**
+     * ISO 8583 message builder
+     * @param objValue Data package on common specs
+     * @param mtiTypeKey Message type identifier starts with MTI + number
+     * @return Return byte contains ISO 8583 message
+     */
+    private String transformData( Object objValue, String mtiTypeKey ) throws JsonProcessingException {
+        String iso8583Batch = "";
+        String mtiType = mtiTypeKey.startsWith("MTI") ? mtiTypeKey.substring(3) : mtiTypeKey;
+
+        if( objValue instanceof ArrayList || objValue instanceof Object[] )
+        {
+            Object[] jsonArray = null;
+            if( objValue instanceof ArrayList )
+            {
+                jsonArray = ((ArrayList<?>) objValue).toArray();
+            }
+            else {
+                jsonArray = (Object[]) objValue;
+            }
+
+            for ( Object dataMap : jsonArray )
+            {
+                String iso8583Msg = new String( buildISO8583((LinkedHashMap) dataMap, config, mtiType) );
+                iso8583Batch = iso8583Batch.concat( iso8583Msg + "\n" );
+            }
+        }
+        else {
+            iso8583Batch = new String(buildISO8583((LinkedHashMap) objValue, config, mtiType)) + "\n";
+        }
+
+        return iso8583Batch;
+    }
 
     /**
      * ISO 8583 message builder
-     * @param json Data package on common specs
+     * @param dataMap Data package on common specs
      * @param formatMap Object containing format, variable, minimum length, maximum length, and other options
      * @param mti_id Message type
      * @return Return byte contains ISO 8583 message
      */
-    private byte[] buildISO8583(JSONObject json, JSONObject formatMap, String mti_id)
-    {
+    private byte[] buildISO8583(LinkedHashMap dataMap, JSONObject formatMap, String mti_id) throws JsonProcessingException {
+
+        String mtiKeyTag = "MTI".concat(mti_id);
+        String transformMapperName = "ISO8583.".concat(mtiKeyTag);
+
+        FieldsDataTransformMapping fieldsDataTransformMapping =
+                m_fieldsDataTransformMappingService.getFieldsDataTransformMappingById(transformMapperName);
+        if (fieldsDataTransformMapping != null) {
+            formatMap = new JSONObject(fieldsDataTransformMapping.getMappingExpressionScript());
+        }
+
+        JSONObject jsonObject = new JSONObject( m_JsonMapper.writeValueAsString( dataMap ) );
+
         this.iso8583Structure = new ISO8583Structure(mti_id, formatMap);
 
         byte[] message = null;
@@ -119,15 +181,15 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                     {
                         String keySpecs = formatMap.get(key).toString();
                         row = new JSONObject(keySpecs);
-                        format = row.get("format").toString();
-                        variable = row.get("variable").toString();
+                        format = row.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText()).toString();
+                        variable = row.get(ISO8583FieldInfo.DataElementConfig.NAME.getText()).toString();
                         variable = variable.trim();
-                        field_length = Integer.parseInt(row.get("field_length").toString());
-                        options = row.get("options").toString();
-                        field_type = ISO8583FieldInfo.Format.valueOf(row.get("type").toString());
+                        field_length = Integer.parseInt(row.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
+                        options = row.get(ISO8583FieldInfo.DataElementConfig.OPTIONS.getText()).toString();
+                        field_type = ISO8583FieldInfo.Format.valueOf(row.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
                         if(!options.isEmpty())
                         {
-                            json = ISO8583Structure.applyOption(json, options);
+                            jsonObject = ISO8583Structure.applyOption(jsonObject, options);
                         }
                         StringBuilder subfield = new StringBuilder();
                         if(!variable.isEmpty())
@@ -143,9 +205,9 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 for(i = 0; i<vars.length && i<subformat.length; i++)
                                 {
                                     vars[i] = vars[i].trim();
-                                    if(json.get(vars[i]) != null)
+                                    if(jsonObject.get(vars[i]) != null)
                                     {
-                                        subdata = json.get(vars[i]).toString();
+                                        subdata = jsonObject.get(vars[i]).toString();
                                     }
                                     else
                                     {
@@ -193,15 +255,15 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                             else
                             {
                                 variable = variable.trim();
-                                if(json.get(variable) != null)
+                                if(jsonObject.get(variable) != null)
                                 {
-                                    subfield = new StringBuilder(json.get(variable).toString());
+                                    subfield = new StringBuilder(jsonObject.get(variable).toString());
                                 }
                                 else
                                 {
                                     subfield = new StringBuilder();
                                 }
-                                ISO8583FieldInfo.Attribute data_type = ISO8583FieldInfo.Attribute.valueOf("STRING");
+                                ISO8583FieldInfo.Attribute data_type = ISO8583FieldInfo.Attribute.STRING;
                                 if(format.contains("d") || field_type == ISO8583FieldInfo.Format.NUMERIC)
                                 {
                                     subfield = new StringBuilder(subfield.toString().replaceAll("[^\\d.\\-]", ""));
@@ -212,7 +274,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                     }
                                     long val = Long.parseLong(subfield.toString());
                                     subfield = new StringBuilder(String.format(format, val));
-                                    data_type = ISO8583FieldInfo.Attribute.valueOf("NUMERIC");
+                                    data_type = ISO8583FieldInfo.Attribute.NUMERIC;
                                 }
 
                                 field_length = ISO8583Structure.getSubfieldLengthTotal(format);

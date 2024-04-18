@@ -21,4 +21,28 @@ public interface ISO8583FieldInfo extends Cloneable {
         ALPHA, ALNUM, ALNUMPAD, ALPHA_OR_NUM, NUM, SIGN_NUM, ALNUMSPECIAL, SPECIAL, BIN, NUMERIC, STRING, AMOUNT, UNKNOWN
     };
 
+    public enum DataElementConfig {
+
+        FORMAT("format"), NAME("name"), OPTIONS("options"), LENGTH("length"), TYPE("type"), DATA("data");
+
+        private String text;
+
+        DataElementConfig(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public static DataElementConfig fromString(String text) {
+            for (DataElementConfig dec : DataElementConfig.values()) {
+                if (dec.text.equalsIgnoreCase(text)) {
+                    return dec;
+                }
+            }
+            return null;
+        }
+    };
+
 }

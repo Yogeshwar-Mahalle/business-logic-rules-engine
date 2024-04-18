@@ -23,9 +23,14 @@ import java.util.Map;
 @Getter
 public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Object>> {
     private static final Logger LOG = LoggerFactory.getLogger(MapXMLSerializer.class);
+    private String ROOT_NODE = "ROOT";
     private final String NAMESPACE_KEYWORD = "#{xmlns:";
     private final String ATTRIBUTE_STARTWITH = "#{";
     private final String ATTRIBUTE_ENDWITH = "}";
+
+    public MapXMLSerializer(String rootNode) {
+        ROOT_NODE = rootNode;
+    }
 
     /*public MapXMLSerializer() {
         this(null);
@@ -37,21 +42,53 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
     @Override
     public void serialize(LinkedHashMap<String, Object> stringObjectHashMap, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
 
-        if (jsonGenerator instanceof ToXmlGenerator xmlGenerator)
-        {
+        if (jsonGenerator instanceof ToXmlGenerator xmlGenerator) {
+            Object valueObject = stringObjectHashMap.get(ROOT_NODE) == null ?
+                    stringObjectHashMap : stringObjectHashMap.get(ROOT_NODE);
+
             //Start XML Root tag writing
             xmlGenerator.writeStartObject();
 
-            String namespacePrefix = null;
-            String namespaceURL = null;
-            LinkedHashMap<String, String> attributeKeyValue = null;
-            mapXMLSerialize(stringObjectHashMap,
-                    xmlGenerator,
-                    serializerProvider,
-                    namespacePrefix,
-                    namespaceURL,
-                    attributeKeyValue,
-                    false);
+            if (valueObject instanceof ArrayList || valueObject instanceof Object[]) {
+                Object[] valueList = null;
+                if( valueObject instanceof ArrayList )
+                {
+                    valueList = ((ArrayList<?>) valueObject).toArray();
+                }
+                else {
+                    valueList = (Object[]) valueObject;
+                }
+
+                for( Object hashMapObject : valueList )
+                {
+                    stringObjectHashMap = (LinkedHashMap<String, Object>) hashMapObject;
+
+                    String namespacePrefix = null;
+                    String namespaceURL = null;
+                    LinkedHashMap<String, String> attributeKeyValue = null;
+                    mapXMLSerialize(stringObjectHashMap,
+                            xmlGenerator,
+                            serializerProvider,
+                            namespacePrefix,
+                            namespaceURL,
+                            attributeKeyValue,
+                            false);
+                }
+
+            } else {
+                stringObjectHashMap = (LinkedHashMap<String, Object>) valueObject;
+
+                String namespacePrefix = null;
+                String namespaceURL = null;
+                LinkedHashMap<String, String> attributeKeyValue = null;
+                mapXMLSerialize(stringObjectHashMap,
+                        xmlGenerator,
+                        serializerProvider,
+                        namespacePrefix,
+                        namespaceURL,
+                        attributeKeyValue,
+                        false);
+            }
 
             //End XML Root tag writing
             xmlGenerator.writeEndObject();
@@ -113,7 +150,6 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                 //xmlGenerator.writeEndObject();
                 attributeKeyValue.clear();
             }
-
 
             attributeKeyValue = new LinkedHashMap<>();
             if( item.getValue() instanceof Map<?,?> )
@@ -214,7 +250,25 @@ public class MapXMLSerializer extends JsonSerializer<LinkedHashMap<String, Objec
                     for(Object value : valueList)
                     {
                         if(value != null) {
-                            xmlGenerator.writeObjectField(tagName, value);
+                            if( value instanceof Map<?,?> )
+                            {
+                                LinkedHashMap<String, Object> valueMap = (LinkedHashMap<String, Object>) value;
+
+                                xmlGenerator.writeFieldName(tagName);
+
+                                xmlGenerator.writeStartObject();
+                                mapXMLSerialize(valueMap,
+                                        xmlGenerator,
+                                        serializerProvider,
+                                        namespacePrefix,
+                                        namespaceURL,
+                                        attributeKeyValue,
+                                        true);
+                                xmlGenerator.writeEndObject();
+                            }
+                            else {
+                                xmlGenerator.writeObjectField(tagName, value);
+                            }
                         }
                     }
                 }

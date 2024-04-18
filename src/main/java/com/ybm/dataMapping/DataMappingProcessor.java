@@ -10,6 +10,7 @@ import com.ybm.dataMapping.payloadtypes.*;
 import com.ybm.dataMapping.processor.DataEnrichmentProcessing;
 import com.ybm.dataMapping.processor.DataMapProcessing;
 import com.ybm.dataMapping.visitor.*;
+import com.ybm.dataMappingRepo.FieldsDataTransformMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class DataMappingProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(DataMappingProcessor.class);
     @Autowired
     DataEnrichmentProcessing dataEnrichmentProcessing;
+
+    @Autowired
+    FieldsDataTransformMappingService fieldsDataTransformMappingService;
 
     @Autowired
     DataMapProcessing dataMapProcessing;
@@ -89,7 +93,7 @@ public class DataMappingProcessor {
             }
             case ISO8583: {
                 try {
-                    payloadMessageInterface = new ISO8583Message( dataName, message );
+                    payloadMessageInterface = new ISO8583Message( dataName, message, fieldsDataTransformMappingService );
                 } catch (JsonProcessingException e) {
                     LOG.error(e.getMessage());
                     throw new RuntimeException(e);
@@ -179,9 +183,9 @@ public class DataMappingProcessor {
                     break;
                 }
                 case ISO8583: {
-                    returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor());
+                    returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor( fieldsDataTransformMappingService ));
                     try {
-                        payloadMessageInterface = new ISO8583Message( dataName, returnResult );
+                        payloadMessageInterface = new ISO8583Message( dataName, returnResult, fieldsDataTransformMappingService );
                     } catch (JsonProcessingException e) {
                         LOG.error(e.getMessage());
                         throw new RuntimeException(e);

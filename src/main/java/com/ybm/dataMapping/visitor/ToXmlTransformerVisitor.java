@@ -39,7 +39,7 @@ public class ToXmlTransformerVisitor implements VisitorInterface {
         try {
 
             SimpleModule module = new SimpleModule();
-            module.addSerializer(new MapXMLSerializer());
+            module.addSerializer(new MapXMLSerializer( m_PayloadMessageInterface.getRootNode() ));
             m_XmlMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             m_XmlMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
             m_XmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
@@ -48,12 +48,8 @@ public class ToXmlTransformerVisitor implements VisitorInterface {
 
             return m_XmlMapper
                     .writer()
-                    .withRootName(m_PayloadMessageInterface.getRootNode())
-                    .writeValueAsString(
-                            m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode()) == null ?
-                                    m_PayloadMessageInterface.getDataMap() :
-                                    m_PayloadMessageInterface.getDataMap().get(m_PayloadMessageInterface.getRootNode())
-                    );
+                    .withRootName( m_PayloadMessageInterface.getRootNode() )
+                    .writeValueAsString( m_PayloadMessageInterface.getDataMap() );
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
