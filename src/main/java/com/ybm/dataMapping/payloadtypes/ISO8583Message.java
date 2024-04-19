@@ -32,7 +32,7 @@ public class ISO8583Message implements PayloadMessageInterface {
     String configStr = "{\"f41\":{\"format\":\"%-8s\", \"name\":\"card_acceptor_terminal\", \"options\":\"\", \"length\":\"8\", \"type\":\"STRING\"},\"f63\":{\"format\":\"%-32s%-30s%-50s%-18s\", \"name\":\"locket_code, locket_name, locket_address, locket_phone\", \"options\":\"\", \"length\":\"130\", \"type\":\"LLLVAR\"},\"f32\":{\"format\":\"%-11s\", \"name\":\"acq_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f42\":{\"format\":\"%15s\", \"name\":\"acceptor_identification_code\", \"options\":\"\", \"length\":\"15\", \"type\":\"STRING\"},\"f121\":{\"format\":\"%-32s\", \"name\":\"payment_reference\", \"options\":\"\", \"length\":\"32\", \"type\":\"LLLVAR\"},\"f12\":{\"format\":\"%-6s\", \"name\":\"local_time\", \"options\":\"\", \"length\":\"6\", \"type\":\"STRING\"},\"f120\":{\"format\":\"%-20s\", \"name\":\"product_code\", \"options\":\"\", \"length\":\"20\", \"type\":\"LLLVAR\"},\"f11\":{\"format\":\"%06d\", \"name\":\"stan\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f33\":{\"format\":\"%-11s\", \"name\":\"fwd_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f13\":{\"format\":\"%-4s\", \"name\":\"local_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f49\":{\"format\":\"%03d\", \"name\":\"transaction_currency_code\", \"options\":\"\", \"length\":\"3\", \"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%-4s\", \"name\":\"settlement_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f37\":{\"format\":\"%012d\", \"name\":\"reference_number\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f48\":{\"format\":\"%11s%12s%01d\", \"name\":\"meter_id, customer_id, id_selector\", \"options\":\"\", \"length\":\"24\", \"type\":\"LLLVAR\"},\"f2\":{\"format\":\"%-19s\", \"name\":\"pan\", \"options\":\"\", \"length\":\"19\", \"type\":\"LLVAR\"},\"f18\":{\"format\":\"%04d\", \"name\":\"merchant_type\", \"options\":\"\", \"length\":\"4\", \"type\":\"NUMERIC\"},\"f3\":{\"format\":\"%06d\", \"name\":\"processing_code\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\", \"name\":\"amount\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\", \"name\":\"transmission_date_time\", \"options\":\"\", \"length\":\"10\", \"type\":\"STRING\"},\"f127\":{\"format\":\"%-20s%-32s\", \"name\":\"username, password\", \"options\":\"\", \"length\":\"52\", \"type\":\"LLLVAR\"}}";
     String iso8583 = "0200F23A400188C180060000000000000182196048200000002731   300000000000020000092513425200007213425209250926602111597        1112345      000000000072DEVALT0120090010080000014514987654321149999999911030E8597E3B2F1646505FDD6E210000090MUP210ZBE957561167FCD8506326E4AHAMDANIE LESTALUHUANI    R1  00000090000000090000000011653600505151106123            0600000000000000000000000000130                                ALTO                          Jalan Anggrek Neli Murni                          02199999          02000500050001         03214987654321                     052tester1             tester1                         ";
 
-    public ISO8583Message(String dataName, String textISO8583Message, FieldsDataTransformMappingService fieldsDataTransformMappingService) throws JsonProcessingException {
+    public ISO8583Message(String dataName, String textISO8583Message, String linkedEntity, String version, FieldsDataTransformMappingService fieldsDataTransformMappingService) throws JsonProcessingException {
 
         textISO8583Message = textISO8583Message == null ? iso8583 : textISO8583Message;
 
@@ -40,16 +40,17 @@ public class ISO8583Message implements PayloadMessageInterface {
         this.m_RootNodeName = dataName;
         this.m_DataMap = new LinkedHashMap<>();
         ObjectMapper jsonMapper = new ObjectMapper();
-        LinkedHashMap<String, LinkedHashMap<String, String>> formatMap = jsonMapper.readValue(configStr, new TypeReference<>() {});
+        LinkedHashMap<String, LinkedHashMap<String, String>> formatMapStd = jsonMapper.readValue(configStr, new TypeReference<>() {});
 
         String jsonMessage = "";
         String[] lines = textISO8583Message.split(System.lineSeparator());
         for ( String line : lines ) {
             // MTI 4 characters + Primary BIT MAP 16 Hexadecimal Characters = 20
             if ( line.length() > 20 ) {
+                LinkedHashMap<String, LinkedHashMap<String, String>> formatMap = formatMapStd;
                 String mti = line.substring(0, 4);
                 String mtiKeyTag = "MTI".concat(mti);
-                String transformMapperName = "ISO8583.".concat(mtiKeyTag);
+                String transformMapperName = linkedEntity.concat("~ISO8583.".concat(mtiKeyTag).concat(".".concat(version)));
 
                 FieldsDataTransformMapping fieldsDataTransformMapping =
                         fieldsDataTransformMappingService.getFieldsDataTransformMappingById(transformMapperName);
@@ -116,9 +117,8 @@ public class ISO8583Message implements PayloadMessageInterface {
                     try
                     {
                         Set<String> fieldsFromTemplate = iso8583Structure.formatMapKeySet();
-                        int MAX_FIELD = 128;
 
-                        for(int idx = 2; idx <= MAX_FIELD; idx++)
+                        for(int idx = 2; idx <= iso8583Structure.getMaxField(); idx++)
                         {
                             String key = "", value = "";
                             String fieldName = "f"+idx;
@@ -138,9 +138,9 @@ public class ISO8583Message implements PayloadMessageInterface {
                                         String[] variables = variable.split(",");
 
                                         String tmp1 = "", tmp2 = "";
-                                        if(ISO8583Structure.hasSubfield(format))
+                                        if(iso8583Structure.hasSubfield(format))
                                         {
-                                            int[] lengths = ISO8583Structure.getSubfieldLength(format);
+                                            int[] lengths = iso8583Structure.getSubfieldLength(format);
                                             arrFormat = null;
                                             if(format.contains("%"))
                                             {
@@ -170,9 +170,9 @@ public class ISO8583Message implements PayloadMessageInterface {
                                                     {
                                                         tmp2 = tmp1;
                                                     }
-                                                    if(arrFormat[j+1].contains("d"))
+                                                    if(arrFormat[j+1].contains("d") || arrFormat[j+1].contains("f"))
                                                     {
-                                                        tmp2 = ISO8583Structure.lTrim(tmp1, "0");
+                                                        tmp2 = iso8583Structure.lTrim(tmp1, "0");
                                                         if(tmp2.isEmpty())
                                                         {
                                                             tmp2 = "0";
@@ -197,9 +197,9 @@ public class ISO8583Message implements PayloadMessageInterface {
                                             {
                                                 value = tmp1;
                                             }
-                                            if(format.contains("d"))
+                                            if(format.contains("d") || format.contains("f"))
                                             {
-                                                value = ISO8583Structure.lTrim(tmp1, "0");
+                                                value = iso8583Structure.lTrim(tmp1, "0");
                                                 if(value.isEmpty())
                                                 {
                                                     value = "0";

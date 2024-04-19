@@ -87,12 +87,8 @@ public class ISO8583Structure {
     /**
      * Array of ISO8583 field name
      */
-    public String[] fields = null;
+    private String[] fields = null;
 
-    /**
-     * ISO8583 field name
-     */
-    private String fieldStr = "";
 
     /**
      * The greatest field number
@@ -103,7 +99,7 @@ public class ISO8583Structure {
 
      */
     @Getter
-    public int maxField = 1;
+    private int maxField = 1;
 
     private static char hexNdx[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     private static Pattern patHex = Pattern.compile("[0-9A-Z]*");
@@ -212,17 +208,17 @@ public class ISO8583Structure {
      * @param field ISO8583 field number
      * @param iso8583Field ISO8583 field data
      */
-    public void setField(int field, ISO8583Field iso8583Field)
+    private void setField(int field, ISO8583Field iso8583Field)
     {
-        this.addBit(field);
-        this.setValue(field, iso8583Field.data, iso8583Field.type, iso8583Field.length);
+        this.addFieldForBit(field);
+        this.setValue(field, iso8583Field.data, iso8583Field.type, iso8583Field.length, iso8583Field.format );
     }
     /**
      * Get ISO8583 field
      * @param field ISO8583 field number
      * @return ISO8583StructureField contains field object
      */
-    public ISO8583Field getField(int field)
+    private ISO8583Field getField(int field)
     {
         ISO8583Field fieldData = new ISO8583Field();
         JSONObject data = new JSONObject();
@@ -230,7 +226,7 @@ public class ISO8583Structure {
         {
             data = (JSONObject) this.jsonItem.get("F"+field);
             fieldData.setField( data.optString(ISO8583FieldInfo.DataElementConfig.DATA.getText(), ""),
-                    ISO8583FieldInfo.Format.valueOf(data.optString(ISO8583FieldInfo.DataElementConfig.TYPE.getText(), ISO8583FieldInfo.Format.STRING.name())),
+                    ISO8583FieldInfo.FormatType.valueOf(data.optString(ISO8583FieldInfo.DataElementConfig.TYPE.getText(), ISO8583FieldInfo.FormatType.STRING.name())),
                     Integer.parseInt(data.optString(ISO8583FieldInfo.DataElementConfig.LENGTH.getText(), "1")) );
         }
         catch(Exception e)
@@ -265,90 +261,98 @@ public class ISO8583Structure {
     public void parse(String message)
     {
         this.fields = null;
-
-        String ln = "";
-
-        String primaryBitMapStr = "";
-        long primaryBitMapInt = 0;
-
-        String secondaryBitMapStr = "";
-        long secondaryBitMapInt = 0;
-
-        String tertiaryBitMapStr = "";
-        long tertiaryBitMapInt = 0;
-
         this.mtiType = message.substring(0, 4).getBytes();
-        primaryBitMapStr = message.substring(4, 20).replaceAll("[^A-Fa-f0-9]", "");
+        this.primaryBitMap = 0;
+        this.secondaryBitMap = 0;
+        this.tertiaryBitMap = 0;
+
+        boolean bSecondaryBitMapExist = false, bTertiaryBitMapExist = false;
+
+        String primaryBitMapStr = message.substring(4, 20).replaceAll("[^A-Fa-f0-9]", "");
         if(primaryBitMapStr.isEmpty())
         {
             primaryBitMapStr = "0";
         }
 
-        primaryBitMapInt = Long.parseUnsignedLong(primaryBitMapStr, 16);
-        this.primaryBitMap = primaryBitMapInt;
-
+        this.primaryBitMap = Long.parseUnsignedLong(primaryBitMapStr, 16);
         if((this.primaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
         {
-            secondaryBitMapStr = message.substring(20, 36).replaceAll("[^A-Fa-f0-9]", "");
+            String secondaryBitMapStr = message.substring(20, 36).replaceAll("[^A-Fa-f0-9]", "");
             if(secondaryBitMapStr.isEmpty())
             {
                 secondaryBitMapStr = "0";
             }
 
-            secondaryBitMapInt = Long.parseUnsignedLong(secondaryBitMapStr, 16);
-            this.secondaryBitMap = secondaryBitMapInt;
+            this.secondaryBitMap = Long.parseUnsignedLong(secondaryBitMapStr, 16);
+            bSecondaryBitMapExist = true;
         }
+
         if((this.secondaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
         {
-            tertiaryBitMapStr = message.substring(36, 44).replaceAll("[^A-Fa-f0-9]", "");
-            if(tertiaryBitMapStr.equals(""))
+            String tertiaryBitMapStr = message.substring(36, 52).replaceAll("[^A-Fa-f0-9]", "");
+            if(tertiaryBitMapStr.isEmpty())
             {
                 tertiaryBitMapStr = "0";
             }
 
-            tertiaryBitMapInt = Long.parseUnsignedLong(tertiaryBitMapStr, 16);
-            this.tertiaryBitMap = tertiaryBitMapInt;
+            this.tertiaryBitMap = Long.parseUnsignedLong(tertiaryBitMapStr, 16);
+            bTertiaryBitMapExist = true;
         }
+
+        LinkedHashSet<String> fieldListSet = new LinkedHashSet<>();
 
         // get field list from bitmap
-        int i = 0;
-        long k = 0;
-
-        k = this.primaryBitMap;
-        for(i = 1; i <= 64; i++)
+        int bitmapLength = 16;
+        long i = this.primaryBitMap;
+        for(int x = 1; x <= 64; x++)
         {
-            if((k & 0x8000000000000000L) == 0x8000000000000000L && i > 1)
+            if((i & 0x8000000000000000L) == 0x8000000000000000L && x > 1)
             {
-                this.addBit(i);
+                fieldListSet.add(String.valueOf(x));
+
+                if(x > this.maxField)
+                {
+                    this.maxField = x;
+                }
             }
-            k = k - 0x8000000000000000L;
-            k = k << 1;
+            i = i - 0x8000000000000000L;
+            i = i << 1;
         }
 
-        int bitmapLength = 16;
-        if((this.primaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
+        if( bSecondaryBitMapExist )
         {
             bitmapLength = 32;
-            k = this.secondaryBitMap;
-            for(i = 65; i <= 128; i++)
+            long j = this.secondaryBitMap;
+            for(int y = 65; y <= 128; y++)
             {
-                if((k & 0x8000000000000000L) == 0x8000000000000000L)
+                //BIT 65 : Tertiary Bit Map
+                if(y != 65 && (j & 0x8000000000000000L) == 0x8000000000000000L)
                 {
-                    this.addBit(i);
+                    fieldListSet.add(String.valueOf(y));
+
+                    if(y > this.maxField)
+                    {
+                        this.maxField = y;
+                    }
                 }
-                k = k - 0x8000000000000000L;
-                k = k << 1;
+                j = j - 0x8000000000000000L;
+                j = j << 1;
             }
 
-            if((this.secondaryBitMap & 0x8000000000000000L) == 0x8000000000000000L)
+            if( bTertiaryBitMapExist )
             {
                 bitmapLength = 48;
-                k = this.tertiaryBitMap;
-                for(i = 129; i <= 192; i++)
+                long k = this.tertiaryBitMap;
+                for(int z = 129; z <= 192; z++)
                 {
                     if((k & 0x8000000000000000L) == 0x8000000000000000L)
                     {
-                        this.addBit(i);
+                        fieldListSet.add(String.valueOf(z));
+
+                        if(z > this.maxField)
+                        {
+                            this.maxField = z;
+                        }
                     }
                     k = k - 0x8000000000000000L;
                     k = k << 1;
@@ -356,7 +360,11 @@ public class ISO8583Structure {
             }
         }
 
-        ISO8583FieldInfo.Format dataType = ISO8583FieldInfo.Format.UNKNOWN;
+        this.fields = new String[1];
+        this.fields = fieldListSet.toArray(this.fields);
+
+        ISO8583FieldInfo.FormatType dataType = ISO8583FieldInfo.FormatType.UNKNOWN;
+        String format = "%s";
         int dataLength = 0;
         int realLength = 0;
         int fieldLength = 0;
@@ -396,15 +404,16 @@ public class ISO8583Structure {
                     }
                     if (fieldFormat != null) {
                         if (fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()) != null) {
-                            dataType = ISO8583FieldInfo.Format.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
+                            dataType = ISO8583FieldInfo.FormatType.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
+                            format = fieldFormat.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText());
                             fieldLength = Integer.parseInt(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()));
                             dataLength = fieldLength;
                             realLength = dataLength;
                             rawData = "";
-                            if (dataType == ISO8583FieldInfo.Format.LLLVAR) {
+                            if (dataType == ISO8583FieldInfo.FormatType.LLLVAR) {
                                 if (shiftedData.length() >= 3) {
                                     rawData = shiftedData.substring(0, 3);
-                                    ln = rawData.replaceAll("[^\\d.]", "");
+                                    String ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
                                     if (ln.isEmpty()) {
                                         ln = "0";
@@ -419,10 +428,10 @@ public class ISO8583Structure {
                                         rawData = "";
                                     }
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.LLVAR) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.LLVAR) {
                                 if (shiftedData.length() >= 2) {
                                     rawData = shiftedData.substring(0, 2);
-                                    ln = rawData.replaceAll("[^\\d.]", "");
+                                    String ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
                                     if (ln.isEmpty()) {
                                         ln = "0";
@@ -437,10 +446,10 @@ public class ISO8583Structure {
                                         rawData = "";
                                     }
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.LVAR) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.LVAR) {
                                 if (!shiftedData.isEmpty()) {
                                     rawData = shiftedData.substring(0, 1);
-                                    ln = rawData.replaceAll("[^\\d.]", "");
+                                    String ln = rawData.replaceAll("[^\\d.]", "");
                                     ln = lTrim(ln, "0");
                                     if (ln.isEmpty()) {
                                         ln = "0";
@@ -455,7 +464,7 @@ public class ISO8583Structure {
                                         rawData = "";
                                     }
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.AMOUNT) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.AMOUNT) {
                                 if (shiftedData.length() >= 12) {
                                     rawData = shiftedData.substring(0, 12);
                                     rawData = rawData.replaceAll("[^\\d]", "");
@@ -468,43 +477,43 @@ public class ISO8583Structure {
                                     shiftedData = shiftedData.substring(12);
                                     realLength = 12;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.YYMM) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.YYMM) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.YYMMDD) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.YYMMDD) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.DDMMYY) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.DDMMYY) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.MMDDhhmmss) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.MMDDhhmmss) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.YYMMDDhhmmss) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.YYMMDDhhmmss) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.STRING) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.STRING) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
                                     realLength = dataLength;
                                 }
-                            } else if (dataType == ISO8583FieldInfo.Format.FIXED) {
+                            } else if (dataType == ISO8583FieldInfo.FormatType.FIXED) {
                                 if (shiftedData.length() >= dataLength) {
                                     rawData = shiftedData.substring(0, dataLength);
                                     shiftedData = shiftedData.substring(dataLength);
@@ -517,14 +526,14 @@ public class ISO8583Structure {
                                     realLength = dataLength;
                                 }
                             }
-                            this.setValue(field, rawData, dataType, realLength);
+                            this.setValue(field, rawData, dataType, realLength, format);
                         }
                     }
                 }
             }
         }
     }
-    public String showAsList()
+    private String showAsList()
     {
         int i;
         StringBuilder ret = new StringBuilder();
@@ -544,7 +553,7 @@ public class ISO8583Structure {
      * @param option Function
      * @return String result of the function
      */
-    private static String applyFunction(String value, String option)
+    private String applyFunction(String value, String option)
     {
         /**
          * substring(start)
@@ -886,7 +895,7 @@ public class ISO8583Structure {
      * @param options String containing the function
      * @return JSONObject after the operation
      */
-    public static JSONObject applyOption(JSONObject json, String options)
+    public JSONObject applyOption(JSONObject json, String options)
     {
         if(!options.isEmpty())
         {
@@ -1018,7 +1027,7 @@ public class ISO8583Structure {
      * @param format Data format
      * @return String array containing single format
      */
-    public static String[] listSubformat(String format)
+    public String[] listSubformat(String format)
     {
         Pattern p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         Matcher m = p.matcher(format);
@@ -1051,7 +1060,7 @@ public class ISO8583Structure {
      * @param message String contains ISO 8583 message
      * @param formatMap LinkedHashMap contains specs
      */
-    public void parse(String message, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap)
+    private void parse(String message, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap)
     {
         this.setFormatMap(formatMap);
         this.parse(message);
@@ -1074,9 +1083,8 @@ public class ISO8583Structure {
             Arrays.sort(fieldsInt);
             for(i = 0; i < this.fields.length; i++)
             {
-                this.fields[i] = fieldsInt[i]+"";
+                this.fields[i] = fieldsInt[i] + "";
             }
-            this.fieldStr = String.join(",", this.fields);
             message = new String(this.mtiType) + this.getBitmap() + this.getBody();
         }
         return message;
@@ -1108,7 +1116,7 @@ public class ISO8583Structure {
      * @param mask Character mask to strip string
      * @return Stripped string
      */
-    public static String lTrim(String input, String mask)
+    public String lTrim(String input, String mask)
     {
         int lastLen = input.length();
         int curLen = lastLen;
@@ -1147,7 +1155,7 @@ public class ISO8583Structure {
      * @param length Expected length
      * @return N right string
      */
-    public static String right(String input, int length)
+    public String right(String input, int length)
     {
         if(length >= input.length())
         {
@@ -1164,7 +1172,7 @@ public class ISO8583Structure {
      * @param length Expected length
      * @return N left string
      */
-    public static String left(String input, int length)
+    public String left(String input, int length)
     {
         if(length >= input.length())
         {
@@ -1180,13 +1188,16 @@ public class ISO8583Structure {
      * Get ISO 8583 bitmap.
      * @return String contains ISO 8583 bitmap
      */
-    public String getBitmap()
+    private String getBitmap()
     {
         String bitmap = "";
         int maxField = 0;
         String fieldStr = "";
         int fieldInt = 0;
         int i = 0;
+        primaryBitMap = 0;
+        secondaryBitMap = 0;
+        tertiaryBitMap = 0;
         for(i = 0; i<fields.length; i++)
         {
             fieldStr = this.fields[i];
@@ -1239,25 +1250,56 @@ public class ISO8583Structure {
         return bitmap.toUpperCase();
     }
     /**
+     * Add bit to ISO 8583 message. It will affect to the bitmap.
+     * @param field ISO 8583 field number
+     */
+    private void addFieldForBit(int field)
+    {
+        if(field > this.maxField)
+        {
+            this.maxField = field;
+        }
+
+        String fieldStr = String.valueOf(field);
+        if(this.fields != null)
+        {
+            fieldStr = String.join(",", this.fields);
+
+            boolean duplicated = false;
+            for (String strField : this.fields) {
+                if (strField.trim().equals( String.valueOf(field) )) {
+                    duplicated = true;
+                    break;
+                }
+            }
+            if(!duplicated)
+            {
+                fieldStr += "," + field;
+            }
+        }
+
+        this.fields = fieldStr.split(",");
+    }
+    /**
      * Get message body.
      * This method will pack all field to a string. The length of each field is set when the field is added/modified
      * @return String contains ISO 8583 message body
      */
-    public String getBody()
+    private String getBody()
     {
         String fieldStr = "";
         JSONObject jo = new JSONObject();
         StringBuilder body = new StringBuilder();
         String data = "";
         String finalItemData = "";
-        ISO8583FieldInfo.Format dataType = ISO8583FieldInfo.Format.UNKNOWN;
-        int dataLength = 0;
-        int iter = 0;
+        ISO8583FieldInfo.FormatType dataType = ISO8583FieldInfo.FormatType.UNKNOWN;
+        String format = "%s";
+        int dataMaxLength = 0;
 
-        long val = 0;
+
         String len = "";
 
-        for(iter = 0; iter < this.fields.length; iter++)
+        for(int iter = 0; iter < this.fields.length; iter++)
         {
             fieldStr = this.fields[iter];
             jo = (JSONObject) this.jsonItem.get("F"+fieldStr.trim());
@@ -1265,47 +1307,80 @@ public class ISO8583Structure {
             {
                 data = jo.get(ISO8583FieldInfo.DataElementConfig.DATA.getText()).toString();
                 finalItemData = data;
-                dataType = ISO8583FieldInfo.Format.valueOf(jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
-                dataLength = Integer.parseInt(jo.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
-                if(dataType == ISO8583FieldInfo.Format.AMOUNT)
+                dataType = ISO8583FieldInfo.FormatType.valueOf(jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
+                format = jo.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText()).toString();
+                dataMaxLength = Integer.parseInt(jo.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
+                if(dataType == ISO8583FieldInfo.FormatType.AMOUNT)
                 {
-                    dataLength = 12;
+                    dataMaxLength = 12;
                     data = data.trim();
                     if(data.isEmpty())
                     {
                         data = "0";
                     }
-                    val = Long.parseLong(data);
-                    finalItemData = String.format("%012d", val);
+                    Double val = Double.parseDouble(data);
+                    finalItemData = String.format("%0" + dataMaxLength + "d", val);
                 }
-                else if(dataType == ISO8583FieldInfo.Format.LLLVAR)
+                else if(dataType == ISO8583FieldInfo.FormatType.LLLVAR)
                 {
+                    data = data.trim();
+                    if( data.length() > dataMaxLength )
+                    {
+                        data = data.substring(dataMaxLength);
+                    }
                     len = String.format("%03d", data.length());
                     finalItemData = len + data;
                 }
-                else if(dataType == ISO8583FieldInfo.Format.LLVAR)
+                else if(dataType == ISO8583FieldInfo.FormatType.LLVAR)
                 {
+                    data = data.trim();
+                    if( data.length() > dataMaxLength )
+                    {
+                        data = data.substring(dataMaxLength);
+                    }
                     len = String.format("%02d", data.length());
                     finalItemData = len + data;
                 }
-                else if(dataType == ISO8583FieldInfo.Format.LVAR)
+                else if(dataType == ISO8583FieldInfo.FormatType.LVAR)
                 {
+                    data = data.trim();
+                    if( data.length() > dataMaxLength )
+                    {
+                        data = data.substring(dataMaxLength);
+                    }
                     len = String.format("%1d", data.length());
                     finalItemData = len + data;
                 }
-                else if(dataType == ISO8583FieldInfo.Format.NUMERIC)
+                else if(dataType == ISO8583FieldInfo.FormatType.NUMERIC)
                 {
                     data = data.trim();
                     if(data.isEmpty())
                     {
                         data = "0";
                     }
-                    val = Long.parseLong(data);
-                    finalItemData = String.format("%0"+dataLength+"d", val);
+                    long val = Long.parseLong(data);
+                    finalItemData = String.format("%0" + dataMaxLength + "d", val);
+                }
+                else if(dataType == ISO8583FieldInfo.FormatType.FLOAT)
+                {
+                    data = data.trim();
+                    if(data.isEmpty())
+                    {
+                        data = "0";
+                    }
+                    Double val = Double.parseDouble(data);
+                    String[] tmp = format.split("\\.");
+                    String decimalPlaces = tmp[1] == null ? ".2f" : ".".concat(tmp[1]);
+                    finalItemData = String.format("%0" + dataMaxLength + decimalPlaces, val);
                 }
                 else
                 {
-                    finalItemData = String.format("%-"+dataLength+"s", data);
+                    data = data.trim();
+                    if( data.length() > dataMaxLength )
+                    {
+                        data = data.substring(dataMaxLength);
+                    }
+                    finalItemData = String.format("%-" + dataMaxLength + "s", data);
                 }
             }
             catch(Exception e)
@@ -1318,49 +1393,16 @@ public class ISO8583Structure {
         return body.toString();
     }
     /**
-     * Add bit to ISO 8583 message. It will affect to the bitmap.
-     * @param field ISO 8583 field number
-     */
-    public void addBit(int field)
-    {
-        if(field > this.maxField)
-        {
-            this.maxField = field;
-        }
-        if(this.fields != null)
-        {
-            this.fieldStr = String.join(",", this.fields);
-            int i;
-            boolean duplicated = false;
-            for(i = 0; i < this.fields.length; i++)
-            {
-                if(this.fields[i].trim().equals(field+""))
-                {
-                    duplicated = true;
-                }
-            }
-            if(!duplicated)
-            {
-                this.fieldStr += ","+field;
-            }
-        }
-        else
-        {
-            this.fieldStr = field+"";
-        }
-        this.fields = this.fieldStr.split(",");
-    }
-    /**
      * Add field value. It seem with the setValue method unless invoke addBit first before set the field value
      * @param field ISO 8583 field number
      * @param data String data
      * @param dataType field Type
      * @param dataLength Data length
      */
-    public void addValue(int field, String data, ISO8583FieldInfo.Format dataType, int dataLength)
+    public void addValue(int field, String data, ISO8583FieldInfo.FormatType dataType, int dataLength, String format)
     {
-        this.addBit(field);
-        this.setValue(field, data, dataType, dataLength);
+        this.addFieldForBit(field);
+        this.setValue(field, data, dataType, dataLength, format);
     }
     /**
      * Set field value
@@ -1369,18 +1411,18 @@ public class ISO8583Structure {
      * @param dataType field Type
      * @param dataLength Data length
      */
-    public void setValue(int field, String data, ISO8583FieldInfo.Format dataType, int dataLength)
+    private void setValue(int field, String data, ISO8583FieldInfo.FormatType dataType, int dataLength, String format)
     {
         JSONObject jo = new JSONObject();
 
-        if(dataType == ISO8583FieldInfo.Format.AMOUNT)
+        if(dataType == ISO8583FieldInfo.FormatType.AMOUNT)
         {
             dataLength = 12;
         }
 
-        if( dataType == ISO8583FieldInfo.Format.LVAR ||
-                dataType == ISO8583FieldInfo.Format.LLVAR ||
-                dataType == ISO8583FieldInfo.Format.LLLVAR )
+        if( dataType == ISO8583FieldInfo.FormatType.LVAR ||
+                dataType == ISO8583FieldInfo.FormatType.LLVAR ||
+                dataType == ISO8583FieldInfo.FormatType.LLLVAR )
         {
             dataLength = data.length();
         }
@@ -1392,13 +1434,14 @@ public class ISO8583Structure {
             if(fieldFormat != null)
             {
                 int c_field_length = Integer.parseInt(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()));
-                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
+                ISO8583FieldInfo.FormatType c_type = ISO8583FieldInfo.FormatType.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
+                format = fieldFormat.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText());
                 if(dataLength < c_field_length)
                 {
                     dataLength = c_field_length;
                 }
 
-                if(dataType == ISO8583FieldInfo.Format.UNKNOWN)
+                if(dataType == ISO8583FieldInfo.FormatType.UNKNOWN)
                 {
                     dataType = c_type;
                 }
@@ -1407,6 +1450,7 @@ public class ISO8583Structure {
         jo.put(ISO8583FieldInfo.DataElementConfig.DATA.getText(), data);
         jo.put(ISO8583FieldInfo.DataElementConfig.TYPE.getText(), dataType);
         jo.put(ISO8583FieldInfo.DataElementConfig.LENGTH.getText(), dataLength);
+        jo.put(ISO8583FieldInfo.DataElementConfig.FORMAT.getText(), format);
         this.jsonItem.put("F"+field, jo);
     }
     /**
@@ -1442,7 +1486,7 @@ public class ISO8583Structure {
      * @param defaultValue Default value
      * @return String value of field
      */
-    public String getValue(int field, String defaultValue)
+    private String getValue(int field, String defaultValue)
     {
         JSONObject jo = new JSONObject();
         try
@@ -1495,10 +1539,10 @@ public class ISO8583Structure {
 
     /**
      * Get length of all subfields
-     * @param format Format of the field
+     * @param format FormatType of the field
      * @return Array containing each of subfield length
      */
-    public static int[] getSubfieldLength(String format)
+    public int[] getSubfieldLength(String format)
     {
         Pattern p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         Matcher m = p.matcher(format);
@@ -1541,10 +1585,10 @@ public class ISO8583Structure {
     }
     /**
      * Calculate all subfields length
-     * @param format Format of the field
+     * @param format FormatType of the field
      * @return Total length of the subfields
      */
-    public static int getSubfieldLengthTotal(String format)
+    public int getSubfieldLengthTotal(String format)
     {
         Pattern p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         Matcher m = p.matcher(format);
@@ -1560,9 +1604,10 @@ public class ISO8583Structure {
             fmt = lTrim(fmt, ",");
             fmt = rTrim(fmt, "s");
             fmt = rTrim(fmt, "d");
+            fmt = rTrim(fmt, "f");
             if(fmt.contains("."))
             {
-                String[] tmp = fmt.split(".");
+                String[] tmp = fmt.split("\\.");
                 fmt = tmp[0];
             }
             fmt = lTrim(fmt, "0");
@@ -1643,10 +1688,10 @@ public class ISO8583Structure {
 
     /**
      * Check if format more than one
-     * @param format Format to be checked
+     * @param format FormatType to be checked
      * @return true if more than one format. Otherwise return false
      */
-    public static boolean hasSubfield(String format)
+    public boolean hasSubfield(String format)
     {
         Pattern p = Pattern.compile("\\%([0-9\\+\\-\\,\\.]*)[sdf]", Pattern.MULTILINE|Pattern.DOTALL);
         Matcher m = p.matcher(format);
@@ -1698,7 +1743,7 @@ public class ISO8583Structure {
      * @return binary array, is half the length of the input string
      * @throws IllegalArgumentException
      */
-    public static byte[] hex2bin(String hex) throws IllegalArgumentException {
+    private static byte[] hex2bin(String hex) throws IllegalArgumentException {
         byte[] ret = null;
         if (hex == null || "".equals(hex)) {
             ret = new byte[] {0};
@@ -1731,10 +1776,10 @@ public class ISO8583Structure {
      * @param bin
      * @return Hex String, twice the size of input byte array
      */
-    public static String bin2hex(byte[] bin) {
+    private static String bin2hex(byte[] bin) {
         return bin2hex(bin,0,bin.length);
     }
-    public static String bin2hex(byte[] bin, int curOffset, int len) {
+    private static String bin2hex(byte[] bin, int curOffset, int len) {
         if (bin == null || curOffset >= len || curOffset < 0 || bin.length < (len-curOffset)) {
             return "";
         }

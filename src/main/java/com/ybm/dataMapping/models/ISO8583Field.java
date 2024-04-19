@@ -12,7 +12,11 @@ public class ISO8583Field {
     /**
      * Field type
      */
-    public ISO8583FieldInfo.Format type = ISO8583FieldInfo.Format.UNKNOWN;
+    public ISO8583FieldInfo.FormatType type = ISO8583FieldInfo.FormatType.UNKNOWN;
+    /**
+     * Field format
+     */
+    public String format = "%s";
     /**
      * Field data
      */
@@ -52,7 +56,7 @@ public class ISO8583Field {
         this.data = field.data;
         return this;
     }
-    public ISO8583Field setField(String data, ISO8583FieldInfo.Format type, int length)
+    public ISO8583Field setField(String data, ISO8583FieldInfo.FormatType type, int length)
     {
         this.isSet = true;
         this.type = type;

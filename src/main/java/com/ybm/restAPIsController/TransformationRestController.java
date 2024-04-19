@@ -89,7 +89,17 @@ public class TransformationRestController {
                 .or(DataMappingProcessor.MessageFormat.UNKNOWN);
 
         String transformMapperName = headers.get("transform-mapper") == null ? headers.get("TRANSFORM-MAPPER") : headers.get("transform-mapper");
-        String result = dataMappingProcessor.transformMessage(dataName, fromMessageFormat, toMessageFormat, messageString, transformMapperName);
+        String linkedEntity = headers.get("linked-entity") == null ? headers.get("LINKED-ENTITY") : headers.get("linked-entity");
+        String version = headers.get("version") == null ? headers.get("VERSION") : headers.get("version");
+        linkedEntity = linkedEntity == null ? "EuclidPro" : linkedEntity;
+        version = version == null ? "01" : version;
+        String result = dataMappingProcessor.transformMessage( dataName,
+                                                                fromMessageFormat,
+                                                                toMessageFormat,
+                                                                messageString,
+                                                                linkedEntity,
+                                                                transformMapperName,
+                                                                version );
 
         MediaType contentType = getMediaType(toMessageFormat);
 

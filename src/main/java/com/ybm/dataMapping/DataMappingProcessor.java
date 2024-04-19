@@ -33,10 +33,12 @@ public class DataMappingProcessor {
     DataMapProcessing dataMapProcessing;
     public static enum MessageFormat {JSON, XML, YAML, PROP, CSV, TEXT, ISO8583, SWIFT, UNKNOWN}
     public String transformMessage(String dataName,
-                                          MessageFormat fromMessageFormat,
-                                          MessageFormat toMessageFormat,
-                                          String message,
-                                          String transformMapperName) {
+                                    MessageFormat fromMessageFormat,
+                                    MessageFormat toMessageFormat,
+                                    String message,
+                                    String linkedEntity,
+                                    String transformMapperName,
+                                    String version) {
         String returnResult = null;
 
         PayloadMessageInterface payloadMessageInterface = null;
@@ -93,7 +95,7 @@ public class DataMappingProcessor {
             }
             case ISO8583: {
                 try {
-                    payloadMessageInterface = new ISO8583Message( dataName, message, fieldsDataTransformMappingService );
+                    payloadMessageInterface = new ISO8583Message( dataName, message, linkedEntity, version, fieldsDataTransformMappingService );
                 } catch (JsonProcessingException e) {
                     LOG.error(e.getMessage());
                     throw new RuntimeException(e);
@@ -183,9 +185,9 @@ public class DataMappingProcessor {
                     break;
                 }
                 case ISO8583: {
-                    returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor( fieldsDataTransformMappingService ));
+                    returnResult = payloadMessageInterface.accept(new ToISO8583TransformerVisitor( linkedEntity, version, fieldsDataTransformMappingService ));
                     try {
-                        payloadMessageInterface = new ISO8583Message( dataName, returnResult, fieldsDataTransformMappingService );
+                        payloadMessageInterface = new ISO8583Message( dataName, returnResult, linkedEntity, version, fieldsDataTransformMappingService );
                     } catch (JsonProcessingException e) {
                         LOG.error(e.getMessage());
                         throw new RuntimeException(e);
