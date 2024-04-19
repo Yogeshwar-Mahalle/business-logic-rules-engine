@@ -9,11 +9,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
 import com.ybm.dataMapping.interfaces.ISO8583MTI;
 import lombok.Getter;
 import lombok.Setter;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,13 +71,13 @@ public class ISO8583Structure {
      */
     @Setter
     @Getter
-    private JSONObject config = new JSONObject();
+    private LinkedHashMap<String, LinkedHashMap<String, String>> formatMap = new LinkedHashMap<>();
 
     /**
      * General ISO8583 configuration. When server receive ISO8583 string message and contains any field that is not configured in specs,
      * it will be parsed using general config of ISO8583.
      */
-    private static JSONObject generalConfig = null;
+    private static LinkedHashMap<String, LinkedHashMap<String, String>> generalFormatMapConfig = null;
 
     /**
      * JSONObject of ISO8583 field
@@ -116,7 +118,7 @@ public class ISO8583Structure {
         mtiType[ISO8583MTI.MTI_MSG_FUNC] = ISO8583MTI.MSG_FUNC_NOTIFICATION;
         mtiType[ISO8583MTI.MTI_TXN_ORIG] = ISO8583MTI.TXN_ORIG_OTHER;
 
-        if(ISO8583Structure.generalConfig == null)
+        if(ISO8583Structure.generalFormatMapConfig == null)
         {
             ISO8583Structure.parseGeneralConfig();
         }
@@ -128,7 +130,7 @@ public class ISO8583Structure {
     public ISO8583Structure(String mti_id)
     {
         this.setMtiType(mti_id.getBytes());
-        if(ISO8583Structure.generalConfig == null)
+        if(ISO8583Structure.generalFormatMapConfig == null)
         {
             ISO8583Structure.parseGeneralConfig();
         }
@@ -136,24 +138,24 @@ public class ISO8583Structure {
     /**
      * Constructor with Message Type Indicator and configuration of the specs
      * @param mti_id Message Type Indicator
-     * @param config Configuration of the specs
+     * @param formatMap Configuration of the specs
      */
-    public ISO8583Structure(String mti_id, JSONObject config)
+    public ISO8583Structure(String mti_id, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap)
     {
         this.setMtiType(mti_id.getBytes());
-        this.setConfig(config);
+        this.setFormatMap(formatMap);
     }
 
     /**
      * Constructor with Message Type Indicator, configuration of the specs and message to be parse
      * @param mti_id Message Type Indicator
-     * @param config Configuration of the specs
+     * @param formatMap Configuration of the specs
      * @param message Message to be parse
      */
-    public ISO8583Structure(String mti_id, JSONObject config, String message)
+    public ISO8583Structure(String mti_id, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap, String message)
     {
         this.setMtiType(mti_id.getBytes());
-        this.setConfig(config);
+        this.setFormatMap(formatMap);
         this.parse(message);
     }
 
@@ -353,7 +355,7 @@ public class ISO8583Structure {
                 }
             }
         }
-        JSONObject jo = new JSONObject();
+
         ISO8583FieldInfo.Format dataType = ISO8583FieldInfo.Format.UNKNOWN;
         int dataLength = 0;
         int realLength = 0;
@@ -366,12 +368,12 @@ public class ISO8583Structure {
         for (String strField : this.fields) {
             field = Integer.parseInt(strField);
             // get config
-            jo = this.config.optJSONObject("f" + field);
-            if (jo == null) {
+            LinkedHashMap<String, String> fieldFormat = this.formatMap.get("f" + field);
+            if (fieldFormat == null) {
 
-                if (ISO8583Structure.generalConfig != null) {
-                    jo = (JSONObject) ISO8583Structure.generalConfig.get("f" + field);
-                    if (jo == null) {
+                if (ISO8583Structure.generalFormatMapConfig != null) {
+                    fieldFormat = ISO8583Structure.generalFormatMapConfig.get("f" + field);
+                    if (fieldFormat == null) {
                         validMessage = false;
                     }
                 } else {
@@ -386,16 +388,16 @@ public class ISO8583Structure {
                 shiftedData = message.substring( bitmapLength + ISO8583MTI.MTI_LEN );
                 for (String strField : this.fields) {
                     field = Integer.parseInt(strField);
-                    jo = this.config.optJSONObject("f" + field);
-                    if (jo == null) {
-                        if (ISO8583Structure.generalConfig != null) {
-                            jo = (JSONObject) ISO8583Structure.generalConfig.get("f" + field);
+                    LinkedHashMap<String, String> fieldFormat = this.formatMap.get("f" + field);
+                    if (fieldFormat == null) {
+                        if (ISO8583Structure.generalFormatMapConfig != null) {
+                            fieldFormat = ISO8583Structure.generalFormatMapConfig.get("f" + field);
                         }
                     }
-                    if (jo != null) {
-                        if (jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()) != null) {
-                            dataType = ISO8583FieldInfo.Format.valueOf(jo.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
-                            fieldLength = Integer.parseInt(jo.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
+                    if (fieldFormat != null) {
+                        if (fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()) != null) {
+                            dataType = ISO8583FieldInfo.Format.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
+                            fieldLength = Integer.parseInt(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()));
                             dataLength = fieldLength;
                             realLength = dataLength;
                             rawData = "";
@@ -1047,11 +1049,11 @@ public class ISO8583Structure {
     /**
      * Parse ISO 8583 Message
      * @param message String contains ISO 8583 message
-     * @param config JSONObject contains specs
+     * @param formatMap LinkedHashMap contains specs
      */
-    public void parse(String message, JSONObject config)
+    public void parse(String message, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap)
     {
-        this.setConfig(config);
+        this.setFormatMap(formatMap);
         this.parse(message);
     }
     /**
@@ -1370,26 +1372,27 @@ public class ISO8583Structure {
     public void setValue(int field, String data, ISO8583FieldInfo.Format dataType, int dataLength)
     {
         JSONObject jo = new JSONObject();
-        JSONObject j = new JSONObject();
 
         if(dataType == ISO8583FieldInfo.Format.AMOUNT)
         {
             dataLength = 12;
         }
+
         if( dataType == ISO8583FieldInfo.Format.LVAR ||
                 dataType == ISO8583FieldInfo.Format.LLVAR ||
                 dataType == ISO8583FieldInfo.Format.LLLVAR )
         {
             dataLength = data.length();
         }
+
         if(dataLength == 0)
         {
-            String f = String.format("f", field);
-            j = this.config.optJSONObject(f);
-            if(j != null)
+            String fieldName = String.format("f", field);
+            LinkedHashMap<String, String> fieldFormat = this.formatMap.get(fieldName);
+            if(fieldFormat != null)
             {
-                int c_field_length = Integer.parseInt(j.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
-                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf( j.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString() );
+                int c_field_length = Integer.parseInt(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()));
+                ISO8583FieldInfo.Format c_type = ISO8583FieldInfo.Format.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
                 if(dataLength < c_field_length)
                 {
                     dataLength = c_field_length;
@@ -1469,9 +1472,12 @@ public class ISO8583Structure {
     {
         try
         {
-            ISO8583Structure.generalConfig = new JSONObject("{\"f94\":{\"format\":\"%-7s\",\"name\":\"F94\",\"options\":\"\",\"length\":7,\"type\":\"STRING\"},\"f93\":{\"format\":\"%05d\",\"name\":\"F93\",\"options\":\"\",\"length\":5,\"type\":\"NUMERIC\"},\"f96\":{\"format\":\"%-8s\",\"name\":\"F96\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f95\":{\"format\":\"%-42s\",\"name\":\"F95\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f10\":{\"format\":\"%08d\",\"name\":\"F10\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f98\":{\"format\":\"%-25s\",\"name\":\"F98\",\"options\":\"\",\"length\":25,\"type\":\"STRING\"},\"f97\":{\"format\":\"%-17s\",\"name\":\"F97\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f12\":{\"format\":\"%06d\",\"name\":\"F12\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f11\":{\"format\":\"%06d\",\"name\":\"F11\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f99\":{\"format\":\"%011d\",\"name\":\"F99\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f14\":{\"format\":\"%04d\",\"name\":\"F14\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f13\":{\"format\":\"%04d\",\"name\":\"F13\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f16\":{\"format\":\"%04d\",\"name\":\"F16\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%04d\",\"name\":\"F15\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f18\":{\"format\":\"%04d\",\"name\":\"F18\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f17\":{\"format\":\"%04d\",\"name\":\"F17\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f19\":{\"format\":\"%03d\",\"name\":\"F19\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f126\":{\"format\":\"%-6s\",\"name\":\"F126\",\"options\":\"\",\"length\":6,\"type\":\"LVAR\"},\"f125\":{\"format\":\"%-50s\",\"name\":\"F125\",\"options\":\"\",\"length\":50,\"type\":\"LLVAR\"},\"f124\":{\"format\":\"%-255s\",\"name\":\"F124\",\"options\":\"\",\"length\":255,\"type\":\"LLLVAR\"},\"f123\":{\"format\":\"%-999s\",\"name\":\"F123\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f21\":{\"format\":\"%03d\",\"name\":\"F21\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f122\":{\"format\":\"%-999s\",\"name\":\"F122\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f20\":{\"format\":\"%03d\",\"name\":\"F20\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f121\":{\"format\":\"%-999s\",\"name\":\"F121\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f23\":{\"format\":\"%03d\",\"name\":\"F23\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f120\":{\"format\":\"%-999s\",\"name\":\"F120\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f22\":{\"format\":\"%03d\",\"name\":\"F22\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f25\":{\"format\":\"%02d\",\"name\":\"F25\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f24\":{\"format\":\"%03d\",\"name\":\"F24\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f27\":{\"format\":\"%01d\",\"name\":\"F27\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f26\":{\"format\":\"%02d\",\"name\":\"F26\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f29\":{\"format\":\"%-9s\",\"name\":\"F29\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f28\":{\"format\":\"%08d\",\"name\":\"F28\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f127\":{\"format\":\"%-999s\",\"name\":\"F127\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f30\":{\"format\":\"%08d\",\"name\":\"F30\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f32\":{\"format\":\"%011d\",\"name\":\"F32\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f31\":{\"format\":\"%-9s\",\"name\":\"F31\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f34\":{\"format\":\"%-28s\",\"name\":\"F34\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f33\":{\"format\":\"%011d\",\"name\":\"F33\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f36\":{\"format\":\"%0104d\",\"name\":\"F36\",\"options\":\"\",\"length\":104,\"type\":\"LLLVAR\"},\"f35\":{\"format\":\"%-28s\",\"name\":\"F35\",\"options\":\"\",\"length\":37,\"type\":\"LLVAR\"},\"f38\":{\"format\":\"%-6s\",\"name\":\"F38\",\"options\":\"\",\"length\":6,\"type\":\"STRING\"},\"f37\":{\"format\":\"%-12s\",\"name\":\"F37\",\"options\":\"\",\"length\":12,\"type\":\"STRING\"},\"f39\":{\"format\":\"%-2s\",\"name\":\"F39\",\"options\":\"\",\"length\":2,\"type\":\"STRING\"},\"f41\":{\"format\":\"%-8s\",\"name\":\"F41\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f40\":{\"format\":\"%-3s\",\"name\":\"F40\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f43\":{\"format\":\"%-40s\",\"name\":\"F43\",\"options\":\"\",\"length\":40,\"type\":\"STRING\"},\"f42\":{\"format\":\"%-15s\",\"name\":\"F42\",\"options\":\"\",\"length\":15,\"type\":\"STRING\"},\"f45\":{\"format\":\"%-76s\",\"name\":\"F45\",\"options\":\"\",\"length\":76,\"type\":\"LLVAR\"},\"f44\":{\"format\":\"%-25s\",\"name\":\"F44\",\"options\":\"\",\"length\":25,\"type\":\"LLVAR\"},\"f47\":{\"format\":\"%-999s\",\"name\":\"F47\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f46\":{\"format\":\"%-999s\",\"name\":\"F46\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f49\":{\"format\":\"%-3s\",\"name\":\"F49\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f48\":{\"format\":\"%-119s\",\"name\":\"F48\",\"options\":\"\",\"length\":119,\"type\":\"LLLVAR\"},\"f50\":{\"format\":\"%-3s\",\"name\":\"F50\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f52\":{\"format\":\"%-16s\",\"name\":\"F52\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f51\":{\"format\":\"%-3s\",\"name\":\"F51\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f54\":{\"format\":\"%-120s\",\"name\":\"F54\",\"options\":\"\",\"length\":120,\"type\":\"STRING\"},\"f53\":{\"format\":\"%-18s\",\"name\":\"F53\",\"options\":\"\",\"length\":18,\"type\":\"STRING\"},\"f56\":{\"format\":\"%-999s\",\"name\":\"F56\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f55\":{\"format\":\"%-999s\",\"name\":\"F55\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f58\":{\"format\":\"%-999s\",\"name\":\"F58\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f57\":{\"format\":\"%-999s\",\"name\":\"F57\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f59\":{\"format\":\"%-99s\",\"name\":\"F59\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f2\":{\"format\":\"%-19s\",\"name\":\"F2\",\"options\":\"\",\"length\":19,\"type\":\"LLVAR\"},\"f3\":{\"format\":\"%06d\",\"name\":\"F3\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\",\"name\":\"F4\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f5\":{\"format\":\"%012d\",\"name\":\"F5\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f6\":{\"format\":\"%012d\",\"name\":\"F6\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\",\"name\":\"F7\",\"options\":\"\",\"length\":10,\"type\":\"STRING\"},\"f8\":{\"format\":\"%08d\",\"name\":\"F8\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f9\":{\"format\":\"%08d\",\"name\":\"F9\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f61\":{\"format\":\"%-99s\",\"name\":\"F61\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f60\":{\"format\":\"%-60s\",\"name\":\"F60\",\"options\":\"\",\"length\":60,\"type\":\"LLVAR\"},\"f63\":{\"format\":\"%-999s\",\"name\":\"F63\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f62\":{\"format\":\"%-999s\",\"name\":\"F62\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f67\":{\"format\":\"%02d\",\"name\":\"F67\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f66\":{\"format\":\"%01d\",\"name\":\"F66\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f69\":{\"format\":\"%03d\",\"name\":\"F69\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f68\":{\"format\":\"%03d\",\"name\":\"F68\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f70\":{\"format\":\"%03d\",\"name\":\"F70\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f72\":{\"format\":\"%-999s\",\"name\":\"F72\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f115\":{\"format\":\"%-999s\",\"name\":\"F115\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f71\":{\"format\":\"%04d\",\"name\":\"F71\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f114\":{\"format\":\"%-999s\",\"name\":\"F114\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f74\":{\"format\":\"%010d\",\"name\":\"F74\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f113\":{\"format\":\"%011d\",\"name\":\"F113\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f73\":{\"format\":\"%06d\",\"name\":\"F73\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f112\":{\"format\":\"%-999s\",\"name\":\"F112\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f76\":{\"format\":\"%010d\",\"name\":\"F76\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f111\":{\"format\":\"%-999s\",\"name\":\"F111\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f75\":{\"format\":\"%010d\",\"name\":\"F75\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f110\":{\"format\":\"%-999s\",\"name\":\"F110\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f78\":{\"format\":\"%010d\",\"name\":\"F78\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f77\":{\"format\":\"%010d\",\"name\":\"F77\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f79\":{\"format\":\"%010d\",\"name\":\"F79\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f119\":{\"format\":\"%-999s\",\"name\":\"F119\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f118\":{\"format\":\"%-999s\",\"name\":\"F118\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f81\":{\"format\":\"%010d\",\"name\":\"F81\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f117\":{\"format\":\"%-999s\",\"name\":\"F117\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f80\":{\"format\":\"%010d\",\"name\":\"F80\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f116\":{\"format\":\"%-999s\",\"name\":\"F116\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f83\":{\"format\":\"%012d\",\"name\":\"F83\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f104\":{\"format\":\"%-100s\",\"name\":\"F104\",\"options\":\"\",\"length\":100,\"type\":\"LLLVAR\"},\"f82\":{\"format\":\"%012d\",\"name\":\"F82\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f103\":{\"format\":\"%-28s\",\"name\":\"F103\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f85\":{\"format\":\"%012d\",\"name\":\"F85\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f102\":{\"format\":\"%-28s\",\"name\":\"F102\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f84\":{\"format\":\"%012d\",\"name\":\"F84\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f101\":{\"format\":\"%-17s\",\"name\":\"F101\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f87\":{\"format\":\"%-16s\",\"name\":\"F87\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f100\":{\"format\":\"%011d\",\"name\":\"F100\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f86\":{\"format\":\"%015d\",\"name\":\"F86\",\"options\":\"\",\"length\":15,\"type\":\"NUMERIC\"},\"f89\":{\"format\":\"%016d\",\"name\":\"F89\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f88\":{\"format\":\"%016d\",\"name\":\"F88\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f109\":{\"format\":\"%-999s\",\"name\":\"F109\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f90\":{\"format\":\"%-42s\",\"name\":\"F90\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f108\":{\"format\":\"%-999s\",\"name\":\"F108\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f107\":{\"format\":\"%-999s\",\"name\":\"F107\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f92\":{\"format\":\"%02d\",\"name\":\"F92\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f106\":{\"format\":\"%-999s\",\"name\":\"F106\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f91\":{\"format\":\"%-1s\",\"name\":\"F91\",\"options\":\"\",\"length\":1,\"type\":\"STRING\"},\"f105\":{\"format\":\"%-999s\",\"name\":\"F105\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"}}");
+            String configStr = "{\"f94\":{\"format\":\"%-7s\",\"name\":\"F94\",\"options\":\"\",\"length\":7,\"type\":\"STRING\"},\"f93\":{\"format\":\"%05d\",\"name\":\"F93\",\"options\":\"\",\"length\":5,\"type\":\"NUMERIC\"},\"f96\":{\"format\":\"%-8s\",\"name\":\"F96\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f95\":{\"format\":\"%-42s\",\"name\":\"F95\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f10\":{\"format\":\"%08d\",\"name\":\"F10\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f98\":{\"format\":\"%-25s\",\"name\":\"F98\",\"options\":\"\",\"length\":25,\"type\":\"STRING\"},\"f97\":{\"format\":\"%-17s\",\"name\":\"F97\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f12\":{\"format\":\"%06d\",\"name\":\"F12\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f11\":{\"format\":\"%06d\",\"name\":\"F11\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f99\":{\"format\":\"%011d\",\"name\":\"F99\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f14\":{\"format\":\"%04d\",\"name\":\"F14\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f13\":{\"format\":\"%04d\",\"name\":\"F13\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f16\":{\"format\":\"%04d\",\"name\":\"F16\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%04d\",\"name\":\"F15\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f18\":{\"format\":\"%04d\",\"name\":\"F18\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f17\":{\"format\":\"%04d\",\"name\":\"F17\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f19\":{\"format\":\"%03d\",\"name\":\"F19\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f126\":{\"format\":\"%-6s\",\"name\":\"F126\",\"options\":\"\",\"length\":6,\"type\":\"LVAR\"},\"f125\":{\"format\":\"%-50s\",\"name\":\"F125\",\"options\":\"\",\"length\":50,\"type\":\"LLVAR\"},\"f124\":{\"format\":\"%-255s\",\"name\":\"F124\",\"options\":\"\",\"length\":255,\"type\":\"LLLVAR\"},\"f123\":{\"format\":\"%-999s\",\"name\":\"F123\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f21\":{\"format\":\"%03d\",\"name\":\"F21\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f122\":{\"format\":\"%-999s\",\"name\":\"F122\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f20\":{\"format\":\"%03d\",\"name\":\"F20\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f121\":{\"format\":\"%-999s\",\"name\":\"F121\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f23\":{\"format\":\"%03d\",\"name\":\"F23\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f120\":{\"format\":\"%-999s\",\"name\":\"F120\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f22\":{\"format\":\"%03d\",\"name\":\"F22\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f25\":{\"format\":\"%02d\",\"name\":\"F25\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f24\":{\"format\":\"%03d\",\"name\":\"F24\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f27\":{\"format\":\"%01d\",\"name\":\"F27\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f26\":{\"format\":\"%02d\",\"name\":\"F26\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f29\":{\"format\":\"%-9s\",\"name\":\"F29\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f28\":{\"format\":\"%08d\",\"name\":\"F28\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f127\":{\"format\":\"%-999s\",\"name\":\"F127\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f30\":{\"format\":\"%08d\",\"name\":\"F30\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f32\":{\"format\":\"%011d\",\"name\":\"F32\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f31\":{\"format\":\"%-9s\",\"name\":\"F31\",\"options\":\"\",\"length\":9,\"type\":\"STRING\"},\"f34\":{\"format\":\"%-28s\",\"name\":\"F34\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f33\":{\"format\":\"%011d\",\"name\":\"F33\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f36\":{\"format\":\"%0104d\",\"name\":\"F36\",\"options\":\"\",\"length\":104,\"type\":\"LLLVAR\"},\"f35\":{\"format\":\"%-28s\",\"name\":\"F35\",\"options\":\"\",\"length\":37,\"type\":\"LLVAR\"},\"f38\":{\"format\":\"%-6s\",\"name\":\"F38\",\"options\":\"\",\"length\":6,\"type\":\"STRING\"},\"f37\":{\"format\":\"%-12s\",\"name\":\"F37\",\"options\":\"\",\"length\":12,\"type\":\"STRING\"},\"f39\":{\"format\":\"%-2s\",\"name\":\"F39\",\"options\":\"\",\"length\":2,\"type\":\"STRING\"},\"f41\":{\"format\":\"%-8s\",\"name\":\"F41\",\"options\":\"\",\"length\":8,\"type\":\"STRING\"},\"f40\":{\"format\":\"%-3s\",\"name\":\"F40\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f43\":{\"format\":\"%-40s\",\"name\":\"F43\",\"options\":\"\",\"length\":40,\"type\":\"STRING\"},\"f42\":{\"format\":\"%-15s\",\"name\":\"F42\",\"options\":\"\",\"length\":15,\"type\":\"STRING\"},\"f45\":{\"format\":\"%-76s\",\"name\":\"F45\",\"options\":\"\",\"length\":76,\"type\":\"LLVAR\"},\"f44\":{\"format\":\"%-25s\",\"name\":\"F44\",\"options\":\"\",\"length\":25,\"type\":\"LLVAR\"},\"f47\":{\"format\":\"%-999s\",\"name\":\"F47\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f46\":{\"format\":\"%-999s\",\"name\":\"F46\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f49\":{\"format\":\"%-3s\",\"name\":\"F49\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f48\":{\"format\":\"%-119s\",\"name\":\"F48\",\"options\":\"\",\"length\":119,\"type\":\"LLLVAR\"},\"f50\":{\"format\":\"%-3s\",\"name\":\"F50\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f52\":{\"format\":\"%-16s\",\"name\":\"F52\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f51\":{\"format\":\"%-3s\",\"name\":\"F51\",\"options\":\"\",\"length\":3,\"type\":\"STRING\"},\"f54\":{\"format\":\"%-120s\",\"name\":\"F54\",\"options\":\"\",\"length\":120,\"type\":\"STRING\"},\"f53\":{\"format\":\"%-18s\",\"name\":\"F53\",\"options\":\"\",\"length\":18,\"type\":\"STRING\"},\"f56\":{\"format\":\"%-999s\",\"name\":\"F56\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f55\":{\"format\":\"%-999s\",\"name\":\"F55\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f58\":{\"format\":\"%-999s\",\"name\":\"F58\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f57\":{\"format\":\"%-999s\",\"name\":\"F57\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f59\":{\"format\":\"%-99s\",\"name\":\"F59\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f2\":{\"format\":\"%-19s\",\"name\":\"F2\",\"options\":\"\",\"length\":19,\"type\":\"LLVAR\"},\"f3\":{\"format\":\"%06d\",\"name\":\"F3\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\",\"name\":\"F4\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f5\":{\"format\":\"%012d\",\"name\":\"F5\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f6\":{\"format\":\"%012d\",\"name\":\"F6\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\",\"name\":\"F7\",\"options\":\"\",\"length\":10,\"type\":\"STRING\"},\"f8\":{\"format\":\"%08d\",\"name\":\"F8\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f9\":{\"format\":\"%08d\",\"name\":\"F9\",\"options\":\"\",\"length\":8,\"type\":\"NUMERIC\"},\"f61\":{\"format\":\"%-99s\",\"name\":\"F61\",\"options\":\"\",\"length\":99,\"type\":\"LLVAR\"},\"f60\":{\"format\":\"%-60s\",\"name\":\"F60\",\"options\":\"\",\"length\":60,\"type\":\"LLVAR\"},\"f63\":{\"format\":\"%-999s\",\"name\":\"F63\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f62\":{\"format\":\"%-999s\",\"name\":\"F62\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f67\":{\"format\":\"%02d\",\"name\":\"F67\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f66\":{\"format\":\"%01d\",\"name\":\"F66\",\"options\":\"\",\"length\":1,\"type\":\"NUMERIC\"},\"f69\":{\"format\":\"%03d\",\"name\":\"F69\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f68\":{\"format\":\"%03d\",\"name\":\"F68\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f70\":{\"format\":\"%03d\",\"name\":\"F70\",\"options\":\"\",\"length\":3,\"type\":\"NUMERIC\"},\"f72\":{\"format\":\"%-999s\",\"name\":\"F72\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f115\":{\"format\":\"%-999s\",\"name\":\"F115\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f71\":{\"format\":\"%04d\",\"name\":\"F71\",\"options\":\"\",\"length\":4,\"type\":\"NUMERIC\"},\"f114\":{\"format\":\"%-999s\",\"name\":\"F114\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f74\":{\"format\":\"%010d\",\"name\":\"F74\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f113\":{\"format\":\"%011d\",\"name\":\"F113\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f73\":{\"format\":\"%06d\",\"name\":\"F73\",\"options\":\"\",\"length\":6,\"type\":\"NUMERIC\"},\"f112\":{\"format\":\"%-999s\",\"name\":\"F112\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f76\":{\"format\":\"%010d\",\"name\":\"F76\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f111\":{\"format\":\"%-999s\",\"name\":\"F111\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f75\":{\"format\":\"%010d\",\"name\":\"F75\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f110\":{\"format\":\"%-999s\",\"name\":\"F110\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f78\":{\"format\":\"%010d\",\"name\":\"F78\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f77\":{\"format\":\"%010d\",\"name\":\"F77\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f79\":{\"format\":\"%010d\",\"name\":\"F79\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f119\":{\"format\":\"%-999s\",\"name\":\"F119\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f118\":{\"format\":\"%-999s\",\"name\":\"F118\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f81\":{\"format\":\"%010d\",\"name\":\"F81\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f117\":{\"format\":\"%-999s\",\"name\":\"F117\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f80\":{\"format\":\"%010d\",\"name\":\"F80\",\"options\":\"\",\"length\":10,\"type\":\"NUMERIC\"},\"f116\":{\"format\":\"%-999s\",\"name\":\"F116\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f83\":{\"format\":\"%012d\",\"name\":\"F83\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f104\":{\"format\":\"%-100s\",\"name\":\"F104\",\"options\":\"\",\"length\":100,\"type\":\"LLLVAR\"},\"f82\":{\"format\":\"%012d\",\"name\":\"F82\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f103\":{\"format\":\"%-28s\",\"name\":\"F103\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f85\":{\"format\":\"%012d\",\"name\":\"F85\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f102\":{\"format\":\"%-28s\",\"name\":\"F102\",\"options\":\"\",\"length\":28,\"type\":\"LLVAR\"},\"f84\":{\"format\":\"%012d\",\"name\":\"F84\",\"options\":\"\",\"length\":12,\"type\":\"NUMERIC\"},\"f101\":{\"format\":\"%-17s\",\"name\":\"F101\",\"options\":\"\",\"length\":17,\"type\":\"STRING\"},\"f87\":{\"format\":\"%-16s\",\"name\":\"F87\",\"options\":\"\",\"length\":16,\"type\":\"STRING\"},\"f100\":{\"format\":\"%011d\",\"name\":\"F100\",\"options\":\"\",\"length\":11,\"type\":\"LLVAR\"},\"f86\":{\"format\":\"%015d\",\"name\":\"F86\",\"options\":\"\",\"length\":15,\"type\":\"NUMERIC\"},\"f89\":{\"format\":\"%016d\",\"name\":\"F89\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f88\":{\"format\":\"%016d\",\"name\":\"F88\",\"options\":\"\",\"length\":16,\"type\":\"NUMERIC\"},\"f109\":{\"format\":\"%-999s\",\"name\":\"F109\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f90\":{\"format\":\"%-42s\",\"name\":\"F90\",\"options\":\"\",\"length\":42,\"type\":\"STRING\"},\"f108\":{\"format\":\"%-999s\",\"name\":\"F108\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f107\":{\"format\":\"%-999s\",\"name\":\"F107\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f92\":{\"format\":\"%02d\",\"name\":\"F92\",\"options\":\"\",\"length\":2,\"type\":\"NUMERIC\"},\"f106\":{\"format\":\"%-999s\",\"name\":\"F106\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"},\"f91\":{\"format\":\"%-1s\",\"name\":\"F91\",\"options\":\"\",\"length\":1,\"type\":\"STRING\"},\"f105\":{\"format\":\"%-999s\",\"name\":\"F105\",\"options\":\"\",\"length\":999,\"type\":\"LLLVAR\"}}";
+
+            ObjectMapper jsonMapper = new ObjectMapper();
+            ISO8583Structure.generalFormatMapConfig = jsonMapper.readValue(configStr, new TypeReference<>() {});
         }
-        catch (JSONException e)
+        catch ( JsonProcessingException e)
         {
             e.printStackTrace();
             LOG.error(e.getMessage());
@@ -1479,23 +1485,12 @@ public class ISO8583Structure {
     }
 
     /**
-     * List the all format to string list
-     * @param formatMap JSON containing the format
-     * @return String list of the format
+     * List the all format to string set
+     * @return String set of the format fields
      */
-    public static List<String> listFormatMapKey(JSONObject formatMap)
+    public Set<String> formatMapKeySet()
     {
-        Set<?> set =  formatMap.keySet();
-        Iterator<?> iter = set.iterator();
-        List<String> keys = new ArrayList<>();
-        String key;
-        do
-        {
-            key = iter.next().toString();
-            keys.add(key);
-        }
-        while(iter.hasNext());
-        return keys;
+        return formatMap.keySet();
     }
 
     /**
@@ -1668,51 +1663,22 @@ public class ISO8583Structure {
     }
 
     /**
-     * Convert string list to string array
-     * @param stringList String list to be converted
-     * @return String array converted from form string list
-     */
-    public static String[] listStringToArrayString(List<String> stringList)
-    {
-        String[] strarray = new String[stringList.size()];
-        stringList.toArray(strarray);
-        return strarray;
-    }
-    /**
      * Check whether the word is exists on the string array
      * @param haystack String array from where the word to be search
      * @param needle Word to be search
      * @param strict Flag for case sensitive or insensitive
      * @return true if word is in array. Otherwise return false
      */
-    private static boolean inArray(String[] haystack, String needle, boolean strict)
+    private boolean isInArray(Set<String> haystack, String needle, boolean strict)
     {
-        int i;
-        String t1, t2;
-        for(i = 0; i<haystack.length; i++)
+        if(strict)
         {
-            if(strict)
-            {
-                t1 = haystack[i];
-                t2 = needle;
-                if(t1.equals(t2))
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                t1 = haystack[i];
-                t1 = t1.toLowerCase();
-                t2 = needle;
-                t2 = t2.toLowerCase();
-                if(t1.equals(t2))
-                {
-                    return true;
-                }
-            }
+            return haystack.contains(needle);
         }
-        return false;
+        else
+        {
+            return haystack.stream().anyMatch(needle::equalsIgnoreCase);
+        }
     }
 
     /**
@@ -1721,9 +1687,9 @@ public class ISO8583Structure {
      * @param needle Word to be search
      * @return true if word is in array. Otherwise return false
      */
-    public static boolean inArray(String[] haystack, String needle)
+    public boolean isInArray(Set<String> haystack, String needle)
     {
-        return inArray(haystack, needle, false);
+        return isInArray(haystack, needle, false);
     }
 
     /**

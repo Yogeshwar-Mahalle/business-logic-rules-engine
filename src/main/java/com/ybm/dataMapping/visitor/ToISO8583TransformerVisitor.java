@@ -5,6 +5,7 @@
 package com.ybm.dataMapping.visitor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ybm.dataMapping.interfaces.ISO8583FieldInfo;
 import com.ybm.dataMapping.interfaces.PayloadMessageInterface;
@@ -23,13 +24,8 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
     private PayloadMessageInterface m_PayloadMessageInterface = null;
     private final ObjectMapper m_JsonMapper = new ObjectMapper();
     private final FieldsDataTransformMappingService m_fieldsDataTransformMappingService;
-    /**
-     * ISO8583Structure to get all ISO 8583 fields
-     */
-    public ISO8583Structure iso8583Structure = new ISO8583Structure();
 
     String configStr = "{\"f41\":{\"format\":\"%-8s\", \"name\":\"card_acceptor_terminal\", \"options\":\"\", \"length\":\"8\", \"type\":\"STRING\"},\"f63\":{\"format\":\"%-32s%-30s%-50s%-18s\", \"name\":\"locket_code, locket_name, locket_address, locket_phone\", \"options\":\"\", \"length\":\"130\", \"type\":\"LLLVAR\"},\"f32\":{\"format\":\"%-11s\", \"name\":\"acq_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f42\":{\"format\":\"%15s\", \"name\":\"acceptor_identification_code\", \"options\":\"\", \"length\":\"15\", \"type\":\"STRING\"},\"f121\":{\"format\":\"%-32s\", \"name\":\"payment_reference\", \"options\":\"\", \"length\":\"32\", \"type\":\"LLLVAR\"},\"f12\":{\"format\":\"%-6s\", \"name\":\"local_time\", \"options\":\"\", \"length\":\"6\", \"type\":\"STRING\"},\"f120\":{\"format\":\"%-20s\", \"name\":\"product_code\", \"options\":\"\", \"length\":\"20\", \"type\":\"LLLVAR\"},\"f11\":{\"format\":\"%06d\", \"name\":\"stan\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f33\":{\"format\":\"%-11s\", \"name\":\"fwd_institution_code\", \"options\":\"\", \"length\":\"11\", \"type\":\"LLVAR\"},\"f13\":{\"format\":\"%-4s\", \"name\":\"local_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f49\":{\"format\":\"%03d\", \"name\":\"transaction_currency_code\", \"options\":\"\", \"length\":\"3\", \"type\":\"NUMERIC\"},\"f15\":{\"format\":\"%-4s\", \"name\":\"settlement_date\", \"options\":\"\", \"length\":\"4\", \"type\":\"STRING\"},\"f37\":{\"format\":\"%012d\", \"name\":\"reference_number\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f48\":{\"format\":\"%11s%12s%01d\", \"name\":\"meter_id, customer_id, id_selector\", \"options\":\"\", \"length\":\"24\", \"type\":\"LLLVAR\"},\"f2\":{\"format\":\"%-19s\", \"name\":\"pan\", \"options\":\"\", \"length\":\"19\", \"type\":\"LLVAR\"},\"f18\":{\"format\":\"%04d\", \"name\":\"merchant_type\", \"options\":\"\", \"length\":\"4\", \"type\":\"NUMERIC\"},\"f3\":{\"format\":\"%06d\", \"name\":\"processing_code\", \"options\":\"\", \"length\":\"6\", \"type\":\"NUMERIC\"},\"f4\":{\"format\":\"%012d\", \"name\":\"amount\", \"options\":\"\", \"length\":\"12\", \"type\":\"NUMERIC\"},\"f7\":{\"format\":\"%-10s\", \"name\":\"transmission_date_time\", \"options\":\"\", \"length\":\"10\", \"type\":\"STRING\"},\"f127\":{\"format\":\"%-20s%-32s\", \"name\":\"username, password\", \"options\":\"\", \"length\":\"52\", \"type\":\"LLLVAR\"}}";
-    JSONObject config = new JSONObject(configStr);
 
     public ToISO8583TransformerVisitor(FieldsDataTransformMappingService fieldsDataTransformMappingService) {
         m_fieldsDataTransformMappingService = fieldsDataTransformMappingService;
@@ -50,6 +46,8 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
             Object objValue = m_PayloadMessageInterface.getDataMap().get( m_PayloadMessageInterface.getRootNode() );
             if( objValue instanceof Map || objValue instanceof ArrayList || objValue instanceof Object[] )
             {
+                LinkedHashMap<String, LinkedHashMap<String, String>> formatMap = m_JsonMapper.readValue(configStr, new TypeReference<>() {});
+
                 if( objValue instanceof Map )
                 {
                     LinkedHashMap<String, Object> iso8583Map = (LinkedHashMap) objValue;
@@ -57,7 +55,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                     for( String mtiTypeKey : iso8583Map.keySet() )
                     {
                         objValue = iso8583Map.get( mtiTypeKey );
-                        iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey ) );
+                        iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey, formatMap ) );
                     }
                 }
                 else {
@@ -75,7 +73,7 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                         for( String mtiTypeKey : iso8583Map.keySet() )
                         {
                             objValue = iso8583Map.get( mtiTypeKey );
-                            iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey ) );
+                            iso8583Batch = iso8583Batch.concat( transformData( objValue, mtiTypeKey, formatMap ) );
                         }
                     }
                 }
@@ -98,7 +96,15 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
      * @param mtiTypeKey Message type identifier starts with MTI + number
      * @return Return byte contains ISO 8583 message
      */
-    private String transformData( Object objValue, String mtiTypeKey ) throws JsonProcessingException {
+    private String transformData( Object objValue, String mtiTypeKey, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap ) throws JsonProcessingException {
+        String transformMapperName = "ISO8583.".concat(mtiTypeKey);
+
+        FieldsDataTransformMapping fieldsDataTransformMapping =
+                m_fieldsDataTransformMappingService.getFieldsDataTransformMappingById(transformMapperName);
+        if (fieldsDataTransformMapping != null) {
+            formatMap = m_JsonMapper.readValue(fieldsDataTransformMapping.getMappingExpressionScript(), new TypeReference<>() {});
+        }
+
         String iso8583Batch = "";
         String mtiType = mtiTypeKey.startsWith("MTI") ? mtiTypeKey.substring(3) : mtiTypeKey;
 
@@ -115,12 +121,12 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
 
             for ( Object dataMap : jsonArray )
             {
-                String iso8583Msg = new String( buildISO8583((LinkedHashMap) dataMap, config, mtiType) );
+                String iso8583Msg = new String( buildISO8583((LinkedHashMap) dataMap, formatMap, mtiType) );
                 iso8583Batch = iso8583Batch.concat( iso8583Msg + "\n" );
             }
         }
         else {
-            iso8583Batch = new String(buildISO8583((LinkedHashMap) objValue, config, mtiType)) + "\n";
+            iso8583Batch = new String(buildISO8583((LinkedHashMap) objValue, formatMap, mtiType)) + "\n";
         }
 
         return iso8583Batch;
@@ -133,67 +139,51 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
      * @param mti_id Message type
      * @return Return byte contains ISO 8583 message
      */
-    private byte[] buildISO8583(LinkedHashMap dataMap, JSONObject formatMap, String mti_id) throws JsonProcessingException {
-
-        String mtiKeyTag = "MTI".concat(mti_id);
-        String transformMapperName = "ISO8583.".concat(mtiKeyTag);
-
-        FieldsDataTransformMapping fieldsDataTransformMapping =
-                m_fieldsDataTransformMappingService.getFieldsDataTransformMappingById(transformMapperName);
-        if (fieldsDataTransformMapping != null) {
-            formatMap = new JSONObject(fieldsDataTransformMapping.getMappingExpressionScript());
-        }
-
-        JSONObject jsonObject = new JSONObject( m_JsonMapper.writeValueAsString( dataMap ) );
-
-        this.iso8583Structure = new ISO8583Structure(mti_id, formatMap);
+    private byte[] buildISO8583(LinkedHashMap dataMap, LinkedHashMap<String, LinkedHashMap<String, String>> formatMap, String mti_id) throws JsonProcessingException {
 
         byte[] message = null;
-        JSONObject row = new JSONObject();
-        String format = "";
-        String variable = "";
-        int field_length = 0;
-        String data = "";
-        String subdata = "";
-        String fmt = "";
-        int field = 0;
-        String options = "";
-        String key_tmp = "";
-        ISO8583FieldInfo.Format field_type = ISO8583FieldInfo.Format.UNKNOWN;
+        JSONObject jsonObject = new JSONObject( m_JsonMapper.writeValueAsString( dataMap ) );
+
+        /**
+         * ISO8583Structure to get all ISO 8583 fields
+         */
+        ISO8583Structure iso8583Structure = new ISO8583Structure(mti_id, formatMap);
+
         try
         {
             try
             {
-                Set<?> s =  formatMap.keySet();
-                Iterator<?> iter = s.iterator();
+                Set<?> set =  formatMap.keySet();
+                Iterator<?> iter = set.iterator();
                 do
                 {
                     String key = iter.next().toString();
-                    key_tmp = key.replaceAll("f", "");
+                    String key_tmp = key.replaceAll("f", "");
                     key_tmp = key_tmp.replaceAll("_", "");
                     if(key_tmp.isEmpty())
                     {
                         key_tmp = "0";
                     }
-                    field = Integer.parseInt(key_tmp);
+                    int field = Integer.parseInt(key_tmp);
 
                     if(formatMap.get(key) != null)
                     {
-                        String keySpecs = formatMap.get(key).toString();
-                        row = new JSONObject(keySpecs);
-                        format = row.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText()).toString();
-                        variable = row.get(ISO8583FieldInfo.DataElementConfig.NAME.getText()).toString();
+                        LinkedHashMap<String, String> fieldFormat = formatMap.get(key);
+                        String format = fieldFormat.get(ISO8583FieldInfo.DataElementConfig.FORMAT.getText());
+                        String variable = fieldFormat.get(ISO8583FieldInfo.DataElementConfig.NAME.getText());
                         variable = variable.trim();
-                        field_length = Integer.parseInt(row.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()).toString());
-                        options = row.get(ISO8583FieldInfo.DataElementConfig.OPTIONS.getText()).toString();
-                        field_type = ISO8583FieldInfo.Format.valueOf(row.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()).toString());
+                        int field_length = Integer.parseInt(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.LENGTH.getText()));
+                        String options = fieldFormat.get(ISO8583FieldInfo.DataElementConfig.OPTIONS.getText());
+                        ISO8583FieldInfo.Format field_type = ISO8583FieldInfo.Format.valueOf(fieldFormat.get(ISO8583FieldInfo.DataElementConfig.TYPE.getText()));
                         if(!options.isEmpty())
                         {
                             jsonObject = ISO8583Structure.applyOption(jsonObject, options);
                         }
+                        String data = "";
                         StringBuilder subfield = new StringBuilder();
                         if(!variable.isEmpty())
                         {
+                            String fmt = "";
                             if(variable.contains(","))
                             {
                                 // split format
@@ -201,8 +191,8 @@ public class ToISO8583TransformerVisitor implements VisitorInterface {
                                 String[] vars = variable.split(",");
                                 String subfiedldata = "";
                                 int[] sfl = ISO8583Structure.getSubfieldLength(format);
-                                int i;
-                                for(i = 0; i<vars.length && i<subformat.length; i++)
+                                String subdata = "";
+                                for(int i = 0; i<vars.length && i<subformat.length; i++)
                                 {
                                     vars[i] = vars[i].trim();
                                     if(jsonObject.get(vars[i]) != null)
